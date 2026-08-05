@@ -1,4 +1,4 @@
-form flask import Flask
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -23,6 +23,15 @@ def create_app():
     migrate.init_app(app, db)
     CORS(app)
 
+    # Move or keep your models import inside the application context block
+    with app.app_context():
+        from app.models.user import User
+        from app.models.product import Product
+        from app.models.order import Order, OrderItem
+        from app.models.farm_log import FarmLog
+        from app.models.chat import ChatMessage
+        from app.models.review import Review
+
     # register blueprints   
     from app.routes.auth import auth_bp
     from app.routes.products import products_bp
@@ -30,7 +39,6 @@ def create_app():
     from app.routes.farm_logs import farm_logs_bp
     from app.routes.analytics import analytics_bp
     from app.routes.chat import chat_bp
-
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api/products')
