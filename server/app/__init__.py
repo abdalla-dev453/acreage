@@ -39,6 +39,7 @@ def create_app():
     from app.routes.farm_logs import farm_logs_bp
     from app.routes.analytics import analytics_bp
     from app.routes.chat import chat_bp
+    from app.routes.reviews import reviews_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api/products')
@@ -46,5 +47,6 @@ def create_app():
     app.register_blueprint(farm_logs_bp, url_prefix='/api/farm_logs')
     app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
     app.register_blueprint(chat_bp, url_prefix='/api/chat')
+    app.register_blueprint(reviews_bp, url_prefix='/api/reviews')
 
     return app
