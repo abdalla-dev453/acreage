@@ -2,7 +2,7 @@ from app import ma
 from app.models.farm_log import FarmLog
 
 
-class FarmLogSchema(ma.ModelSchema):
+class FarmLogSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = FarmLog
         load_instance = True

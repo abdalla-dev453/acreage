@@ -1,3 +1,5 @@
+from xml.etree.ElementInclude import include
+
 from app import ma
 from app.models.chat import ChatMessage
 from app.schemas.user import UserSchema
@@ -9,6 +11,7 @@ class ChatMessageSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ChatMessage
         load_instance = True
+        include_fk = True
 
 chat_message_schema = ChatMessageSchema()
 chat_messages_schema = ChatMessageSchema(many=True)

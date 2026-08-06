@@ -20,7 +20,7 @@ class User(db.Model):
     farm_orders = db.relationship('Order', foreign_keys='Order.farmer_id', backref='farmer', lazy=True)
     buyer_orders = db.relationship('Order', foreign_keys='Order.buyer_id', backref='buyer', lazy=True)
     farm_logs = db.relationship('FarmLog', backref='farmer', lazy=True)
-    reviews_written = db.relationship('Review', backref='reviewer', lazy=True)
+    reviews_written = db.relationship('Review', foreign_keys='Review.reviewer_id', backref='reviewer', lazy=True)
 
 
     def set_password(self, password):

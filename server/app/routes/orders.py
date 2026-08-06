@@ -9,7 +9,7 @@ import uuid
 orders_bp = Blueprint('orders', __name__)
 
 @orders_bp.route('/', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_orders():
     user_id = int(get_jwt_identity())
     role = request.args.get('role', 'farmer')
@@ -23,7 +23,7 @@ def get_orders():
 
 
 @orders_bp.route('/', methods=['POST'])
-@jwt_required
+@jwt_required()
 def place_order():
     buyer_id = int(get_jwt_identity())
     data = request.get_json() or {}
@@ -72,7 +72,7 @@ def place_order():
 
 
 @orders_bp.route('/<int:order_id>/status', methods=['PATCH'])
-@jwt_required
+@jwt_required()
 def update_order_status(order_id):
     order = Order.query.get_or_404(order_id)
     data = request.get_json() or {}

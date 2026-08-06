@@ -26,7 +26,7 @@ def get_reviews(farmer_id):
 
 
 @reviews_bp.route('/farmer/<int:farmer_id>', methods=['POST'])
-@jwt_required
+@jwt_required()
 def create_review(farmer_id):
     reviewer_id = int(get_jwt_identity())
     data = request.get_json() or {}

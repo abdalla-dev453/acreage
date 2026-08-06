@@ -25,7 +25,7 @@ def get_product(product_id):
 
 
 @products_bp.route('/', methods=['POST'])
-@jwt_required
+@jwt_required()
 def create_product():
     current_user_id = int(get_jwt_identity())
     data = request.get_json() or {}
@@ -47,7 +47,7 @@ def create_product():
 
 
 @products_bp.route('/<int:product_id>', methods=['PUT'])
-@jwt_required
+@jwt_required()
 def update_product(product_id):
     current_user_id = int(get_jwt_identity())
     product = Product.query.get_or_404(product_id)
