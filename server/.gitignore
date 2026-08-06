@@ -1,0 +1,11 @@
+# Local database instance folder
+instance/
+../instance/
+
+# Python compiled cache blocks
+__pycache__/
+*.pyc
+
+# Local runtime variables
+.env
+venv/
