@@ -8,6 +8,15 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // 1. Listen for background 401 unauthenticated interceptor events
+        const handleGlobalLogout = () => {
+            localStorage.removeItem('token');
+            setUser(null);
+        };
+
+        window.addEventListener('auth-logout', handleGlobalLogout);
+
+        // 2. Existing profile context checking setup
         const token = localStorage.getItem('token');
         if (token) {
             API.get("/auth/me")
@@ -17,6 +26,11 @@ export const AuthProvider = ({ children }) => {
         } else {
             setLoading(false);
         }
+
+        // Clean up event listener when component unmounts
+        return () => {
+            window.removeEventListener('auth-logout', handleGlobalLogout);
+        };
     }, []);
 
     const login = async (email, password) => {
