@@ -1,6 +1,6 @@
-# 🌾 ShambaPulse
+# 🌾 Acreage
 
-An end-to-end agritech marketplace and management platform connecting local Kenyan farmers directly with urban buyers. ShambaPulse eliminates middlemen by providing direct trade capabilities, real-time market analytics charts, agronomic crop activity logs, order fulfillment workflows, and an integrated M-Pesa ready digital wallet system.
+An end-to-end agritech marketplace and management platform connecting local Kenyan farmers directly with urban buyers. acreage eliminates middlemen by providing direct trade capabilities, real-time market analytics charts, agronomic crop activity logs, order fulfillment workflows, and an integrated M-Pesa ready digital wallet system.
 
 ---
 
@@ -162,7 +162,7 @@ All route calls are prefixed with `/api` and return standardized JSON objects.
 
 ## 🚀 Environment Initialization Workflow
 
-Follow this sequence to launch ShambaPulse inside your local environment.
+Follow this sequence to launch acreage inside your local environment.
 
 ### 1. Backend Setup (`/server`)
 Navigate into the server repository directory and activate your virtual environment:
@@ -180,7 +180,7 @@ export PYTHONPATH=.
 
 # Rebuild migration history and apply database layout schema
 flask db init
-flask db migrate -m "Initialize ShambaPulse tables schema"
+flask db migrate -m "Initialize acreage tables schema"
 flask db upgrade
 
 # Populates test farmers, orders, products, chats and reviews assets

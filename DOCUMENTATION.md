@@ -1,7 +1,7 @@
-# 📘 ShambaPulse - System Architecture & API Documentation
+# 📘 Acreage - System Architecture & API Documentation
 
 ## 📄 Overview
-ShambaPulse simplifies the agricultural supply chain by eliminating intermediate transaction layers, allowing farmers to list fresh harvests directly to consumers, restaurants, and wholesale buyers.
+Acreage simplifies the agricultural supply chain by eliminating intermediate transaction layers, allowing farmers to list fresh harvests directly to consumers, restaurants, and wholesale buyers.
 
 ---
 
