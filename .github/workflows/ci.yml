@@ -1,11 +1,7 @@
 name: Acreage CI Pipeline
 
-# 1. Trigger the workflow on pushes or pull requests to the main branch
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# Universal triggers: forces the pipeline to fire on every push, pull request, or manual button click
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   # --- BACKEND VERIFICATION JOB ---
@@ -19,7 +15,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip' # Automatically caches dependencies for faster subsequent runs
+          cache: 'pip'
 
       - name: Install Flask Dependencies
         run: |
@@ -44,8 +40,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: client/package-json.lock # Directs caching to the client lock file
+          cache: 'npm' # Fixed: Matches the standard npm engine tracker
+          cache-dependency-path: client/package-lock.json # FIXED: Corrected the filename typo
 
       - name: Install React Dependencies
         run: |
