@@ -1,9 +1,17 @@
-import React from 'react'
+import { BrowserRouter as Router } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ChatProvider } from './context/ChatContext';
+import AppRoutes from './routes/AppRoutes';
+import './index.css';
 
-const App = () => {
+export default function App() {
   return (
-    <div>App</div>
-  )
+    <AuthProvider>
+      <ChatProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </ChatProvider>
+    </AuthProvider>
+  );
 }
-
-export default App
