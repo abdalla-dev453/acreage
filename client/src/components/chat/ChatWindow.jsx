@@ -56,14 +56,14 @@ export default function ChatWindow({ activeUser, messages = [], onSendMessage })
               <div 
                 className={`max-w-md p-3.5 rounded-2xl text-sm shadow-sm ${
                   isMe 
-                    ? 'bg-purple-600 text-white rounded-tr-none' 
+                    ? 'bg-orange-600 text-white rounded-tr-none' 
                     : 'bg-white border border-slate-100 text-slate-800 rounded-tl-none'
                 }`}
               >
                 <p className="leading-relaxed break-words">{msg.message}</p>
                 {/* Optional metadata timestamp layout */}
                 {msg.created_at && (
-                  <p className={`text-[10px] mt-1.5 text-right ${isMe ? 'text-purple-200' : 'text-slate-400'}`}>
+                  <p className={`text-[10px] mt-1.5 text-right ${isMe ? 'text-orange-200' : 'text-slate-400'}`}>
                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 )}
@@ -82,12 +82,12 @@ export default function ChatWindow({ activeUser, messages = [], onSendMessage })
           placeholder="Type a message..."
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400"
+          className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-slate-400"
         />
         <button 
           type="submit" 
           disabled={!text.trim()}
-          className="p-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:hover:bg-purple-600 text-white rounded-xl transition shadow-sm"
+          className="p-2.5 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:hover:bg-orange-600 text-white rounded-xl transition shadow-sm"
         >
           <Send className="w-4 h-4" />
         </button>

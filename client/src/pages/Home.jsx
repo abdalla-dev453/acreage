@@ -12,7 +12,7 @@ export default function Home() {
       {/* Platform Header Navigation Control Bar */}
       <header className="flex justify-between items-center max-w-6xl w-full mx-auto bg-white/60 backdrop-blur-md py-4 px-6 rounded-2xl border border-slate-200/50 shadow-sm z-10">
         <div className="flex items-center space-x-2 select-none">
-          <div className="p-2 bg-purple-600 rounded-xl text-white shadow-sm shadow-purple-500/10">
+          <div className="p-2 bg-orange-600 rounded-xl text-white shadow-sm shadow-orange-500/10">
             <Sprout className="w-5 h-5 stroke-[2.2]" />
           </div>
           <span className="font-extrabold text-xl tracking-wider text-slate-800 uppercase">ACREAGE</span>
@@ -23,12 +23,12 @@ export default function Home() {
           {user ? (
             <div className="flex items-center gap-3">
               <span className="hidden sm:inline-block text-xs font-bold text-slate-400">Logged in as @{user.username}</span>
-              <Link to="/dashboard" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm">Go to Workspace</Link>
+              <Link to="/dashboard" className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm">Go to Workspace</Link>
             </div>
           ) : (
             <>
               <Link to="/login" className="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">Sign In</Link>
-              <Link to="/register" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm">Get Started</Link>
+              <Link to="/register" className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm">Get Started</Link>
             </>
           )}
         </div>
@@ -36,8 +36,8 @@ export default function Home() {
 
       {/* Main Feature Hero Spotlight Area */}
       <main className="max-w-3xl mx-auto text-center my-auto space-y-6 px-4 z-10 py-12">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-50 border border-purple-100/50 rounded-full text-purple-700 text-[10px] font-bold uppercase tracking-widest mx-auto select-none">
-          <span className="w-1 h-1 rounded-full bg-purple-600 animate-ping" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 border border-orange-100/50 rounded-full text-orange-700 text-[10px] font-bold uppercase tracking-widest mx-auto select-none">
+          <span className="w-1 h-1 rounded-full bg-orange-600 animate-ping" />
           <span>Empowering Local Farm Ecosystems</span>
         </div>
         
@@ -52,7 +52,7 @@ export default function Home() {
         <div className="flex justify-center pt-4">
           <Link 
             to={user ? "/dashboard" : "/register"} 
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-all shadow-md shadow-purple-500/10 active:scale-95 cursor-pointer text-sm"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-all shadow-md shadow-orange-500/10 active:scale-95 cursor-pointer text-sm"
           >
             <span>{user ? 'Open Your Dashboard' : 'Create Merchant Account'}</span>
             <ArrowRight className="w-4 h-4 stroke-[2.2]" />
@@ -65,7 +65,7 @@ export default function Home() {
         
         {/* 2. Large Background Word Banner that lights up upon footer hover */}
         <div className="absolute inset-x-0 bottom-8 flex justify-center items-center pointer-events-none z-0 overflow-hidden">
-          <span className="text-[12vw] font-black tracking-[0.2em] text-slate-200/40 uppercase transition-all duration-700 ease-out transform translate-y-4 opacity-50 scale-95 group-hover:text-purple-600/15 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 tracking-widest select-none">
+          <span className="text-[12vw] font-black tracking-[0.2em] text-slate-200/40 uppercase transition-all duration-700 ease-out transform translate-y-4 opacity-50 scale-95 group-hover:text-orange-600/15 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 tracking-widest select-none">
             ACREAGE
           </span>
         </div>
@@ -76,9 +76,9 @@ export default function Home() {
             © 2026 ACREAGE Platform. All rights reserved.
           </p>
           <div className="flex space-x-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <a href="#privacy" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
-            <a href="#terms" className="hover:text-purple-600 transition-colors">Terms of Service</a>
-            <a href="#support" className="hover:text-purple-600 transition-colors">Support Ledger</a>
+            <a href="#privacy" className="hover:text-orange-600 transition-colors">Privacy Policy</a>
+            <a href="#terms" className="hover:text-orange-600 transition-colors">Terms of Service</a>
+            <a href="#support" className="hover:text-orange-600 transition-colors">Support Ledger</a>
           </div>
         </div>
       </footer>

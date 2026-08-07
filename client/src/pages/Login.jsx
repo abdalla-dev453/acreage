@@ -31,7 +31,7 @@ export default function Login() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4">
       {/* Brand Header Visual Layout */}
       <div className="flex items-center space-x-2 mb-6">
-        <div className="p-2 bg-purple-600 rounded-xl text-white shadow-sm">
+        <div className="p-2 bg-orange-600 rounded-xl text-white shadow-sm">
           <Sprout className="w-6 h-6" />
         </div>
         <span className="font-extrabold text-xl tracking-wider text-slate-800 uppercase">ACREAGE</span>
@@ -60,7 +60,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)} 
               placeholder="e.g. john@farm.com"
               disabled={isSubmitting}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all disabled:opacity-60" 
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all disabled:opacity-60" 
             />
           </div>
 
@@ -75,7 +75,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)} 
               placeholder="••••••••"
               disabled={isSubmitting}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all disabled:opacity-60" 
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all disabled:opacity-60" 
             />
           </div>
 
@@ -83,7 +83,7 @@ export default function Login() {
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-xl transition shadow-sm inline-flex items-center justify-center gap-2"
+            className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-xl transition shadow-sm inline-flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <>
@@ -98,7 +98,7 @@ export default function Login() {
 
         <p className="mt-5 text-center text-sm text-slate-500">
           Don't have an account?{' '}
-          <Link to="/register" className="text-purple-600 font-bold hover:underline transition-all">
+          <Link to="/register" className="text-orange-600 font-bold hover:underline transition-all">
             Register
           </Link>
         </p>

@@ -13,7 +13,7 @@ export default function AnalyticsChart({ overview = { top_ordered_pct: 52, growt
       <div>
         <div className="flex justify-between items-center mb-1">
           <h3 className="font-bold text-slate-800 text-base">Overview</h3>
-          <button className="text-xs text-purple-600 font-semibold transition-colors bg-purple-50 px-2.5 py-1 rounded-lg hover:bg-purple-100/70">
+          <button className="text-xs text-orange-600 font-semibold transition-colors bg-orange-50 px-2.5 py-1 rounded-lg hover:bg-orange-100/70">
             View Details
           </button>
         </div>
@@ -38,7 +38,7 @@ export default function AnalyticsChart({ overview = { top_ordered_pct: 52, growt
             cx="60"
             cy="60"
             r={radius}
-            className="text-purple-600"
+            className="text-orange-600"
             strokeWidth="10"
             stroke="currentColor"
             fill="transparent"

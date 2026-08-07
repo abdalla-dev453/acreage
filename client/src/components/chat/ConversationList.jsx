@@ -23,7 +23,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect }) 
           placeholder="Search conversations..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400"
+          className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-slate-400"
         />
       </div>
 
@@ -42,13 +42,13 @@ export default function ConversationList({ contacts = [], activeId, onSelect }) 
                 onClick={() => onSelect(contact)}
                 className={`p-3 rounded-xl flex items-center space-x-3 cursor-pointer transition-all ${
                   isActive
-                    ? 'bg-purple-50 text-purple-900 border border-purple-100'
+                    ? 'bg-orange-50 text-orange-900 border border-orange-100'
                     : 'hover:bg-slate-50 text-slate-700'
                 }`}
               >
                 {/* Visual Initial Placeholder Avatar Block */}
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm shrink-0 ${
-                  isActive ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'
+                  isActive ? 'bg-orange-600 text-white' : 'bg-orange-100 text-orange-700'
                 }`}>
                   {initial}
                 </div>
@@ -56,7 +56,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect }) 
                 {/* Text Node Descriptions Layout */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-800 truncate">{contactName}</p>
-                  <p className={`text-xs truncate ${isActive ? 'text-purple-500 font-medium' : 'text-slate-400'}`}>
+                  <p className={`text-xs truncate ${isActive ? 'text-orange-500 font-medium' : 'text-slate-400'}`}>
                     {contact?.role ? `${contact.role} • Tap to chat` : 'Tap to chat'}
                   </p>
                 </div>

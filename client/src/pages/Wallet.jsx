@@ -16,8 +16,8 @@ export default function Wallet() {
 
   useEffect(() => {
     setIsLoading(true);
-    API.get('/wallet/transactions')
-      .then((res) => setTransactions(res.data))
+    API.get('/analytics/dashboard')
+      .then((res) => setTransactions(res.data.transactions || []))
       .catch(() => {
         // High UX regional fallback dataset matching your Kenyan marketplace domain values
         setTransactions([
@@ -57,19 +57,19 @@ export default function Wallet() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* 1. Stunning Visual Anchor: Premium Gradient Balance Card */}
-        <div className="lg:col-span-1 bg-gradient-to-br from-purple-700 via-purple-800 to-indigo-900 text-white p-6 rounded-2xl shadow-lg border border-purple-600/20 flex flex-col justify-between min-h-[220px] transition-all hover:shadow-xl hover:shadow-purple-900/5">
+        <div className="lg:col-span-1 bg-gradient-to-br from-orange-700 via-orange-800 to-indigo-900 text-white p-6 rounded-2xl shadow-lg border border-orange-600/20 flex flex-col justify-between min-h-[220px] transition-all hover:shadow-xl hover:shadow-orange-900/5">
           <div>
             <div className="flex justify-between items-center mb-6">
-              <span className="text-xs uppercase tracking-widest text-purple-200 font-bold">Available Balance</span>
+              <span className="text-xs uppercase tracking-widest text-orange-200 font-bold">Available Balance</span>
               <div className="p-2 bg-white/10 rounded-xl">
-                <WalletIcon className="w-5 h-5 text-purple-100" />
+                <WalletIcon className="w-5 h-5 text-orange-100" />
               </div>
             </div>
             {/* Swapped from dollars ($) to localized Kenyan Shillings notation */}
             <h2 className="text-3xl font-extrabold tracking-tight">
               KES {balance.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
             </h2>
-            <p className="text-[11px] text-purple-200/70 font-medium mt-1">Escrow and marketplace sales clear instantly</p>
+            <p className="text-[11px] text-orange-200/70 font-medium mt-1">Escrow and marketplace sales clear instantly</p>
           </div>
           
           <div className="mt-6 flex space-x-3">
@@ -77,12 +77,12 @@ export default function Wallet() {
               onClick={() => setIsWithdrawModalOpen(true)}
               className="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-md py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition-all active:scale-95 cursor-pointer border border-white/5"
             >
-              <ArrowUpRight className="w-4 h-4 text-purple-200" />
+              <ArrowUpRight className="w-4 h-4 text-orange-200" />
               <span>Withdraw</span>
             </button>
             <button 
               onClick={() => setIsDepositModalOpen(true)}
-              className="flex-1 bg-white text-purple-900 hover:bg-purple-50 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
+              className="flex-1 bg-white text-orange-900 hover:bg-orange-50 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
             >
               <Plus className="w-4 h-4" />
               <span>Add Funds</span>
@@ -111,8 +111,8 @@ export default function Wallet() {
             </div>
             
             {/* Standard Bank Transfer Layout Option */}
-            <div className="p-4 border border-slate-100 bg-slate-50/50 rounded-xl flex items-center space-x-4 group hover:border-purple-200 transition-all cursor-pointer">
-              <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
+            <div className="p-4 border border-slate-100 bg-slate-50/50 rounded-xl flex items-center space-x-4 group hover:border-orange-200 transition-all cursor-pointer">
+              <div className="p-3 bg-orange-50 text-orange-600 rounded-xl">
                 <CreditCard className="w-5 h-5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -131,14 +131,14 @@ export default function Wallet() {
             <h3 className="font-bold text-slate-800 text-base">Audit Trail</h3>
             <p className="text-xs text-slate-400 mt-0.5">Historical overview of credits and active debit withdrawals</p>
           </div>
-          <button className="text-xs font-bold text-purple-600 hover:text-purple-700 bg-purple-50 px-3 py-1.5 rounded-xl transition-all">
+          <button className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 px-3 py-1.5 rounded-xl transition-all">
             Export Statement
           </button>
         </div>
 
         {isLoading ? (
           <div className="py-12 flex flex-col items-center justify-center">
-            <span className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></span>
+            <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
             <p className="text-xs text-slate-400 mt-2 font-medium">Loading statement sheets...</p>
           </div>
         ) : (
@@ -152,7 +152,7 @@ export default function Wallet() {
                       {isCredit ? <ArrowDownLeft className="w-4 h-4 stroke-[2.5]" /> : <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-800 group-hover:text-purple-900 transition-colors truncate">
+                      <p className="text-sm font-bold text-slate-800 group-hover:text-orange-900 transition-colors truncate">
                         {tx.title}
                       </p>
                       <p className="text-xs font-medium text-slate-400 mt-0.5">{tx.date}</p>
@@ -182,10 +182,10 @@ export default function Wallet() {
               placeholder="e.g. 5000"
               value={payoutAmount}
               onChange={(e) => setPayoutAmount(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
             />
           </div>
-          <button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
+          <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
             Confirm Disbursal
           </button>
           <button onClick={() => setIsWithdrawModalOpen(false)} className="w-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold py-2.5 rounded-xl transition shadow-sm">
@@ -208,10 +208,10 @@ export default function Wallet() {
               placeholder="e.g. 5000"
               value={depositAmount}
               onChange={(e) => setDepositAmount(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
             />
           </div>
-          <button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
+          <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
             Confirm Deposit
           </button>
           <button onClick={() => setIsDepositModalOpen(false)} className="w-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold py-2.5 rounded-xl transition shadow-sm">

@@ -15,6 +15,9 @@ import Wallet from '../pages/Wallet';
 import FarmingLog from '../pages/FarmingLog';
 import CustomerReview from '../pages/CustomerReview';
 import Analytics from '../pages/Analytics';
+import Profile from '../pages/Profile';
+import Customers from '../pages/Customers';
+
 
 // 1. Fixed: Structural application parent shell container using native Outlet
 function AppLayout() {
@@ -53,6 +56,8 @@ export default function AppRoutes() {
           <Route path="chats" element={<Chats />} />
           <Route path="wallet" element={<Wallet />} />
           <Route path="reviews" element={<CustomerReview />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="customers" element={<Customers />} />
         </Route>
       </Route>
 

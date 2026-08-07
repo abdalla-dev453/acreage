@@ -9,19 +9,20 @@ from sqlalchemy import func
 
 reviews_bp = Blueprint('reviews', __name__)
 
-
-@reviews_bp.route('/farmer/<int:farmer_id>', methods=['GET'])
-def get_reviews(farmer_id):
-    reviews = Review.query.filter_by(farmer_id=farmer_id).order_by(Review.created_at.desc()).all()
-
-    avg_rating = db.session.query(func.avg(Review.rating))\
-        .filter(Review.farmer_id == farmer_id).scalar() or 0.0
-
+@reviews_bp.route('/', methods=['GET'])
+@jwt_required()
+def get_global_reviews():
+    # Fetch all reviews across the platform sorted by latest entry
+    all_reviews = Review.query.order_by(Review.created_at.desc()).all()
+    
+    # Calculate a platform-wide average score safely
+    avg_rating = db.session.query(func.avg(Review.rating)).scalar() or 0.0
+    
     return jsonify({
         "average_rating": round(avg_rating, 1),
-        "total_reviwews": len(reviews),
-        "reviews": reviews_schema.dump(reviews)
-    })
+        "total_reviews": len(all_reviews), 
+        "reviews": reviews_schema.dump(all_reviews)
+    }), 200
 
 
 

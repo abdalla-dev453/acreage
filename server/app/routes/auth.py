@@ -3,10 +3,10 @@ from app import db
 from app.models.user import User
 from app.schemas.user import UserSchema
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from werkzeug.security import generate_password_hash
 
 auth_bp = Blueprint('auth', __name__)
 
-# 1. FIXED: Changed method constraint from 'GET' to 'POST'
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
@@ -32,7 +32,6 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    # Log user in instantly by issuing a new JWT access token upon successful signup
     access_token = create_access_token(identity=str(user.id))
     return jsonify({
         'token': access_token,
@@ -59,7 +58,6 @@ def login():
     }), 200
 
 
-# 2. FIXED: Added the mandatory @jwt_required() decorator wrapper hook
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_profile():
@@ -68,10 +66,47 @@ def get_profile():
     return jsonify(UserSchema().dump(user)), 200
 
 
-# 3. ADDED: New protected route to supply real contacts data directly to your frontend Chat List
 @auth_bp.route('/users', methods=['GET'])
 @jwt_required()
 def get_all_users():
     users = User.query.all()
-    # Serialize the complete array ledger through your existing Marshmallow UserSchema
     return jsonify(UserSchema(many=True).dump(users)), 200
+
+
+# ADDED: Direct target endpoint to handle your frontend Profile.jsx update form triggers
+@auth_bp.route('/profile', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get_or_404(int(current_user_id))
+    data = request.get_json() or {}
+
+    # 1. Update general field variables safely
+    username = data.get('username', user.username).strip()
+    email = data.get('email', user.email).strip()
+    
+    # Check uniqueness constraints if user modifies unique handles
+    if username != user.username and User.query.filter_by(username=username).first():
+        return jsonify({'message': 'Username is already taken'}), 400
+    if email != user.email and User.query.filter_by(email=email).first():
+        return jsonify({'message': 'Email is already registered'}), 400
+
+    user.username = username
+    user.email = email
+    user.location = data.get('location', user.location)
+    
+    # Dynamic field assignment supporting custom metadata strings from Profile.jsx forms
+    if 'phone' in data:
+        user.phone_number = data.get('phone') # Maps back to user column models attribute 
+
+    # 2. Check and handle security/credential mutations safely
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+    
+    if new_password:
+        if not current_password or not user.check_password(current_password):
+            return jsonify({'message': 'Verification failed. Current password is incorrect.'}), 401
+        
+        user.set_password(new_password)
+
+    db.session.commit()

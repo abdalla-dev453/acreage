@@ -1,10 +1,12 @@
 from flask import Blueprint, jsonify, request
 from app.models.product import Product
+from app.models.user import User  # Imported User model to run role verifications
 from app import db
 from app.schemas.product import product_schema, products_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 products_bp = Blueprint('products', __name__)
+
 
 @products_bp.route('/', methods=['GET'])
 def get_products():
@@ -28,17 +30,31 @@ def get_product(product_id):
 @jwt_required()
 def create_product():
     current_user_id = int(get_jwt_identity())
+    
+    # 1. ENHANCEMENT: Role Enforcement Guard block
+    requesting_user = User.query.get_or_404(current_user_id)
+    if requesting_user.role != 'farmer':
+        return jsonify({'message': 'Access restricted. Only verified farmers can list agricultural products.'}), 403
+
     data = request.get_json() or {}
+
+    # 2. ENHANCEMENT: Explicit type casting preventing model type allocation warnings
+    try:
+        price = float(data.get('price_per_unit', 0.0))
+        stock = float(data.get('stock_quantity', 0.0))
+    except (ValueError, TypeError):
+        return jsonify({'message': 'Invalid data format for price or stock metrics.'}), 400
 
     product = Product(
         farmer_id=current_user_id,
         title=data.get('title'),
         category=data.get('category'),
         description=data.get('description'),
-        price_per_unit=data.get('price_per_unit'),
+        price_per_unit=price,
         unit=data.get('unit', 'kg'),
-        stock_quantity=data.get('stock_quantity', 0.0),
+        stock_quantity=stock,
         image_url=data.get('image_url'),
+        is_available=True
     )
 
     db.session.add(product)
@@ -52,17 +68,31 @@ def update_product(product_id):
     current_user_id = int(get_jwt_identity())
     product = Product.query.get_or_404(product_id)
 
+    # Ownership enforcement guard
     if product.farmer_id != current_user_id:
-        return jsonify({'message': 'Unauthorized to modify this product'}), 403
+        return jsonify({'message': 'Unauthorized to modify this product listing'}), 403
 
     data = request.get_json() or {}
+    
+    # Update properties with fallbacks
     product.title = data.get('title', product.title)
     product.category = data.get('category', product.category)
     product.description = data.get('description', product.description)
-    product.price_per_unit = data.get('price_per_unit', product.price_per_unit)  
     product.unit = data.get('unit', product.unit)
-    product.stock_quantity = data.get('stock_quantity', product.stock_quantity)
     product.is_available = data.get('is_available', product.is_available)
+
+    # Cast optional numerical mutations smoothly
+    if 'price_per_unit' in data:
+        try:
+            product.price_per_unit = float(data['price_per_unit'])
+        except (ValueError, TypeError):
+            return jsonify({'message': 'Invalid price format'}), 400
+            
+    if 'stock_quantity' in data:
+        try:
+            product.stock_quantity = float(data['stock_quantity'])
+        except (ValueError, TypeError):
+            return jsonify({'message': 'Invalid stock format'}), 400
 
     db.session.commit()
     return product_schema.jsonify(product), 200

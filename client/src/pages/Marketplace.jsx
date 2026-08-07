@@ -106,13 +106,13 @@ export default function Marketplace() {
             placeholder="Search crop, grain or produce item..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder-slate-400"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-slate-400"
           />
         </div>
         
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl text-sm font-bold flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-sm shadow-purple-500/10 cursor-pointer shrink-0"
+          className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-xl text-sm font-bold flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-sm shadow-orange-500/10 cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Add Crop Listing</span>
@@ -131,7 +131,7 @@ export default function Marketplace() {
             onClick={() => setSelectedCategory(cat)}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer whitespace-nowrap capitalize ${
               selectedCategory === cat
-                ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                 : 'bg-white hover:bg-slate-50 border-slate-200/60 text-slate-600'
             }`}
           >
@@ -143,7 +143,7 @@ export default function Marketplace() {
       {/* 3. Product Catalog Grid */}
       {isLoading ? (
         <div className="py-24 text-center flex flex-col items-center justify-center">
-          <span className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></span>
+          <span className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
           <p className="text-xs text-slate-400 font-semibold mt-2">Syncing harvest logs...</p>
         </div>
       ) : (
@@ -168,10 +168,10 @@ export default function Marketplace() {
                     </div>
                     
                     {/* Category tag */}
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-purple-600 bg-purple-50 border border-purple-100/50 px-2 py-0.5 rounded-md inline-block">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-600 bg-orange-50 border border-orange-100/50 px-2 py-0.5 rounded-md inline-block">
                       {product.category}
                     </span>
-                    <h3 className="font-bold text-slate-800 text-base mt-2 group-hover:text-purple-700 transition-colors truncate">
+                    <h3 className="font-bold text-slate-800 text-base mt-2 group-hover:text-orange-700 transition-colors truncate">
                       {product.title}
                     </h3>
                     <p className="text-xs font-semibold text-slate-400 mt-1">
@@ -189,7 +189,7 @@ export default function Marketplace() {
                         per {unit}
                       </span>
                     </div>
-                    <button className="bg-slate-50 hover:bg-purple-50 text-slate-600 hover:text-purple-700 border border-slate-200/60 hover:border-purple-200 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm">
+                    <button className="bg-slate-50 hover:bg-orange-50 text-slate-600 hover:text-orange-700 border border-slate-200/60 hover:border-orange-200 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm">
                       Manage Stock
                     </button>
                   </div>
@@ -219,7 +219,7 @@ export default function Marketplace() {
               placeholder="e.g. Export Hass Avocados"
               value={newCrop.title}
               onChange={(e) => setNewCrop({ ...newCrop, title: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+              className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
             />
           </div>
 
@@ -229,7 +229,7 @@ export default function Marketplace() {
               <select
                 value={newCrop.category}
                 onChange={(e) => setNewCrop({ ...newCrop, category: e.target.value })}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
               >
                 <option value="Vegetables">Vegetables</option>
                 <option value="Fruits">Fruits</option>
@@ -244,7 +244,7 @@ export default function Marketplace() {
               <select
                 value={newCrop.unit}
                 onChange={(e) => setNewCrop({ ...newCrop, unit: e.target.value })}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
               >
                 <option value="kg">Kilogram (kg)</option>
                 <option value="piece">Piece</option>
@@ -264,7 +264,7 @@ export default function Marketplace() {
                 placeholder="e.g. 150"
                 value={newCrop.price_per_unit}
                 onChange={(e) => setNewCrop({ ...newCrop, price_per_unit: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
               />
             </div>
 
@@ -277,7 +277,7 @@ export default function Marketplace() {
                 placeholder="e.g. 350"
                 value={newCrop.stock_quantity}
                 onChange={(e) => setNewCrop({ ...newCrop, stock_quantity: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
@@ -289,7 +289,7 @@ export default function Marketplace() {
               placeholder="Provide crop quality parameters (e.g., Grade A, organic compost applied)..."
               value={newCrop.description}
               onChange={(e) => setNewCrop({ ...newCrop, description: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all resize-none"
+              className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all resize-none"
             />
           </div>
 
@@ -304,7 +304,7 @@ export default function Marketplace() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 disabled:opacity-50"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

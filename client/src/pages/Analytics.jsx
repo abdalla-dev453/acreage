@@ -24,7 +24,7 @@ export default function Analytics() {
             conversion_rate: '4.8%'
           },
           category_breakdown: [
-            { category: 'Vegetables', share: '45%', amount: 68940, color: 'bg-purple-600' },
+            { category: 'Vegetables', share: '45%', amount: 68940, color: 'bg-orange-600' },
             { category: 'Grains & Tubers', share: '30%', amount: 45960, color: 'bg-indigo-500' },
             { category: 'Fruits', share: '25%', amount: 38300, color: 'bg-emerald-500' },
           ]
@@ -83,7 +83,7 @@ export default function Analytics() {
                   {card.trend} vs last period
                 </span>
               </div>
-              <div className="p-3 bg-purple-50 text-purple-600 rounded-xl transition-all duration-300 group-hover:bg-purple-600 group-hover:text-white shrink-0 shadow-sm">
+              <div className="p-3 bg-orange-50 text-orange-600 rounded-xl transition-all duration-300 group-hover:bg-orange-600 group-hover:text-white shrink-0 shadow-sm">
                 <Icon className="w-4 h-4 stroke-[2.2]" />
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function Analytics() {
       {/* 3. Core Visual Analytics Charts Section Grid */}
       {isLoading ? (
         <div className="py-24 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-100 shadow-sm">
-          <span className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></span>
+          <span className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
           <p className="text-xs text-slate-400 font-semibold mt-2">Computing time-series dataset metrics...</p>
         </div>
       ) : (
@@ -116,7 +116,7 @@ export default function Analytics() {
                 <div key={i} className="space-y-2 group">
                   <div className="flex justify-between items-end text-xs font-bold text-slate-700">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-800 group-hover:text-purple-700 transition-colors">
+                      <span className="text-sm font-bold text-slate-800 group-hover:text-orange-700 transition-colors">
                         {item.category}
                       </span>
                       <span className="text-[10px] text-slate-400 font-medium font-mono mt-0.5">
