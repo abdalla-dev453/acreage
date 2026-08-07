@@ -9,7 +9,7 @@ export default function FarmingLog() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Form state fields mapped directly to your Flask database columns
+  // Form state fields mapped directly to Flask database columns
   const [formData, setFormData] = useState({
     field_name: '',
     activity_type: 'Planting & Sowing',
@@ -19,10 +19,10 @@ export default function FarmingLog() {
   });
 
   useEffect(() => {
-    API.get('/farm_logs/') // Fetches live entries from your database seed
+    API.get('/farm_logs/') // Fetches live entries from  database seed
       .then((res) => setLogs(res.data))
       .catch(() => {
-        // Safe database fallback layout matching your seeded dataset attributes
+        // Safe database fallback layout matching  seeded dataset attributes
         setLogs([
           { id: 1, field_name: 'Block A - Greenhouse', activity_type: 'Weeding & Pruning', description: 'Removed lateral shoots from tomato vines.', logged_at: '2026-08-05T14:30:00Z' },
           { id: 2, field_name: 'Hillside Section', activity_type: 'Fertilizer Application', description: 'Applied organic compost to young avocado trees.', logged_at: '2026-08-03T09:15:00Z' },

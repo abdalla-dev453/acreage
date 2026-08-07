@@ -15,7 +15,7 @@ export default function Home() {
           <div className="p-2 bg-purple-600 rounded-xl text-white shadow-sm shadow-purple-500/10">
             <Sprout className="w-5 h-5 stroke-[2.2]" />
           </div>
-          <span className="font-extrabold text-xl tracking-wider text-slate-800 uppercase">CRAVEAT</span>
+          <span className="font-extrabold text-xl tracking-wider text-slate-800 uppercase">ACREAGE</span>
         </div>
         
         {/* Dynamic Header Action Group */}
@@ -73,7 +73,7 @@ export default function Home() {
         {/* Footer Typography Text Metrics */}
         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between border-t border-slate-200/60 pt-6 gap-3">
           <p className="text-xs text-slate-400 font-semibold tracking-wide">
-            © 2026 CRAVEAT Platform. All rights reserved.
+            © 2026 ACREAGE Platform. All rights reserved.
           </p>
           <div className="flex space-x-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
             <a href="#privacy" className="hover:text-purple-600 transition-colors">Privacy Policy</a>

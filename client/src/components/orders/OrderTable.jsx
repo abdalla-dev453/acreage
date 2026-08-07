@@ -11,7 +11,7 @@ export default function OrderTable({ orders = [] }) {
       case 'cancelled':
         return 'bg-red-100 text-red-600';
       case 'pending':
-        return 'bg-amber-100 text-amber-700'; // Added styling for your database seed default
+        return 'bg-amber-100 text-amber-700'; // Added styling for database seed default
       default:
         return 'bg-slate-100 text-slate-600';
     }

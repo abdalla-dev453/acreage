@@ -48,7 +48,7 @@ export default function Register() {
         <div className="p-2 bg-purple-600 rounded-xl text-white shadow-sm">
           <Sprout className="w-6 h-6" />
         </div>
-        <span className="font-extrabold text-xl tracking-wider text-slate-800 uppercase">CRAVEAT</span>
+        <span className="font-extrabold text-xl tracking-wider text-slate-800 uppercase">ACREAGE</span>
       </div>
 
       <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
