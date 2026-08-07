@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext'; // FIXED: Adjusted path depth to match context structure layout
+import { AuthContext } from '../context/AuthContext';
 
 // Added allowedRoles array parameter support to protect specific sub-paths (e.g., /analytics)
 export default function ProtectedRoute({ allowedRoles = [] }) {
