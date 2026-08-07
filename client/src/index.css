@@ -1,10 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Optional: Subtle background baseline match for your dashboard theme */
 body {
-  @apply bg-slate-50 text-slate-900 min-h-screen antialiased;
+    font-family: 'Inter', sans-serif;
 }
-
-
