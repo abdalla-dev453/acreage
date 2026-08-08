@@ -17,6 +17,7 @@ import CustomerReview from '../pages/CustomerReview';
 import Analytics from '../pages/Analytics';
 import Profile from '../pages/Profile';
 import Customers from '../pages/Customers';
+import Marketplace from '../pages/Marketplace';
 
 
 // 1. Fixed: Structural application parent shell container using native Outlet
@@ -59,7 +60,7 @@ export default function AppRoutes() {
           <Route path="profile" element={<Profile />} />
           <Route path="customers" element={<Customers />} />
           <Route path="analytics" element={<Analytics />} />
-
+          <Route path="marketplace" element={<Marketplace />} />
         </Route>
       </Route>
 
@@ -67,6 +68,7 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={['farmer']} />}>
         <Route element={<AppLayout />}>
           <Route path="farm-logs" element={<FarmingLog />} />
+          <Route path="marketplace" element={<Marketplace />} />
         </Route>
       </Route>
 

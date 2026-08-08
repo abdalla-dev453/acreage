@@ -35,6 +35,7 @@ export default function Sidebar() {
     { name: 'Farm Logs', path: '/farm-logs', icon: ClipboardList, roles: ['farmer'] },
     { name: 'Orders', path: '/orders', icon: ShoppingBag, roles: ['farmer', 'buyer'] },
     { name: 'Customers', path: '/customers', icon: Users, roles: ['farmer'] },
+    { name: 'Marketplace', path: '/marketplace', icon: ShoppingBag, roles: ['farmer', 'buyer'] },
     { name: 'Reviews', path: '/reviews', icon: Star, roles: ['farmer', 'buyer'] },
     { name: 'Chats', path: '/chats', icon: MessageSquare, roles: ['farmer', 'buyer'] },
     { name: 'Wallet', path: '/wallet', icon: Wallet, roles: ['farmer', 'buyer'] },

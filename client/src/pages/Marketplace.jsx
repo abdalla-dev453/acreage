@@ -1,323 +1,384 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Search, ShoppingBag, Plus, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { useState, useEffect, useContext } from 'react';
+import { Plus, ShoppingCart, Loader2, Image, CheckCircle } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
-import Modal from '../components/common/Modal';
 
 export default function Marketplace() {
-  const [products, setProducts] = useState([]);
-  const [query, setQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useContext(AuthContext);
   
-  // Listing Modal State Managers
+  // High-UX Role Condition Checkers
+  const isFarmer = user?.role === 'farmer';
+  const isBuyer = user?.role === 'buyer';
+
+  // State Management
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [actionStatus, setActionStatus] = useState({ type: '', text: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newCrop, setNewCrop] = useState({
+
+  // Form State for listing new products
+  const [formData, setFormData] = useState({
     title: '',
     category: 'Vegetables',
+    description: '',
     price_per_unit: '',
     unit: 'kg',
     stock_quantity: '',
-    description: ''
+    image_url: ''
   });
 
-  // Pull active produce items from Flask endpoint
-  const fetchInventory = () => {
-    setIsLoading(true);
-    API.get('/products/')
-      .then((res) => setProducts(res.data))
-      .catch(() => {
-        setProducts([
-          { id: 1, title: 'Organic Tomatoes', price_per_unit: 150.0, category: 'Vegetables', unit: 'kg', stock_quantity: 100.0, is_available: true },
-          { id: 2, title: 'White Onions', price_per_unit: 120.0, category: 'Vegetables', unit: 'kg', stock_quantity: 250.0, is_available: true },
-          { id: 3, title: 'Fresh Avocados', price_per_unit: 40.0, category: 'Fruits', unit: 'piece', stock_quantity: 500.0, is_available: true },
-          { id: 4, title: 'Grade A Potatoes', price_per_unit: 3000.0, category: 'Grains & Tubers', unit: 'bag', stock_quantity: 15.0, is_available: true },
-        ]);
-      })
-      .finally(() => setIsLoading(false));
+  // Buyer Quick Order Quantity State Mapping
+  const [orderQuantities, setOrderQuantities] = useState({});
+
+  const categories = ['Vegetables', 'Cereals', 'Fruits', 'Grains & Tubers'];
+
+  // Fetch product catalog from database endpoints
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      const url = activeCategory ? `/products/?category=${activeCategory}` : '/products/';
+      const res = await API.get(url);
+      setProducts(res.data);
+    } catch (err) {
+      console.error('Failed to fetch marketplace catalog:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchInventory();
-  }, []);
+    fetchProducts();
+  }, [activeCategory]);
 
-  // Compute unique categories dynamically for filter chips
-  const categoriesList = useMemo(() => {
-    const internalList = products.map(p => p.category);
-    return ['all', ...new Set(internalList)];
-  }, [products]);
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  // Real-time compound query filter processing
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchCategory = selectedCategory === 'all' || product.category === selectedCategory;
-      const matchSearch = product.title.toLowerCase().includes(query.toLowerCase());
-      return matchCategory && matchSearch && product.is_available !== false;
-    });
-  }, [products, query, selectedCategory]);
-
-  // Handle Form Submission for New Crop
+  // Farmer Action: Post New Product Listing
   const handleCreateListing = async (e) => {
     e.preventDefault();
-    if (!newCrop.title || !newCrop.price_per_unit || !newCrop.stock_quantity) return;
-
     setIsSubmitting(true);
-    try {
-      const payload = {
-        ...newCrop,
-        price_per_unit: parseFloat(newCrop.price_per_unit),
-        stock_quantity: parseFloat(newCrop.stock_quantity)
-      };
+    setActionStatus({ type: '', text: '' });
 
-      const res = await API.post('/products/', payload);
-      setProducts((prev) => [res.data, ...prev]);
+    try {
+      await API.post('/products/', formData);
+      setActionStatus({ type: 'success', text: 'Agricultural produce listed successfully!' });
+      setFormData({ title: '', category: 'Vegetables', description: '', price_per_unit: '', unit: 'kg', stock_quantity: '', image_url: '' });
       
-      setNewCrop({ title: '', category: 'Vegetables', price_per_unit: '', unit: 'kg', stock_quantity: '', description: '' });
-      setIsModalOpen(false);
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setActionStatus({ type: '', text: '' });
+        fetchProducts();
+      }, 1500);
     } catch (err) {
-      console.error('Failed to commit listing', err);
-      const mockNewItem = {
-        id: Date.now(),
-        title: newCrop.title,
-        category: newCrop.category,
-        price_per_unit: parseFloat(newCrop.price_per_unit),
-        unit: newCrop.unit,
-        stock_quantity: parseFloat(newCrop.stock_quantity),
-        is_available: true
-      };
-      setProducts((prev) => [mockNewItem, ...prev]);
-      setIsModalOpen(false);
+      setActionStatus({ type: 'error', text: err.response?.data?.message || 'Failed to list product.' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="space-y-6 w-full animate-fade-in pb-12">
-      <Navbar title="Marketplace Catalog" />
+  // Buyer Action: Place Checkout Request Order Instantly
+  const handlePlaceOrder = async (productId, farmerId, maxStock) => {
+    const qty = parseFloat(orderQuantities[productId] || 1);
+    
+    if (qty <= 0 || qty > maxStock) {
+      alert(`Invalid quantity. Available supply threshold is ${maxStock} units.`);
+      return;
+    }
 
-      {/* 1. Toolbar and Search Control Panels Layout */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:max-w-md">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-          <input
-            type="text"
-            placeholder="Search crop, grain or produce item..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-slate-400"
-          />
-        </div>
+    try {
+      setActionStatus({ type: 'success', text: 'Processing order request...' });
+      
+      await API.post('/orders/', {
+        items: [{ product_id: productId, quantity: qty }],
+        payment_status: 'unpaid',
+        delivery_address: 'Fulfillment Warehouse, Nairobi',
+        contact_phone: user?.phone || '+254 700 000 000'
+      });
+
+      alert('Order placed successfully! Reconciling marketplace balances.');
+      fetchProducts();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Checkout connection error.');
+    } finally {
+      setActionStatus({ type: '', text: '' });
+    }
+  };
+
+  const handleQtyChange = (productId, val) => {
+    setOrderQuantities({ ...orderQuantities, [productId]: val });
+  };
+
+  return (
+    <div className="space-y-6 w-full animate-fade-in pb-16">
+      {/* Upper Management Action Banner Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+        <Navbar title="Acreage Produce Marketplace" />
         
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-xl text-sm font-bold flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-sm shadow-orange-500/10 cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Add Crop Listing</span>
-        </button>
+        {/* Dynamic Authority UI Block rendering exclusively for Farmers */}
+        {isFarmer && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md shadow-orange-600/10 flex items-center space-x-2 cursor-pointer transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>List New Produce</span>
+          </button>
+        )}
       </div>
 
-      {/* 2. Dynamic Filter Chip Categories Track */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-hide">
-        <div className="flex items-center text-slate-400 text-xs font-bold uppercase tracking-wider gap-1.5 mr-2 pl-1">
-          <SlidersHorizontal className="w-3.5 h-3.5" />
-          <span>Filter:</span>
-        </div>
-        {categoriesList.map((cat) => (
+      {/* Category Pills Filtering Control Rail */}
+      <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
+        <button
+          onClick={() => setActiveCategory('')}
+          className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${!activeCategory ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-500 border border-slate-200/60 hover:bg-slate-50'}`}
+        >
+          All Produce
+        </button>
+        {categories.map((cat) => (
           <button
             key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer whitespace-nowrap capitalize ${
-              selectedCategory === cat
-                ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
-                : 'bg-white hover:bg-slate-50 border-slate-200/60 text-slate-600'
-            }`}
+            onClick={() => setActiveCategory(cat)}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${activeCategory === cat ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-500 border border-slate-200/60 hover:bg-slate-50'}`}
           >
-            {cat === 'all' ? 'All Produce' : cat}
+            {cat}
           </button>
         ))}
       </div>
 
-      {/* 3. Product Catalog Grid */}
+      {/* Main Catalog Grid Stream View */}
       {isLoading ? (
-        <div className="py-24 text-center flex flex-col items-center justify-center">
-          <span className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
-          <p className="text-xs text-slate-400 font-semibold mt-2">Syncing harvest logs...</p>
+        <div className="py-24 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-100">
+          <Loader2 className="w-6 h-6 text-orange-600 animate-spin" />
+          <p className="text-xs text-slate-400 font-bold mt-2 uppercase tracking-widest">Querying active regional inventory grids...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => {
-              const price = product?.price_per_unit || 0;
-              const unit = product?.unit || 'kg';
-              const stock = product?.stock_quantity || 0;
-
-              return (
-                <div key={product.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col justify-between group transition-all hover:shadow-md">
-                  <div>
-                    {/* Image Placeholder Visual Block */}
-                    <div className="h-40 bg-slate-50 rounded-xl mb-4 flex items-center justify-center text-slate-300 relative overflow-hidden border border-slate-100/50">
-                      <ShoppingBag className="w-10 h-10 transition-transform duration-300 group-hover:scale-110" />
-                      {stock <= 20 && stock > 0 && (
-                        <span className="absolute top-2 right-2 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-md animate-pulse">
-                          Low Stock
-                        </span>
-                      )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {products.length > 0 ? (
+            products.map((prod) => (
+              <div key={prod.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md hover:border-orange-100 transition-all">
+                
+                {/* Product Media Box */}
+                <div className="h-44 w-full bg-slate-50 relative overflow-hidden flex items-center justify-center border-b border-slate-50">
+                  {prod.image_url ? (
+                    <img 
+                      src={prod.image_url} 
+                      alt={prod.title} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500'; }}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-slate-300 font-bold text-[10px] uppercase">
+                      <Image className="w-8 h-8 stroke-[1.5] text-slate-200 mb-1" />
+                      <span>No Photo Attached</span>
                     </div>
-                    
-                    {/* Category tag */}
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-600 bg-orange-50 border border-orange-100/50 px-2 py-0.5 rounded-md inline-block">
-                      {product.category}
-                    </span>
-                    <h3 className="font-bold text-slate-800 text-base mt-2 group-hover:text-orange-700 transition-colors truncate">
-                      {product.title}
-                    </h3>
-                    <p className="text-xs font-semibold text-slate-400 mt-1">
-                      Available Supply: <span className="text-slate-700 font-bold">{stock.toLocaleString()}</span> {unit}s
-                    </p>
-                  </div>
-
-                  {/* Pricing and Action Row */}
-                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div className="min-w-0">
-                      <span className="text-lg font-extrabold text-slate-900 tracking-tight block">
-                        KES {price.toLocaleString()}
-                      </span>
-                      <span className="text-[11px] text-slate-400 font-medium block -mt-0.5">
-                        per {unit}
-                      </span>
-                    </div>
-                    <button className="bg-slate-50 hover:bg-orange-50 text-slate-600 hover:text-orange-700 border border-slate-200/60 hover:border-orange-200 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm">
-                      Manage Stock
-                    </button>
-                  </div>
+                  )}
+                  <span className="absolute left-3 top-3 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
+                    {prod.category}
+                  </span>
                 </div>
-              );
-            })
+
+                {/* Core Descriptor Text Blocks */}
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-1">
+                    <h3 className="font-extrabold text-slate-800 text-sm tracking-tight truncate">{prod.title}</h3>
+                    <p className="text-xs text-slate-400 font-medium line-clamp-2 min-h-[2rem] leading-relaxed">{prod.description || 'Premium harvested regional agriculture lot available for immediate dispatch routing channels.'}</p>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-50 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Price Per Unit</span>
+                      <p className="text-sm font-black text-slate-800 font-mono">KES {prod.price_per_unit} <span className="text-xs font-bold text-slate-400">/{prod.unit}</span></p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Available Supply</span>
+                      <p className="text-xs font-extrabold text-orange-600 font-mono">{prod.stock_quantity} {prod.unit}s</p>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Action Trigger Blocks dependent on user role */}
+                  {isBuyer && (
+                    <div className="pt-2 flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        max={prod.stock_quantity}
+                        value={orderQuantities[prod.id] || 1}
+                        onChange={(e) => handleQtyChange(prod.id, e.target.value)}
+                        className="w-16 px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs font-bold text-center focus:outline-none"
+                      />
+                      <button
+                        onClick={() => handlePlaceOrder(prod.id, prod.farmer_id, prod.stock_quantity)}
+                        className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs uppercase tracking-wider py-1.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center space-x-1 shadow-sm shadow-orange-600/5"
+                      >
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <span>Place Order</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {isFarmer && (
+                    <div className="pt-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 py-2 rounded-xl border border-slate-100">
+                      {prod.farmer_id === user?.id ? 'Your Active Listing Asset' : 'External Partner Lot'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
           ) : (
             <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-slate-100 text-slate-400 font-medium text-xs">
-              No agricultural listings match your current filters.
+              No agricultural listings available under this specific filter track layout context.
             </div>
           )}
         </div>
       )}
 
-      {/* 4. Access Controlled Modal Overlay */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create New Crop Listing">
-        <form onSubmit={handleCreateListing} className="space-y-4">
-          <p className="text-xs text-slate-500 mb-2">
-            Post your fresh harvest parameters straight to the unified market ledger for active buyers to source.
-          </p>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Crop Title</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Export Hass Avocados"
-              value={newCrop.title}
-              onChange={(e) => setNewCrop({ ...newCrop, title: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Market Category</label>
-              <select
-                value={newCrop.category}
-                onChange={(e) => setNewCrop({ ...newCrop, category: e.target.value })}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
-              >
-                <option value="Vegetables">Vegetables</option>
-                <option value="Fruits">Fruits</option>
-                <option value="Grains">Grains</option>
-                <option value="Grains & Tubers">Grains & Tubers</option>
-                <option value="Cereals">Cereals</option>
-              </select>
+      {/* FARMER MANAGEMENT MODAL FORM */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 border border-slate-100 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-slate-800 text-sm tracking-tight uppercase">Configure New Market Commodity</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer">
+                ✕
+              </button>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Measurement Unit</label>
-              <select
-                value={newCrop.unit}
-                onChange={(e) => setNewCrop({ ...newCrop, unit: e.target.value })}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
-              >
-                <option value="kg">Kilogram (kg)</option>
-                <option value="piece">Piece</option>
-                <option value="crate">Crate</option>
-                <option value="bag">Bag / Sack</option>
-              </select>
-            </div>
-          </div>
+            {actionStatus.text && (
+              <div className={`p-3 rounded-xl text-xs font-bold border flex items-center gap-2 ${actionStatus.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
+                {actionStatus.type === 'success' && <CheckCircle className="w-4 h-4" />}
+                <span>{actionStatus.text}</span>
+              </div>
+            )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Price per Unit (KES)</label>
-              <input
-                type="number"
-                required
-                min="1"
-                placeholder="e.g. 150"
-                value={newCrop.price_per_unit}
-                onChange={(e) => setNewCrop({ ...newCrop, price_per_unit: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-              />
-            </div>
+            <form onSubmit={handleCreateListing} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Produce Title Name</label>
+                <input
+                  type="text"
+                  name="title"
+                  required
+                  placeholder="e.g. Export Hass Avocados"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Total Quantity Stock</label>
-              <input
-                type="number"
-                required
-                min="0.5"
-                placeholder="e.g. 350"
-                value={newCrop.stock_quantity}
-                onChange={(e) => setNewCrop({ ...newCrop, stock_quantity: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-              />
-            </div>
-          </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Market Category Channel</label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-white"
+                  >
+                    {categories.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Harvest Description</label>
-            <textarea
-              rows="2"
-              placeholder="Provide crop quality parameters (e.g., Grade A, organic compost applied)..."
-              value={newCrop.description}
-              onChange={(e) => setNewCrop({ ...newCrop, description: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all resize-none"
-            />
-          </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Measurement Unit Scale</label>
+                  <select
+                    name="unit"
+                    value={formData.unit}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-white"
+                  >
+                    <option value="kg">Kilograms (kg)</option>
+                    <option value="crate">Crates</option>
+                    <option value="bag">Bags (90kg)</option>
+                  </select>
+                </div>
+              </div>
 
-          <div className="pt-2 flex items-center justify-end space-x-3">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Publishing to Ledger...</span>
-                </>
-              ) : (
-                <span>Publish Crop Listing</span>
-              )}
-            </button>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Price Per Unit (KES)</label>
+                  <input
+                    type="number"
+                    name="price_per_unit"
+                    required
+                    min="1"
+                    placeholder="150"
+                    value={formData.price_per_unit}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Total Available Stock</label>
+                  <input
+                    type="number"
+                    name="stock_quantity"
+                    required
+                    min="1"
+                    placeholder="500"
+                    value={formData.stock_quantity}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Produce Showcase Image URL</label>
+                <input
+                  type="url"
+                  name="image_url"
+                  placeholder="https://images.unsplash.com/photo-..."
+                  value={formData.image_url}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Operational Lot Description</label>
+                <textarea
+                  name="description"
+                  rows="2"
+                  placeholder="Grade A organic produce ready for dispatch..."
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-5 py-2 rounded-xl transition flex items-center space-x-2 disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Syncing Grid Ledgers...</span>
+                    </>
+                  ) : (
+                    <span>Publish Listing</span>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
-      </Modal>
+        </div>
+      )}
     </div>
   );
 }

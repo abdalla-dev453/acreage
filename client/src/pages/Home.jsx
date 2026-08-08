@@ -65,7 +65,7 @@ export default function Home() {
         
         {/* 2. Large Background Word Banner that lights up upon footer hover */}
         <div className="absolute inset-x-0 bottom-8 flex justify-center items-center pointer-events-none z-0 overflow-hidden">
-          <span class="text-[12vw] font-black tracking-[0.2em] text-orange-400/10 uppercase select-none animate-pulse">
+          <span class="text-[9vw] font-black tracking-[0.2em] text-orange-500/20 uppercase select-none animate-pulse">
             ACREAGE
           </span>
         </div>
