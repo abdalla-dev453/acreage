@@ -5,7 +5,11 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         load_instance = True
-        exclude = ("password_hash",)  # Exclude password_hash from serialization
+        include_fk = True
+        dump_only = ('created_at',) 
+
+    # Dynamic fallback inclusion ensures password security layout parameters remain hidden
+    password_hash = ma.auto_field(load_only=True, required=False)
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
