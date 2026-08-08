@@ -5,9 +5,7 @@ from app.models.user import User
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
 
-
 payouts_bp = Blueprint('payouts', __name__)
-
 
 @payouts_bp.route('/withdraw', methods=['POST'])
 @jwt_required()
@@ -22,24 +20,38 @@ def initiate_payout():
     amount = data.get('amount')
     mpesa_number = data.get('mpesa_number')
 
-    if not amount or not float(amount) <= 0:
-        return jsonify({'message': 'Invalid withdrawal amount specified.'}), 400
+    # 1. FIXED: Corrected amount check condition boundary logic
+    if not amount or float(amount) <= 0:
+        return jsonify({'message': 'Invalid withdrawal amount specified. Must be greater than 0.'}), 400
 
     if not mpesa_number:
         return jsonify({'message': 'M-pesa recipient phone number is required.'}), 400
 
+    # 2. ADDED: Safaricom M-Pesa B2C String Normalization Engine
+    raw_phone = str(mpesa_number).strip().replace('+', '').replace(' ', '')
+    
+    if raw_phone.startswith('0'):
+        cleaned_phone = '254' + raw_phone[1:]
+    elif raw_phone.startswith('7') or raw_phone.startswith('1'):
+        cleaned_phone = '254' + raw_phone
+    else:
+        cleaned_phone = raw_phone
 
-    # stimulate an M-pesa B2C API Request initialization
-    # Generate a unique reference for the payout
+    # Explicit format length check to protect API payload execution from rejections
+    if not cleaned_phone.isdigit() or len(cleaned_phone) != 12:
+        return jsonify({'message': 'Invalid Kenyan phone sequence format. Use 2547XXXXXXXX or 07XXXXXXXX.'}), 400
+
+    # Generate a unique reference for the payout transaction
     payout_ref = f"B2C{uuid.uuid4().hex[:8].upper()}"
 
+    # Instantiating model with verified cleaned_phone variable parameters
     new_payout = Payout(
         farmer_id=current_user_id,
         amount=float(amount),
-        mpesa_number=str(mpesa_number).strip(),
+        mpesa_number=cleaned_phone,
         conversation_id=payout_ref,
         status='completed'
-    )\
+    )
 
     db.session.add(new_payout)
     db.session.commit()
@@ -48,7 +60,7 @@ def initiate_payout():
         'message': 'M-pesa payout processed successfully.',
         'transaction_reference': payout_ref,
         'amount': amount,
-        'recipient': mpesa_number
+        'recipient': cleaned_phone
     }), 201
 
 
@@ -59,7 +71,7 @@ def get_payout_history():
     records = Payout.query.filter_by(farmer_id=current_user_id).order_by(Payout.created_at.desc()).all()
 
     return jsonify([{
-        'id':r.id,
+        'id': r.id,
         'amount': r.amount,
         'mpesa_number': r.mpesa_number,
         'reference': r.conversation_id,

@@ -1,224 +1,229 @@
-import { useEffect, useState } from 'react';
-import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, CreditCard, Plus, ArrowRight, Smartphone } from 'lucide-react';
+import { useEffect, useState, useContext } from 'react';
+import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle2, XCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
-import Modal from '../components/common/Modal'; // Importing your optimized root level Modal portal component
 
 export default function Wallet() {
-  const [balance, setBalance] = useState(12500.00);
-  const [transactions, setTransactions] = useState([]);
+  const { user } = useContext(AuthContext);
+  const isFarmer = user?.role === 'farmer';
+
+  // State Management
+  const [balance, setBalance] = useState(0.0);
+  const [payouts, setPayouts] = useState([]);
+  const [ordersSummary, setOrdersSummary] = useState({ total_revenue: 0.0, total_orders: 0 });
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Interactive Modal Visibility state locks
-  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
-  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [payoutAmount, setPayoutAmount] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Form State
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [mpesaNumber, setMpesaNumber] = useState(user?.mpesa_number || '+254700000000');
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
+
+  // Fetch initial analytical matrix data balances and payout histories concurrently
+  const fetchWalletData = async () => {
+    try {
+      setIsLoading(true);
+      
+      // 1. Fetch dashboard financials for balance metrics
+      const analyticsRes = await API.get('/analytics/dashboard');
+      const revenue = analyticsRes.data?.metrics?.total_revenue ?? 0.0;
+      setOrdersSummary({
+        total_revenue: revenue,
+        total_orders: analyticsRes.data?.metrics?.total_orders ?? 0
+      });
+
+      // 2. Fetch processed payouts history
+      const historyRes = await API.get('/payouts/history');
+      setPayouts(historyRes.data);
+
+      // # Calculate net remaining balance (Gross Revenue minus completed withdrawals)
+      const totalWithdrawn = historyRes.data
+        .filter(p => p.status === 'completed')
+        .reduce((sum, current) => sum + current.amount, 0);
+
+      setBalance(Math.max(0, revenue - totalWithdrawn));
+    } catch (err) {
+      console.error('Wallet metrics fetch failed:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setIsLoading(true);
-    API.get('/analytics/dashboard')
-      .then((res) => setTransactions(res.data.transactions || []))
-      .catch(() => {
-        // High UX regional fallback dataset matching your Kenyan marketplace domain values
-        setTransactions([
-          { id: 1, type: 'credit', title: 'Payment for Order ACR-2026-0001', amount: 4200.0, date: 'Today, 2:30 PM' },
-          { id: 2, type: 'debit', title: 'Withdrawal to M-Pesa Wallet', amount: 1200.0, date: 'Yesterday, 10:15 AM' },
-          { id: 3, type: 'credit', title: 'Payment for Order ACR-2026-0002', amount: 8900.0, date: '04 Aug 2026' },
-        ]);
-      })
-      .finally(() => setIsLoading(false));
+    fetchWalletData();
   }, []);
 
-  const handleWithdrawSubmit = (e) => {
+  // Handle M-Pesa B2C Withdrawal Form Submission
+  const handleWithdrawalSubmit = async (e) => {
     e.preventDefault();
-    const amt = parseFloat(payoutAmount);
-    if (!amt || amt > balance) return;
+    setFormError('');
+    setFormSuccess('');
     
-    setBalance((prev) => prev - amt);
-    setTransactions((prev) => [
-      {
-        id: Date.now(),
-        type: 'debit',
-        title: 'M-Pesa Payout Transfer',
-        amount: amt,
-        date: 'Just now'
-      },
-      ...prev
-    ]);
-    
-    setPayoutAmount('');
-    setIsWithdrawModalOpen(false);
+    const parsedAmount = parseFloat(withdrawAmount);
+    if (!parsedAmount || parsedAmount <= 0) {
+      setFormError('Please input a valid positive amount.');
+      return;
+    }
+
+    if (parsedAmount > balance) {
+      setFormError('Insufficient wallet balance clearance threshold.');
+      return;
+    }
+
+    if (!mpesaNumber.trim()) {
+      setFormError('Recipient M-Pesa mobile number sequence required.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await API.post('/payouts/withdraw', {
+        amount: parsedAmount,
+        mpesa_number: mpesaNumber.trim() || mpesaNumber
+      });
+
+      setFormSuccess('Disbursement processed successfully to M-Pesa Express network!');
+      setWithdrawAmount('');
+      
+      // Refresh balance ledger state structures safely
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setFormSuccess('');
+        fetchWalletData();
+      }, 2000);
+
+    } catch (err) {
+      setFormError(err.response?.data?.message || 'B2C Gateway timeout error. Try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="space-y-6 w-full animate-fade-in pb-12">
-      {/* Dynamic Header Navbar */}
-      <Navbar title="Financial Ledger & Wallet" />
+    <div className="space-y-6 w-full animate-fade-in pb-16">
+      <Navbar title="Digital Wallet & Payouts" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        {/* 1. Stunning Visual Anchor: Premium Gradient Balance Card */}
-        <div className="lg:col-span-1 bg-gradient-to-br from-orange-700 via-orange-800 to-indigo-900 text-white p-6 rounded-2xl shadow-lg border border-orange-600/20 flex flex-col justify-between min-h-[220px] transition-all hover:shadow-xl hover:shadow-orange-900/5">
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-xs uppercase tracking-widest text-orange-200 font-bold">Available Balance</span>
-              <div className="p-2 bg-white/10 rounded-xl">
-                <WalletIcon className="w-5 h-5 text-orange-100" />
-              </div>
-            </div>
-            {/* Swapped from dollars ($) to localized Kenyan Shillings notation */}
-            <h2 className="text-3xl font-extrabold tracking-tight">
+      {/* Financial Overview Matrix Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        {/* Card 1: Live Withdrawable Balance */}
+        <div className="bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between h-44 relative overflow-hidden group">
+          <div className="absolute -right-6 -bottom-6 text-slate-800/20 group-hover:scale-110 transition-transform duration-300 pointer-events-none">
+            <WalletIcon className="w-36 h-36 stroke-[1.5]" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Available Balance</p>
+            <h3 className="text-3xl font-black font-mono tracking-tight text-orange-500">
               KES {balance.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
-            </h2>
-            <p className="text-[11px] text-orange-200/70 font-medium mt-1">Escrow and marketplace sales clear instantly</p>
+            </h3>
           </div>
-          
-          <div className="mt-6 flex space-x-3">
-            <button 
-              onClick={() => setIsWithdrawModalOpen(true)}
-              className="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-md py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition-all active:scale-95 cursor-pointer border border-white/5"
+          {isFarmer && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              disabled={balance <= 0}
+              className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center space-x-2 shadow-md shadow-orange-600/10 cursor-pointer active:scale-95"
             >
-              <ArrowUpRight className="w-4 h-4 text-orange-200" />
-              <span>Withdraw</span>
+              <span>Initiate Withdrawal</span>
+              <ArrowUpRight className="w-4 h-4" />
             </button>
-            <button 
-              onClick={() => setIsDepositModalOpen(true)}
-              className="flex-1 bg-white text-orange-900 hover:bg-orange-50 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Funds</span>
-            </button>
+          )}
+        </div>
+
+        {/* Card 2: Cumulative Platform Marketplace Revenues */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-44">
+          <div className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              {isFarmer ? 'Gross Revenue Earnings' : 'Aggregate Expenditure Spends'}
+            </p>
+            <h3 className="text-3xl font-black font-mono tracking-tight text-slate-800">
+              KES {ordersSummary.total_revenue.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
+            </h3>
+          </div>
+          <div className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100/50 px-3 py-1.5 rounded-xl w-max flex items-center space-x-1.5">
+            <ArrowDownLeft className="w-4 h-4" />
+            <span>Secured via Escrow Platform</span>
           </div>
         </div>
 
-        {/* 2. Interactive Saved Payment Channels Layout Panel */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="font-bold text-slate-800 text-base">Settlement Accounts</h3>
-            <p className="text-xs text-slate-400 mt-0.5 mb-4">Configured payout streams for farm sales and buyer balances</p>
+        {/* Card 3: Total Transactions Volumes Counter */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-44">
+          <div className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Completed Orders</p>
+            <h3 className="text-3xl font-black font-mono tracking-tight text-slate-800">
+              {ordersSummary.total_orders} <span className="text-xs font-bold text-slate-400">Invoices</span>
+            </h3>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 items-center">
-            {/* Custom Styled Safaricom M-Pesa Option */}
-            <div className="p-4 border border-slate-100 bg-slate-50/50 rounded-xl flex items-center space-x-4 group hover:border-emerald-200 transition-all cursor-pointer">
-              <div className="p-3 bg-emerald-600 text-white rounded-xl font-extrabold text-[10px] tracking-wider shadow-sm flex items-center gap-1">
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>M-PESA</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-slate-800 truncate">+254 712 *** 789</p>
-                <p className="text-xs font-medium text-emerald-600">Default Payout Node</p>
-              </div>
-            </div>
-            
-            {/* Standard Bank Transfer Layout Option */}
-            <div className="p-4 border border-slate-100 bg-slate-50/50 rounded-xl flex items-center space-x-4 group hover:border-orange-200 transition-all cursor-pointer">
-              <div className="p-3 bg-orange-50 text-orange-600 rounded-xl">
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-slate-800 truncate">Equity Bank Kenya</p>
-                <p className="text-xs text-slate-400 font-semibold tracking-wide">•••• 4021</p>
-              </div>
-            </div>
-          </div>
+          <p className="text-xs text-slate-400 font-medium">
+            Active tracking pipeline across all regional fulfillment routes.
+          </p>
         </div>
+
       </div>
 
-      {/* 3. Transaction History Row Table List */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
+      {/* Bottom Segment: Recent Payout Ledger History Section */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-slate-800 text-base">Audit Trail</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Historical overview of credits and active debit withdrawals</p>
+            <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">Payout Settlement History</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Audit log parameters for Safaricom M-Pesa B2C liquidations</p>
           </div>
-          <button className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 px-3 py-1.5 rounded-xl transition-all">
-            Export Statement
-          </button>
         </div>
 
         {isLoading ? (
-          <div className="py-12 flex flex-col items-center justify-center">
-            <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Loading statement sheets...</p>
+          <div className="py-20 text-center flex flex-col items-center justify-center">
+            <Loader2 className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin text-orange-600" />
+            <p className="text-xs text-slate-400 font-bold mt-2 tracking-wide uppercase">Reconciling statements...</p>
           </div>
+        ) : payouts.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                  <th className="py-3 px-5">Transaction ID</th>
+                  <th className="py-3 px-5">Recipient Target</th>
+                  <th className="py-3 px-5">Settlement Timestamp</th>
+                  <th className="py-3 px-5">Status Badge</th>
+                  <th className="py-3 px-5 text-right">Net Value</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 text-xs font-medium text-slate-600">
+                {payouts.map((row) => (
+                  <tr key={row.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-3.5 px-5 font-mono text-[11px] font-bold text-slate-700 uppercase">{row.reference}</td>
+                    <td className="py-3.5 px-5 text-slate-500 font-semibold">{row.mpesa_number}</td>
+                    <td className="py-3.5 px-5 text-slate-400 font-medium">{row.date}</td>
+                    <td className="py-3.5 px-5">
+                      <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-md font-bold text-[10px] uppercase tracking-wider border ${
+                        row.status === 'completed' 
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                          : row.status === 'pending'
+                          ? 'bg-amber-50 text-amber-700 border-amber-100'
+                          : 'bg-rose-50 text-rose-700 border-rose-100'
+                      }`}>
+                        {row.status === 'completed' && <CheckCircle2 className="w-3 h-3 stroke-[2.5]" />}
+                        {row.status === 'pending' && <Clock className="w-3 h-3 stroke-[2.5]" />}
+                        {row.status === 'failed' && <XCircle className="w-3 h-3 stroke-[2.5]" />}
+                        <span>{row.status}</span>
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5 text-right font-semibold">{row.amount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>  
         ) : (
-          <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto pr-1">
-            {transactions.map((tx) => {
-              const isCredit = tx.type === 'credit';
-              return (
-                <div key={tx.id} className="py-3.5 flex items-center justify-between group transition-all hover:bg-slate-50/40 px-1 rounded-xl">
-                  <div className="flex items-center space-x-3 min-w-0">
-                    <div className={`p-2.5 rounded-xl shrink-0 ${isCredit ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                      {isCredit ? <ArrowDownLeft className="w-4 h-4 stroke-[2.5]" /> : <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-800 group-hover:text-orange-900 transition-colors truncate">
-                        {tx.title}
-                      </p>
-                      <p className="text-xs font-medium text-slate-400 mt-0.5">{tx.date}</p>
-                    </div>
-                  </div>
-                  <span className={`text-sm font-bold shrink-0 ml-4 ${isCredit ? 'text-emerald-600' : 'text-slate-800'}`}>
-                    {isCredit ? '+' : '-'} KES {tx.amount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="py-20 text-center flex flex-col items-center justify-center">
+            <XCircle className="w-6 h-6 stroke-[2.5]" />
+            <p className="text-xs text-slate-400 font-bold mt-2 tracking-wide uppercase">No payouts found</p>
           </div>
         )}
+
       </div>
 
-      {/* 4. High UX Modals Integration using your custom Portal layout engine */}
-      <Modal isOpen={isWithdrawModalOpen} onClose={() => setIsWithdrawModalOpen(false)} title="M-Pesa Withdrawal Request">
-        <form onSubmit={handleWithdrawSubmit} className="space-y-4">
-          <p className="text-xs text-slate-400">Funds will be disbursed instantly to your primary linked Safaricom number line via B2C API.</p>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Amount (KES)</label>
-            <input 
-              type="number" 
-              required
-              min="10"
-              max={balance}
-              placeholder="e.g. 5000"
-              value={payoutAmount}
-              onChange={(e) => setPayoutAmount(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-            />
-          </div>
-          <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
-            Confirm Disbursal
-          </button>
-          <button onClick={() => setIsWithdrawModalOpen(false)} className="w-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold py-2.5 rounded-xl transition shadow-sm">
-            Cancel
-          </button>
-        </form>
-      </Modal>
-
-      {/* 5. High UX Modals Integration using your custom Portal layout engine */}
-      <Modal isOpen={isDepositModalOpen} onClose={() => setIsDepositModalOpen(false)} title="M-Pesa Deposit Request">
-        <form onSubmit={handleDepositSubmit} className="space-y-4">
-          <p className="text-xs text-slate-400">Funds will be credited to your wallet instantly via B2C API.</p>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Amount (KES)</label>
-            <input 
-              type="number" 
-              required
-              min="10"
-              max={balance}
-              placeholder="e.g. 5000"
-              value={depositAmount}
-              onChange={(e) => setDepositAmount(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-            />
-          </div>
-          <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
-            Confirm Deposit
-          </button>
-          <button onClick={() => setIsDepositModalOpen(false)} className="w-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold py-2.5 rounded-xl transition shadow-sm">
-            Cancel
-          </button>
-        </form>
-      </Modal>
     </div>
-  );
+  )
 }
