@@ -58,6 +58,8 @@ export default function AppRoutes() {
           <Route path="reviews" element={<CustomerReview />} />
           <Route path="profile" element={<Profile />} />
           <Route path="customers" element={<Customers />} />
+          <Route path="analytics" element={<Analytics />} />
+
         </Route>
       </Route>
 
@@ -65,7 +67,6 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={['farmer']} />}>
         <Route element={<AppLayout />}>
           <Route path="farm-logs" element={<FarmingLog />} />
-          <Route path="analytics" element={<Analytics />} />
         </Route>
       </Route>
 
