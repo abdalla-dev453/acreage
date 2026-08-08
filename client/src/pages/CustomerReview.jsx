@@ -11,7 +11,7 @@ export default function CustomerReview() {
   useEffect(() => {
     setIsLoading(true);
     // Hits your registered Flask blueprint endpoints context mapping
-    API.get('/reviews') 
+    API.get('/reviews/') 
       .then((res) => {
         // Adapt dynamically if backend returns an object wrapper or raw arrays
         if (res.data.reviews) {

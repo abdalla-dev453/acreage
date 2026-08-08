@@ -22,7 +22,7 @@ export default function Home() {
         <div className="flex items-center space-x-4">
           {user ? (
             <div className="flex items-center gap-3">
-              <span className="hidden sm:inline-block text-xs font-bold text-slate-400">Logged in as @{user.username}</span>
+              <span className="hidden sm:inline-block text-xs font-bold text-slate-600">Logged in as @{user.username}</span>
               <Link to="/dashboard" className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm">Go to Workspace</Link>
             </div>
           ) : (
@@ -65,17 +65,17 @@ export default function Home() {
         
         {/* 2. Large Background Word Banner that lights up upon footer hover */}
         <div className="absolute inset-x-0 bottom-8 flex justify-center items-center pointer-events-none z-0 overflow-hidden">
-          <span className="text-[12vw] font-black tracking-[0.2em] text-slate-200/40 uppercase transition-all duration-700 ease-out transform translate-y-4 opacity-50 scale-95 group-hover:text-orange-600/15 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 tracking-widest select-none">
+          <span class="text-[12vw] font-black tracking-[0.2em] text-orange-400/10 uppercase select-none animate-pulse">
             ACREAGE
           </span>
         </div>
 
         {/* Footer Typography Text Metrics */}
-        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between border-t border-slate-200/60 pt-6 gap-3">
-          <p className="text-xs text-slate-400 font-semibold tracking-wide">
+        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between border-t border-slate-300/60 pt-6 gap-3">
+          <p className="text-xs text-slate-600 font-semibold tracking-wide">
             © 2026 ACREAGE Platform. All rights reserved.
           </p>
-          <div className="flex space-x-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="flex space-x-6 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             <a href="#privacy" className="hover:text-orange-600 transition-colors">Privacy Policy</a>
             <a href="#terms" className="hover:text-orange-600 transition-colors">Terms of Service</a>
             <a href="#support" className="hover:text-orange-600 transition-colors">Support Ledger</a>
