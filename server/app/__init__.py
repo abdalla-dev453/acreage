@@ -31,6 +31,7 @@ def create_app():
         from app.models.farm_log import FarmLog
         from app.models.chat import ChatMessage
         from app.models.review import Review
+        from app.models.payout import Payout
 
     # register blueprints   
     from app.routes.auth import auth_bp
@@ -40,6 +41,7 @@ def create_app():
     from app.routes.analytics import analytics_bp
     from app.routes.chat import chat_bp
     from app.routes.reviews import reviews_bp
+    from app.routes.payouts import payouts_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api/products')
@@ -48,5 +50,6 @@ def create_app():
     app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
     app.register_blueprint(chat_bp, url_prefix='/api/chat')
     app.register_blueprint(reviews_bp, url_prefix='/api/reviews')
+    app.register_blueprint(payouts_bp, url_prefix='/api/payouts')
 
     return app
