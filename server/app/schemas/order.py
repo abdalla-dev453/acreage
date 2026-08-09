@@ -17,7 +17,7 @@ class OrderItemSchema(ma.SQLAlchemyAutoSchema):
 class OrderSchema(ma.SQLAlchemyAutoSchema):
     items = ma.Nested(OrderItemSchema, many=True)
     buyer = ma.Nested(UserSchema, only=("id", "username", "email"))
-    farmer = ma.Nested(UserSchema, only=("id", "username", "phone_number"))
+    farmer = ma.Nested(UserSchema, only=("id", "username", "location"))
 
 
     class Meta:

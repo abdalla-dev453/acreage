@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Check, CheckCheck, ShieldCheck, Sparkles, MessageCircleSquare, Info, AlertTriangle } from 'lucide-react';
+import { Send, Phone, Check, CheckCheck, ShieldCheck, Sparkles, MessageSquare, Info, AlertTriangle } from 'lucide-react';
 
 export default function ChatWindow({ activeUser, messages = [], onSendMessage, isPartnerTyping = false }) {
   const [text, setText] = useState('');
@@ -26,7 +26,7 @@ export default function ChatWindow({ activeUser, messages = [], onSendMessage, i
     return (
       <div className="flex-1 bg-white rounded-2xl border border-slate-100 p-8 flex flex-col items-center justify-center text-center select-none h-[calc(100vh-2rem)]">
         <div className="p-4 bg-orange-50 border border-orange-100 rounded-2xl text-orange-600 shadow-sm animate-bounce mb-4">
-          <MessageCircleSquare className="w-8 h-8 stroke-[1.5]" />
+          <MessageSquare className="w-8 h-8 stroke-[1.5]" />
         </div>
         <h4 className="text-sm font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
           Secure Escrow Chatroom <Sparkles className="w-3.5 h-3.5 text-orange-500 fill-orange-400 animate-pulse" />

@@ -3,7 +3,7 @@ from app.models.product import Product
 from app.schemas.user import UserSchema
 
 class ProductSchema(ma.SQLAlchemyAutoSchema):
-    farmer = ma.Nested(UserSchema, only=("id", "username", "location", "phone_number"))
+    farmer = ma.Nested(UserSchema, only=("id", "username", "location"))
 
     class Meta:
         model = Product

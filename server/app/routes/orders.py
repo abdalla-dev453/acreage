@@ -66,7 +66,7 @@ def place_order():
         ))
 
     # Clean phone numbers to strict 2547XXXXXXXX or 2541XXXXXXXX formats required by Safaricom
-    raw_phone = str(data.get('contact_phone', buyer_user.phone_number or '')).strip().replace('+', '').replace(' ', '')
+    raw_phone = str(data.get('contact_phone', '')).strip().replace('+', '').replace(' ', '')
     if raw_phone.startswith('0'):
         cleaned_phone = '254' + raw_phone[1:]
     elif raw_phone.startswith('7') or raw_phone.startswith('1'):
@@ -169,7 +169,7 @@ def mpesa_callback():
 
     mpesa_receipt_number = None
     for item in metadata_items:
-        if item.get('None') == 'MpesaReceiptNumber':
+        if item.get('Name') == 'MpesaReceiptNumber':
             mpesa_receipt_number = item.get('Value')
             break
 

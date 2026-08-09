@@ -16,7 +16,7 @@ class User(db.Model):
 
 
     # relationships
-    products = db.relationship('Product', backref='owner', lazy=True)
+    products = db.relationship('Product', backref='farmer', lazy=True)
     farm_orders = db.relationship('Order', foreign_keys='Order.farmer_id', backref='farmer', lazy=True)
     buyer_orders = db.relationship('Order', foreign_keys='Order.buyer_id', backref='buyer', lazy=True)
     farm_logs = db.relationship('FarmLog', backref='farmer', lazy=True)
