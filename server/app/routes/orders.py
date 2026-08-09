@@ -108,7 +108,7 @@ def place_order():
             "PartyA": cleaned_phone,               #  FIXED: Points to verified clean user phone sequence
             "PartyB": os.getenv('MPESA_SHORTCODE', '174379'),
             "PhoneNumber": cleaned_phone,           #  FIXED: Points to verified clean user phone sequence
-            "CallBackURL": "https://yourdomain.com", # Public ngrok/production target hook URL
+            "CallBackURL": "https://ngrok-free.app", # Public ngrok/production target hook URL
             "AccountReference": f"ACR{new_order.id}",
             "TransactionDesc": "Acreage Marketplace Escrow Purchase"
         }
@@ -140,3 +140,78 @@ def update_order_status(order_id):
     db.session.commit()
     
     return order_schema.jsonify(order), 200
+
+
+
+# MPESA CALLBACKS ENDPOINT
+@orders_bp.route('/mpesa-callback', methods=['POST'])
+def mpesa_callback():
+    """.
+    Asynchronous WEbhook listening for safaricom Daraja STK push processing results.
+    This route is public  (no@jwt_required) becoz it is called external by safaricom.
+    """
+
+    stk_callback_response = request.get_json() or {}
+
+    # Parse Daraja inner payload structure parameters safely
+    body = stk_callback_response.get('Body', {})
+    stk_callback = body.get('stkCallback', {})
+
+    result_code = stk_callback.get('ResultCode')
+    result_desc = stk_callback.get('ResultDesc')
+    merchant_request_id = stk_callback.get('MerchantRequestID')
+    checkout_request_id = stk_callback.get('CheckoutRequestID')
+
+
+    # Extract our unique acc tracking ref
+    # saf sends  this inside the CallbackMetadata array if successfully processed
+    metadata_items = stk_callback.get('CallbackMetadata', {}).get('Item', [])
+
+    mpesa_receipt_number = None
+    for item in metadata_items:
+        if item.get('None') == 'MpesaReceiptNumber':
+            mpesa_receipt_number = item.get('Value')
+            break
+
+
+    # Extract the custom structural tracking target from the acc ref string layout 
+    # IN place_order we formatted AccountReference as f"ACR{new_order.id}"
+    # Lets extract the numeric ID
+    account_ref = stk_callback.get('AccountReference', '')
+    order_id_str = account_ref.replace('ACR', '').strip()
+
+    # Alternative fallback fallback check
+    order = None
+    if order_id_str.isdigit():
+        order = Order.query.get(int(order_id_str))
+
+
+    if not order:
+        # High-utility recovery mode query if string slicing misses matching index targets
+        print(f"Callback mapping error. Order reference {account_ref} not found locally.")
+        return jsonify({"ResultCode": 1, "ResultDesc": "Order identifier missing alignment"}), 400
+
+    # 2. EVALUATE TRANSACTION LIFECYCLE RESULTS
+    if result_code == 0:
+        # Success code (0 means the customer entered the correct pin and funds transferred)
+        print(f"STK Push Payment Cleared for Order #{order.order_code}. Receipt: {mpesa_receipt_number}")
+        order.payment_status = 'paid'
+        # Optional: You can attach the receipt number onto your order tracking text string notes if needed
+        order.delivery_address += f" [M-Pesa Ref: {mpesa_receipt_number}]"
+        
+    else:
+        # Failure code (Customer cancelled, insufficient funds, timeout, etc.)
+        print(f"STK Push Payment Rejected for Order #{order.order_code}. Reason: {result_desc}")
+        order.payment_status = 'failed'
+        order.status = 'cancelled'
+        
+        # RESTORE PRODUCT STOCK: Since payment failed, release crop items back to the marketplace immediately
+        for item in order.items:
+            product = Product.query.get(item.product_id)
+            if product:
+                product.stock_quantity += item.quantity
+
+    db.session.commit()
+    
+    # Safaricom requires this exact JSON response signature acknowledgement to clear the queue layout parameters
+    return jsonify({"ResultCode": 0, "ResultDesc": "Callback processed and acknowledged cleanly."}), 200
