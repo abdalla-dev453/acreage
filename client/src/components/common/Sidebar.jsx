@@ -13,7 +13,8 @@ import {
   User,
   ClipboardList,
   Menu,
-  X
+  X,
+  Home
 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -40,6 +41,7 @@ export default function Sidebar() {
     { name: 'Chats', path: '/chats', icon: MessageSquare, roles: ['farmer', 'buyer'] },
     { name: 'Wallet', path: '/wallet', icon: Wallet, roles: ['farmer', 'buyer'] },
     { name: 'Profile Settings', path: '/profile', icon: User, roles: ['farmer', 'buyer'] }, // Added Profile
+    { name: 'Home', path: '/', icon: Home, roles: ['farmer', 'buyer'], onClick: handleLogout }
   ];
 
   const visibleNavItems = navItems.filter(item => 
