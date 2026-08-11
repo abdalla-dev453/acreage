@@ -1,0 +1,19 @@
+# --- Python / Flask backend ---
+server/venv/
+server/venv2/
+**/__pycache__/
+*.pyc
+server/instance/
+server/.env
+.env
+
+# --- Node / React frontend ---
+client/node_modules/
+client/dist/
+client/.env
+client/.env.local
+
+# --- OS / editor ---
+.DS_Store
+.vscode/
+.idea/

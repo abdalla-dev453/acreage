@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from app import db
+from app import db, limiter
 from app.models.user import User
 from app.schemas.user import UserSchema
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -7,16 +7,30 @@ from werkzeug.security import generate_password_hash
 
 auth_bp = Blueprint('auth', __name__)
 
+# Only these roles can ever be self-assigned at registration. Anything else
+# in the request body (e.g. "admin") is rejected outright rather than
+# silently accepted, since role gates payouts/product-listing/etc.
+ALLOWED_ROLES = ('farmer', 'buyer')
+MIN_PASSWORD_LENGTH = 8
+
+
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit("5 per minute")
 def register():
     data = request.get_json() or {}
-    email = data.get('email')
-    username = data.get('username')
-    password = data.get('password')
+    email = (data.get('email') or '').strip().lower()
+    username = (data.get('username') or '').strip()
+    password = data.get('password') or ''
     role = data.get('role', 'farmer')
 
     if not email or not username or not password:
         return jsonify({'message': 'Email, username, and password are required'}), 400
+
+    if role not in ALLOWED_ROLES:
+        return jsonify({'message': f"Role must be one of: {', '.join(ALLOWED_ROLES)}"}), 400
+
+    if len(password) < MIN_PASSWORD_LENGTH:
+        return jsonify({'message': f'Password must be at least {MIN_PASSWORD_LENGTH} characters'}), 400
 
     if User.query.filter((User.email == email) | (User.username == username)).first():
         return jsonify({'message': 'User with this email or username already exists'}), 400
@@ -41,10 +55,11 @@ def register():
 
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit("10 per minute")
 def login():
     data = request.get_json() or {}
-    email = data.get('email')
-    password = data.get('password')
+    email = (data.get('email') or '').strip().lower()
+    password = data.get('password') or ''
 
     user = User.query.filter_by(email=email).first()
 
