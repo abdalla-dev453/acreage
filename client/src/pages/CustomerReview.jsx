@@ -97,7 +97,7 @@ export default function CustomerReview() {
                   {/* Proportional scaling progress indicator layout bar */}
                   <div className="flex-1 bg-slate-50 border border-slate-100/50 h-2 rounded-full overflow-hidden">
                     <div 
-                      className="bg-orange-600 h-full rounded-full transition-all duration-500 ease-out group-hover:bg-orange-500" 
+                      className="bg-green-600 h-full rounded-full transition-all duration-500 ease-out group-hover:bg-green-500" 
                       style={{ width: `${percent}%` }}
                     />
                   </div>
@@ -121,7 +121,7 @@ export default function CustomerReview() {
 
         {isLoading ? (
           <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center flex flex-col items-center justify-center">
-            <span className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
+            <span className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></span>
             <p className="text-xs text-slate-400 font-medium mt-2">Aggregating historical feedback sheets...</p>
           </div>
         ) : (
@@ -139,11 +139,11 @@ export default function CustomerReview() {
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex items-center space-x-3 min-w-0">
                         {/* Placeholder dynamic initial user avatar circle bubble */}
-                        <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-700 flex items-center justify-center font-bold text-sm uppercase tracking-wider select-none shrink-0 shadow-sm border border-orange-100/50">
+                        <div className="w-9 h-9 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold text-sm uppercase tracking-wider select-none shrink-0 shadow-sm border border-green-100/50">
                           {clientName.trim().charAt(0)}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-800 group-hover:text-orange-900 transition-colors truncate">
+                          <p className="text-sm font-bold text-slate-800 group-hover:text-green-900 transition-colors truncate">
                             @{clientName}
                           </p>
                           <p className="text-[10px] text-slate-400 font-semibold tracking-wide mt-0.5">

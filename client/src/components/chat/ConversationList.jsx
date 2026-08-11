@@ -47,7 +47,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
       <div className="mb-4">
         <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
           <span>Inbox Hub</span>
-          <MessageSquare className="w-4 h-4 text-orange-500" />
+          <MessageSquare className="w-4 h-4 text-green-500" />
         </h2>
         <p className="text-[11px] text-slate-400 mt-0.5 font-medium">Real-time marketplace negotiation threads</p>
       </div>
@@ -60,7 +60,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
           placeholder="Search contact handles..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-slate-400"
+          className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder-slate-400"
         />
       </div>
 
@@ -79,15 +79,15 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                 onClick={() => onSelect(contact)}
                 className={`p-3 rounded-xl flex items-start space-x-3 cursor-pointer transition-all border border-transparent select-none group ${
                   isActive
-                    ? 'bg-orange-50/80 border-orange-100 shadow-sm'
+                    ? 'bg-green-50/80 border-green-100 shadow-sm'
                     : 'hover:bg-slate-50/80 hover:border-slate-100'
                 }`}
               >
                 {/* Visual Initial Placeholder Avatar Bubble */}
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shadow-sm shrink-0 transition-transform group-hover:scale-105 border uppercase ${
                   isActive 
-                    ? 'bg-orange-600 text-white border-transparent' 
-                    : 'bg-orange-50 text-orange-700 border-orange-100/30'
+                    ? 'bg-green-600 text-white border-transparent' 
+                    : 'bg-green-50 text-green-700 border-green-100/30'
                 }`}>
                   {initial}
                 </div>
@@ -95,7 +95,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                 {/* Main Dynamic Meta Information Column Wrapper */}
                 <div className="flex-1 min-w-0 space-y-0.5">
                   <div className="flex justify-between items-baseline">
-                    <p className="text-xs font-black text-slate-800 truncate group-hover:text-orange-600 transition-colors">
+                    <p className="text-xs font-black text-slate-800 truncate group-hover:text-green-600 transition-colors">
                       @{contactName}
                     </p>
                     {hasConversation && (
@@ -110,7 +110,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                     {contact.isLastMessageFromMe && (
                       <span className="shrink-0 text-slate-300">
                         {contact.isLastMessageRead ? (
-                          <CheckCheck className="w-3.5 h-3.5 text-orange-500" />
+                          <CheckCheck className="w-3.5 h-3.5 text-green-500" />
                         ) : (
                           <Check className="w-3.5 h-3.5" />
                         )}
@@ -124,7 +124,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                   </div>
 
                   {/* Account Classification Badge Track Tags */}
-                  <span className="inline-block text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-orange-600/80 transition-colors mt-1">
+                  <span className="inline-block text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-green-600/80 transition-colors mt-1">
                     {contact.role || 'Member'}
                   </span>
                 </div>
@@ -132,7 +132,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                 {/* HIGH-UX METRIC: Unread Badge Alert Notification Bubble */}
                 {contact.unreadCount > 0 && !isActive && (
                   <div className="flex flex-col items-center justify-center shrink-0 self-center">
-                    <span className="min-w-[16px] h-4 px-1 bg-orange-600 text-white font-black text-[9px] rounded-full flex items-center justify-center shadow-sm shadow-orange-600/20 animate-pulse">
+                    <span className="min-w-[16px] h-4 px-1 bg-green-600 text-white font-black text-[9px] rounded-full flex items-center justify-center shadow-sm shadow-green-600/20 animate-pulse">
                       {contact.unreadCount}
                     </span>
                   </div>

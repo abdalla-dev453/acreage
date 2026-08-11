@@ -59,7 +59,7 @@ export default function Analytics() {
     const totalRevenue = rawBreakdown.reduce((sum, item) => sum + (item.value ?? item.amount ?? 0), 0);
     
     // Cycle array of Tailwind color rings
-    const colorPalette = ['bg-orange-600', 'bg-indigo-500', 'bg-emerald-500', 'bg-purple-500', 'bg-amber-500'];
+    const colorPalette = ['bg-green-600', 'bg-indigo-500', 'bg-emerald-500', 'bg-purple-500', 'bg-amber-500'];
 
     return rawBreakdown.map((item, index) => {
       const numericAmount = item.value ?? item.amount ?? 0;
@@ -119,7 +119,7 @@ export default function Analytics() {
                   {card.trend} vs last period
                 </span>
               </div>
-              <div className="p-3 bg-orange-50 text-orange-600 rounded-xl transition-all duration-300 group-hover:bg-orange-600 group-hover:text-white shrink-0 shadow-sm">
+              <div className="p-3 bg-green-50 text-green-600 rounded-xl transition-all duration-300 group-hover:bg-green-600 group-hover:text-white shrink-0 shadow-sm">
                 <Icon className="w-4 h-4 stroke-[2.2]" />
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function Analytics() {
       {/* Interior Charts Core Visual Grid Container Workspace */}
       {isLoading ? (
         <div className="py-24 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-100 shadow-sm">
-          <Loader2 className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin text-orange-600" />
+          <Loader2 className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin text-green-600" />
           <p className="text-xs text-slate-400 font-bold mt-2 uppercase tracking-wider">Syncing database statement records...</p>
         </div>
       ) : (
@@ -153,7 +153,7 @@ export default function Analytics() {
                   <div key={i} className="space-y-1.5 group">
                     <div className="flex justify-between items-end text-xs font-bold text-slate-700">
                       <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-black text-slate-800 group-hover:text-orange-600 transition-colors truncate">
+                        <span className="text-xs font-black text-slate-800 group-hover:text-green-600 transition-colors truncate">
                           {item.category}
                         </span>
                         <span className="text-[10px] text-slate-400 font-semibold font-mono mt-0.5">

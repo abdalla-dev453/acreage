@@ -61,7 +61,7 @@ export default function FarmingLog() {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center space-x-2 transition"
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center space-x-2 transition"
         >
           <Plus className="w-4 h-4" />
           <span>New Entry</span>
@@ -77,14 +77,14 @@ export default function FarmingLog() {
 
           return (
             <div key={log.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-start space-x-4">
-              <div className="p-2.5 bg-orange-50 text-orange-600 rounded-lg">
+              <div className="p-2.5 bg-green-50 text-green-600 rounded-lg">
                 <Sprout className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-slate-800 text-sm">{log.activity_type}</h3>
-                    <p className="text-xs text-orange-600 font-semibold mt-0.5">{log.field_name}</p>
+                    <p className="text-xs text-green-600 font-semibold mt-0.5">{log.field_name}</p>
                   </div>
                   <span className="text-xs text-slate-400 flex items-center space-x-1 whitespace-nowrap">
                     <Calendar className="w-3 h-3" />
@@ -167,7 +167,7 @@ export default function FarmingLog() {
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-semibold py-2 rounded-xl transition text-sm cursor-pointer"
+            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-2 rounded-xl transition text-sm cursor-pointer"
           >
             {isSubmitting ? 'Saving...' : 'Save Log Entry'}
           </button>

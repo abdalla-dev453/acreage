@@ -62,7 +62,7 @@ export default function Chats() {
       {/* Conditionally render loader framework or final layout lists */}
       {isLoadingContacts ? (
         <div className="w-80 bg-white rounded-2xl border border-slate-100 flex flex-col items-center justify-center p-4">
-          <span className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
+          <span className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></span>
           <p className="text-xs text-slate-400 font-medium mt-2">Loading chats...</p>
         </div>
       ) : (

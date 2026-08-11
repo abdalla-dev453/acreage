@@ -60,7 +60,7 @@ export default function Orders() {
       {/* 3. Stunning Enhancement: Interactive High-Impact Summary Cards Row Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { key: 'all', label: 'All Orders', count: counters.all, bg: 'bg-orange-50 text-orange-700 border-orange-100', icon: ShoppingBag },
+          { key: 'all', label: 'All Orders', count: counters.all, bg: 'bg-green-50 text-green-700 border-green-100', icon: ShoppingBag },
           { key: 'pending', label: 'Pending', count: counters.pending, bg: 'bg-amber-50 text-amber-700 border-amber-100', icon: Clock },
           { key: 'on delivery', label: 'In Transit', count: counters.onDelivery, bg: 'bg-indigo-50 text-indigo-700 border-indigo-100', icon: Truck },
           { key: 'delivered', label: 'Delivered', count: counters.delivered, bg: 'bg-emerald-50 text-emerald-700 border-emerald-100', icon: CheckCircle2 },
@@ -74,15 +74,15 @@ export default function Orders() {
               onClick={() => setActiveTab(tab.key)}
               className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all duration-300 transform cursor-pointer group active:scale-95 shadow-sm min-h-[96px] ${
                 isSelected 
-                  ? 'bg-orange-600 text-white border-orange-600 shadow-md ring-4 ring-orange-500/10' 
+                  ? 'bg-green-600 text-white border-green-600 shadow-md ring-4 ring-green-500/10' 
                   : 'bg-white hover:bg-slate-50 border-slate-100'
               }`}
             >
               <div className="flex justify-between items-center w-full">
-                <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-orange-100' : 'text-slate-400 group-hover:text-slate-500'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-green-100' : 'text-slate-400 group-hover:text-slate-500'}`}>
                   {tab.label}
                 </span>
-                <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : tab.key === 'all' ? 'text-orange-500' : 'text-slate-400'}`} />
+                <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : tab.key === 'all' ? 'text-green-500' : 'text-slate-400'}`} />
               </div>
               <p className={`text-2xl font-extrabold tracking-tight mt-2 ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                 {tab.count}
@@ -108,7 +108,7 @@ export default function Orders() {
               placeholder="Search by code, user or contact..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-64 pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" 
+              className="w-full sm:w-64 pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all" 
             />
           </div>
           
@@ -122,7 +122,7 @@ export default function Orders() {
       {/* Main Ledger Core Component Frame */}
       {isLoading ? (
         <div className="bg-white rounded-2xl border border-slate-100 p-12 flex flex-col items-center justify-center">
-          <span className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
+          <span className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></span>
           <p className="text-xs text-slate-400 font-medium mt-2">Loading transactions...</p>
         </div>
       ) : (

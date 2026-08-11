@@ -116,7 +116,7 @@ export default function Wallet() {
           </div>
           <div className="space-y-1">
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Available Balance</p>
-            <h3 className="text-3xl font-black font-mono tracking-tight text-orange-500">
+            <h3 className="text-3xl font-black font-mono tracking-tight text-green-500">
               KES {balance.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
             </h3>
           </div>
@@ -124,7 +124,7 @@ export default function Wallet() {
             <button
               onClick={() => setIsModalOpen(true)}
               disabled={balance <= 0}
-              className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center space-x-2 shadow-md shadow-orange-600/10 cursor-pointer active:scale-95"
+              className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center space-x-2 shadow-md shadow-green-600/10 cursor-pointer active:scale-95"
             >
               <span>Initiate Withdrawal</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -174,7 +174,7 @@ export default function Wallet() {
 
         {isLoading ? (
           <div className="py-20 text-center flex flex-col items-center justify-center">
-            <Loader2 className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin text-orange-600" />
+            <Loader2 className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin text-green-600" />
             <p className="text-xs text-slate-400 font-bold mt-2 tracking-wide uppercase">Reconciling statements...</p>
           </div>
         ) : payouts.length > 0 ? (

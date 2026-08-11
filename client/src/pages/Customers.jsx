@@ -53,7 +53,7 @@ export default function Customers() {
             placeholder="Search by handle or town..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder-slate-400"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder-slate-400"
           />
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function Customers() {
       {/* Main Grid Stream Container */}
       {isLoading ? (
         <div className="py-24 text-center flex flex-col items-center justify-center">
-          <span className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></span>
+          <span className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></span>
           <p className="text-xs text-slate-400 font-semibold mt-2">Streaming client profiles...</p>
         </div>
       ) : (
@@ -70,17 +70,17 @@ export default function Customers() {
             filteredCustomers.map((customer) => (
               <div 
                 key={customer.id} 
-                className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-start space-x-4 group hover:shadow-md hover:border-orange-100/70 transition-all"
+                className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-start space-x-4 group hover:shadow-md hover:border-green-100/70 transition-all"
               >
                 {/* Visual Avatar Placeholder Initials Icon Bubble */}
-                <div className="w-12 h-12 rounded-xl bg-orange-50 text-orange-700 font-extrabold text-sm flex items-center justify-center uppercase shrink-0 transition-transform group-hover:scale-105 shadow-sm border border-orange-100/30">
+                <div className="w-12 h-12 rounded-xl bg-green-50 text-green-700 font-extrabold text-sm flex items-center justify-center uppercase shrink-0 transition-transform group-hover:scale-105 shadow-sm border border-green-100/30">
                   {customer.username.trim().charAt(0)}
                 </div>
                 
                 {/* Core Text Descriptive Nodes */}
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <div>
-                    <h3 className="font-bold text-slate-800 text-sm group-hover:text-orange-600 transition-colors truncate">
+                    <h3 className="font-bold text-slate-800 text-sm group-hover:text-green-600 transition-colors truncate">
                       @{customer.username}
                     </h3>
                     <span className="inline-block text-[9px] font-bold bg-slate-100 border text-slate-500 px-1.5 py-0.5 rounded uppercase tracking-wider">
@@ -94,7 +94,7 @@ export default function Customers() {
                       <span className="text-slate-500">{customer.email}</span>
                     </p>
                     <p className="flex items-center gap-1.5 truncate">
-                      <MapPin className="w-3.5 h-3.5 text-orange-400/70" />
+                      <MapPin className="w-3.5 h-3.5 text-green-400/70" />
                       <span className="text-slate-600 font-semibold">{customer.location || 'Kenya'}</span>
                     </p>
                     {customer.phone_number && (

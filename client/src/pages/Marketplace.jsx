@@ -122,7 +122,7 @@ export default function Marketplace() {
         {isFarmer && (
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md shadow-orange-600/10 flex items-center space-x-2 cursor-pointer transition-all active:scale-95"
+            className="bg-green-600 hover:bg-green-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md shadow-green-600/10 flex items-center space-x-2 cursor-pointer transition-all active:scale-95"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>List New Produce</span>
@@ -152,14 +152,14 @@ export default function Marketplace() {
       {/* Main Catalog Grid Stream View */}
       {isLoading ? (
         <div className="py-24 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-100">
-          <Loader2 className="w-6 h-6 text-orange-600 animate-spin" />
+          <Loader2 className="w-6 h-6 text-green-600 animate-spin" />
           <p className="text-xs text-slate-400 font-bold mt-2 uppercase tracking-widest">Querying active regional inventory grids...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {products.length > 0 ? (
             products.map((prod) => (
-              <div key={prod.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md hover:border-orange-100 transition-all">
+              <div key={prod.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md hover:border-green-100 transition-all">
                 
                 {/* Product Media Box */}
                 <div className="h-44 w-full bg-slate-50 relative overflow-hidden flex items-center justify-center border-b border-slate-50">
@@ -195,7 +195,7 @@ export default function Marketplace() {
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Available Supply</span>
-                      <p className="text-xs font-extrabold text-orange-600 font-mono">{prod.stock_quantity} {prod.unit}s</p>
+                      <p className="text-xs font-extrabold text-green-600 font-mono">{prod.stock_quantity} {prod.unit}s</p>
                     </div>
                   </div>
 
@@ -212,7 +212,7 @@ export default function Marketplace() {
                       />
                       <button
                         onClick={() => handlePlaceOrder(prod.id, prod.farmer_id, prod.stock_quantity)}
-                        className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs uppercase tracking-wider py-1.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center space-x-1 shadow-sm shadow-orange-600/5"
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold text-xs uppercase tracking-wider py-1.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center space-x-1 shadow-sm shadow-green-600/5"
                       >
                         <ShoppingCart className="w-3.5 h-3.5" />
                         <span>Place Order</span>
@@ -264,7 +264,7 @@ export default function Marketplace() {
                   placeholder="e.g. Export Hass Avocados"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 />
               </div>
 
@@ -275,7 +275,7 @@ export default function Marketplace() {
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-white"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 bg-white"
                   >
                     {categories.map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -289,7 +289,7 @@ export default function Marketplace() {
                     name="unit"
                     value={formData.unit}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-white"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 bg-white"
                   >
                     <option value="kg">Kilograms (kg)</option>
                     <option value="crate">Crates</option>
@@ -309,7 +309,7 @@ export default function Marketplace() {
                     placeholder="150"
                     value={formData.price_per_unit}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20"
                   />
                 </div>
 
@@ -323,7 +323,7 @@ export default function Marketplace() {
                     placeholder="500"
                     value={formData.stock_quantity}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20"
                   />
                 </div>
               </div>
@@ -336,7 +336,7 @@ export default function Marketplace() {
                   placeholder="https://images.unsplash.com/photo-..."
                   value={formData.image_url}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 />
               </div>
 
@@ -348,7 +348,7 @@ export default function Marketplace() {
                   placeholder="Grade A organic produce ready for dispatch..."
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-none"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 resize-none"
                 />
               </div>
 
@@ -363,7 +363,7 @@ export default function Marketplace() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-5 py-2 rounded-xl transition flex items-center space-x-2 disabled:opacity-50 cursor-pointer"
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded-xl transition flex items-center space-x-2 disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

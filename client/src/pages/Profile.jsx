@@ -72,7 +72,7 @@ export default function Profile() {
 
       {/* Profile Overview Banner Card */}
       <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 group transition-all hover:shadow-md">
-        <div className="w-20 h-20 rounded-xl bg-orange-600 text-white font-extrabold text-2xl flex items-center justify-center shadow-sm select-none uppercase transform transition-transform group-hover:scale-105 shrink-0">
+        <div className="w-20 h-20 rounded-xl bg-green-600 text-white font-extrabold text-2xl flex items-center justify-center shadow-sm select-none uppercase transform transition-transform group-hover:scale-105 shrink-0">
           {formData.username ? formData.username.charAt(0) : 'U'}
         </div>
         <div className="text-center sm:text-left space-y-1 min-w-0">
@@ -82,7 +82,7 @@ export default function Profile() {
           <p className="text-xs text-slate-400 font-medium truncate">
             {formData.email} • <span className="font-semibold text-slate-500">{formData.location}</span>
           </p>
-          <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-md border border-orange-100">
+          <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-2.5 py-0.5 rounded-md border border-green-100">
             {user?.role || 'Verified User'}
           </span>
         </div>
@@ -104,7 +104,7 @@ export default function Profile() {
               onClick={() => { setActiveTab(tab.id); setStatusMessage({ type: '', text: '' }); }}
               className={`pb-3 flex items-center space-x-2 border-b-2 transition-all cursor-pointer select-none ${
                 isCurrent
-                  ? 'border-orange-600 text-orange-600'
+                  ? 'border-green-600 text-green-600'
                   : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
             >
@@ -148,7 +148,7 @@ export default function Profile() {
                     name="farm_name"
                     value={formData.farm_name}
                     onChange={handleChange}
-                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                   />
                 </div>
               </div>
@@ -162,7 +162,7 @@ export default function Profile() {
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                   />
                 </div>
               </div>
@@ -176,7 +176,7 @@ export default function Profile() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                   />
                 </div>
               </div>
@@ -190,7 +190,7 @@ export default function Profile() {
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
-                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                   />
                 </div>
               </div>
@@ -218,7 +218,7 @@ export default function Profile() {
                       name="mpesa_number"
                       value={formData.mpesa_number}
                       onChange={handleChange}
-                      className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                      className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                     />
                   </div>
                 </div>
@@ -226,7 +226,7 @@ export default function Profile() {
 
               {/* Bank Settlement Integration Channel */}
               <div className="p-4 border border-slate-100 bg-slate-50/50 rounded-xl space-y-3">
-                <span className="text-[10px] font-bold text-orange-700 bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-green-700 bg-green-50 border border-green-100 px-2 py-0.5 rounded-md uppercase tracking-wider">
                   Bank Settlement
                 </span>
                 <div className="space-y-3">
@@ -239,7 +239,7 @@ export default function Profile() {
                         name="bank_name"
                         value={formData.bank_name}
                         onChange={handleChange}
-                        className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                        className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                       />
                     </div>
                   </div>
@@ -252,7 +252,7 @@ export default function Profile() {
                         name="account_number"
                         value={formData.account_number}
                         onChange={handleChange}
-                        className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                        className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                       />
                     </div>
                   </div>
@@ -291,7 +291,7 @@ export default function Profile() {
                   placeholder="••••••••"
                   value={formData.current_password}
                   onChange={handleChange}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                 />
               </div>
             </div>
@@ -306,7 +306,7 @@ export default function Profile() {
                   placeholder="••••••••"
                   value={formData.new_password}
                   onChange={handleChange}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                 />
               </div>
             </div>
@@ -321,7 +321,7 @@ export default function Profile() {
                   placeholder="••••••••"
                   value={formData.confirm_password}
                   onChange={handleChange}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                 />
               </div>
             </div>
@@ -333,7 +333,7 @@ export default function Profile() {
           <button
             type="submit"
             disabled={isSaving}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 transition active:scale-95 disabled:opacity-50 cursor-pointer shadow-sm shadow-orange-500/20"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 transition active:scale-95 disabled:opacity-50 cursor-pointer shadow-sm shadow-green-500/20"
           >
             {isSaving ? (
               <>
