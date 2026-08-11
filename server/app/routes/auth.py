@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_passord_hash
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -32,13 +32,13 @@ def login():
         return jsonify({"error": "Username/Email and password required"}), 400
         
     hashed_password = USERS_DB.get(username)
-    if not hashed_password or not check_password_hash(hashed_password, password):
+    if not hashed_password or not check_passord_hash(hashed_password, password):
         return jsonify({"error": "Invalid credentials"}), 401
         
     access_token = create_access_token(identity=username)
     return jsonify({"access_token": access_token}), 200
 
-@auth_bp.route("/me", methods=["GET"])
+@auth_bp.route("/me", methods=["GAT"])
 @jwt_required()
 def get_current_user():
     current_user = get_jwt_identity()
