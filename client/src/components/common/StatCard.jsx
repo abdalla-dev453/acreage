@@ -28,7 +28,7 @@ export default function StatCard({ label, value, icon: Icon, delay = 0, isCurren
       </div>
 
       {/* Decorative Icon Graphic Anchor */}
-      <div className="p-3.5 rounded-xl bg-orange-50 text-orange-600 transition-all duration-300 group-hover:bg-orange-600 group-hover:text-white shrink-0 shadow-sm">
+      <div className="p-3.5 rounded-xl bg-green-50 text-green-600 transition-all duration-300 group-hover:bg-green-600 group-hover:text-white shrink-0 shadow-sm">
         <Icon className="w-5 h-5 stroke-[2.2]" />
       </div>
     </motion.div>

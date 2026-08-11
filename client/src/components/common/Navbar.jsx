@@ -28,7 +28,7 @@ export default function Navbar({ title = 'Dashboard' }) {
       {/* Dynamic Route Title Node Header */}
       <div className="flex items-center space-x-3">
         <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight flex items-center space-x-2">
-          <span className="text-orange-600 font-mono font-medium opacity-70">#</span>
+          <span className="text-green-600 font-mono font-medium opacity-70">#</span>
           <span>{title}</span>
         </h1>
         {user?.role && (
@@ -46,7 +46,7 @@ export default function Navbar({ title = 'Dashboard' }) {
         <button className="p-2.5 bg-white border border-slate-100 shadow-sm rounded-xl hover:bg-slate-50 text-slate-500 transition-all active:scale-95 relative">
           <Bell className="w-4.5 h-4.5" />
           {/* Notification Alert Dot Anchor */}
-          <span className="w-1.5 h-1.5 bg-orange-600 rounded-full absolute top-2.5 right-2.5 animate-pulse" />
+          <span className="w-1.5 h-1.5 bg-green-600 rounded-full absolute top-2.5 right-2.5 animate-pulse" />
         </button>
         <button className="p-2.5 bg-white border border-slate-100 shadow-sm rounded-xl hover:bg-slate-50 text-slate-500 transition-all active:scale-95">
           <Settings className="w-4.5 h-4.5" />
@@ -57,7 +57,7 @@ export default function Navbar({ title = 'Dashboard' }) {
 
         {/* 2. Enhanced Profile Avatar Cluster Indicator */}
         <div className="flex items-center space-x-2.5 pl-1 group cursor-pointer">
-          <div className="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-sm transition-transform group-hover:scale-105 select-none uppercase tracking-wide">
+          <div className="w-9 h-9 rounded-xl bg-green-600 text-white flex items-center justify-center font-bold text-sm shadow-sm transition-transform group-hover:scale-105 select-none uppercase tracking-wide">
             {getInitials(user?.username)}
           </div>
           <div className="hidden md:flex flex-col text-left max-w-[100px]">

@@ -7,7 +7,7 @@ export default function TopSelling({ items = [] }) {
       {/* Header Container Layout */}
       <div className="flex justify-between items-center mb-1">
         <h3 className="font-bold text-slate-800 text-base">Top Selling Products</h3>
-        <button className="text-xs text-orange-600 hover:text-orange-700 font-semibold transition-colors bg-orange-50 px-2.5 py-1 rounded-lg">
+        <button className="text-xs text-green-600 hover:text-green-700 font-semibold transition-colors bg-green-50 px-2.5 py-1 rounded-lg">
           View All
         </button>
       </div>
@@ -29,7 +29,7 @@ export default function TopSelling({ items = [] }) {
               <div key={item.id || idx} className="space-y-1.5 group">
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-semibold text-slate-800 group-hover:text-orange-700 transition-colors truncate">
+                    <span className="text-sm font-semibold text-slate-800 group-hover:text-green-700 transition-colors truncate">
                       {itemTitle}
                     </span>
                     <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
@@ -49,7 +49,7 @@ export default function TopSelling({ items = [] }) {
                 {/* 2. Enhanced Visual Anchor: Progress visual indicator track bar */}
                 <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100/50">
                   <div 
-                    className="h-full bg-orange-600 rounded-full transition-all duration-500 ease-out group-hover:bg-orange-500"
+                    className="h-full bg-green-600 rounded-full transition-all duration-500 ease-out group-hover:bg-green-500"
                     style={{ width: `${barWidthPercent}%` }}
                   />
                 </div>
