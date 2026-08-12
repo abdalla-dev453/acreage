@@ -13,6 +13,7 @@ def app():
         JWT_SECRET_KEY = "test-jwt-secret-key-with-safe-length"
         CORS_ORIGINS = ["http://localhost:5173"]
         SECURITY_TOKEN_EXPIRES_MINUTES = 30
+        EMAIL_VERIFICATION_REQUIRED = True
         FRONTEND_URL = "http://localhost:5173"
         MAIL_SERVER = None
         LOG_LEVEL = "WARNING"

@@ -28,6 +28,9 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     SECURITY_TOKEN_EXPIRES_MINUTES = int(os.getenv("SECURITY_TOKEN_EXPIRES_MINUTES", "30"))
+    EMAIL_VERIFICATION_REQUIRED = os.getenv(
+        "EMAIL_VERIFICATION_REQUIRED", str(IS_PROD)
+    ).lower() in {"1", "true", "yes"}
     FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
 
     MAIL_SERVER = os.getenv("MAIL_SERVER")

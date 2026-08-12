@@ -64,3 +64,13 @@ def test_user_password_hash_is_not_plaintext(app):
     assert user.password_hash != 'Password1'
     assert user.check_password('Password1')
     assert not user.check_password('incorrect')
+
+
+def test_auth_errors_include_cors_headers(client):
+    response = client.post(
+        '/api/auth/login',
+        json={'email': 'missing@example.com', 'password': 'Password1'},
+        headers={'Origin': 'http://localhost:5173'},
+    )
+    assert response.status_code == 401
+    assert response.headers['Access-Control-Allow-Origin'] == 'http://localhost:5173'

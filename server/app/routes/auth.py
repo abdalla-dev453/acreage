@@ -63,9 +63,16 @@ def register():
         user.set_password(password)
 
         db.session.add(user)
-        _send_verification(user)
+        if current_app.config['EMAIL_VERIFICATION_REQUIRED']:
+            _send_verification(user)
+            message = 'Account created. Check your email to verify it before signing in.'
+        else:
+            # Local development commonly has no SMTP service. Production keeps
+            # this disabled only when explicitly configured to do so.
+            user.email_verified = True
+            message = 'Account created. You can now sign in.'
         db.session.commit()
-        return jsonify({'message': 'Account created. Check your email to verify it before signing in.'}), 201
+        return jsonify({'message': message}), 201
 
     except Exception:
         db.session.rollback()
