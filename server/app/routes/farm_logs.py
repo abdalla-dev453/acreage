@@ -4,6 +4,7 @@ from datetime import datetime
 from app.models.farm_log import FarmLog
 from app.schemas.farm_log import farm_log_schema, farm_logs_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.utils.http import json_object
 
 farm_logs_bp = Blueprint('farm_logs', __name__)
 
@@ -20,7 +21,9 @@ def get_logs():
 @jwt_required()
 def create_log():
     user_id = int(get_jwt_identity())
-    data = request.get_json() or {}
+    data, error = json_object()
+    if error:
+        return error
 
     # 2. Extract and parse the date string (e.g., "2026-09-05") into a native Python Date object
     harvest_date_str = data.get('estimated_harvest_date')

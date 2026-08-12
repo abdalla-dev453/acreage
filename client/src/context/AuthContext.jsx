@@ -48,8 +48,6 @@ export const AuthProvider = ({ children }) => {
             role, 
             location 
         });
-        localStorage.setItem('token', res.data.token);
-        setUser(res.data.user);
         return res.data;
     };
 

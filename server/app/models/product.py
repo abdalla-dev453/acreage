@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from app.utils.time import utcnow
 
 class Product(db.Model):
     __tablename__ = 'products'
@@ -14,7 +14,7 @@ class Product(db.Model):
     stock_quantity = db.Column(db.Float, nullable=False, default=0.0)
     image_url = db.Column(db.String(255), nullable=True)
     is_available = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
 
     # Relationships

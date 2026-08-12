@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from app.utils.time import utcnow
 
 
 class Review(db.Model):
@@ -11,4 +11,4 @@ class Review(db.Model):
     farmer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)  # 1 to 5 stars
     comment = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)

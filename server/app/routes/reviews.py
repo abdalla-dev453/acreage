@@ -5,6 +5,7 @@ from app.models.user import User
 from app.schemas.review import review_schema, reviews_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func
+from app.utils.http import json_object
 
 
 reviews_bp = Blueprint('reviews', __name__)
@@ -30,13 +31,15 @@ def get_global_reviews():
 @jwt_required()
 def create_review(farmer_id):
     reviewer_id = int(get_jwt_identity())
-    data = request.get_json() or {}
+    data, error = json_object()
+    if error:
+        return error
 
     rating = data.get("rating")
     if not rating or not (1 <= int(rating) <= 5):
         return jsonify({"message": "Rating must be between 1 and 5"}), 400
 
-    farmer = User.query.get_or_404(farmer_id)
+    farmer = db.get_or_404(User, farmer_id)
     if farmer.role != "farmer":
         return jsonify({"message": "Reviews can only be submitted for farmers"}), 400
 

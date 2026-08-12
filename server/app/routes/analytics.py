@@ -12,7 +12,7 @@ analytics_bp = Blueprint('analytics', __name__)
 @jwt_required()
 def get_dashboard_analytics():
     user_id = int(get_jwt_identity())
-    user = User.query.get_or_404(user_id)
+    user = db.get_or_404(User, user_id)
 
     # Filter base orders context dynamically depending on account classification
     if user.role == "farmer":

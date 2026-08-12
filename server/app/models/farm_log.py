@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from app.utils.time import utcnow
 
 
 class FarmLog(db.Model):
@@ -12,4 +12,4 @@ class FarmLog(db.Model):
     description = db.Column(db.Text, nullable=True)
     inputs_used = db.Column(db.String(200), nullable=True)  # e.g., Organic NPK 50kg
     estimated_harvest_date = db.Column(db.Date, nullable=True)
-    logged_at = db.Column(db.DateTime, default=datetime.utcnow)
+    logged_at = db.Column(db.DateTime, default=utcnow)

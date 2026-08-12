@@ -26,6 +26,7 @@ Acreage simplifies the agricultural supply chain by eliminating intermediate tra
 | `POST` | `/api/products/` | Create a new agricultural product listing | Farmer |
 | `GET` | `/api/products/<id>` | Fetch specific product detail | Public |
 | `PUT` | `/api/products/<id>` | Update stock or pricing parameters | Owner / Admin |
+| `DELETE` | `/api/products/<id>` | Delete a product with no order history | Owner |
 
 #### Example Request Body (`POST /api/products/`):
 ```json

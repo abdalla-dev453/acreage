@@ -4,6 +4,7 @@ from app.models.chat import ChatMessage
 from app.schemas.chat import chat_messages_schema, chat_message_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import or_, and_
+from app.utils.http import json_object
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -43,7 +44,9 @@ def get_thread(other_user_id):
 @jwt_required()
 def send_message():
     current_user_id = int(get_jwt_identity())
-    data = request.get_json() or {}
+    data, error = json_object()
+    if error:
+        return error
 
     # Validate incoming message request parameters safely
     receiver_id = data.get('receiver_id')

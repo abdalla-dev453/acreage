@@ -1,6 +1,6 @@
 from app import db
-from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from app.utils.time import utcnow
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -8,11 +8,18 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    # Werkzeug's current scrypt hashes can exceed 128 characters.
+    password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(50), nullable=False, default='farmer')  # 'buyer' or 'admin'
+    phone_number = db.Column(db.String(20), nullable=True)
     location = db.Column(db.String(255), nullable=True)
     avatar_url = db.Column(db.String(255), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
+    email_verified = db.Column(db.Boolean, nullable=False, default=False)
+    verification_token_hash = db.Column(db.String(64), nullable=True)
+    verification_token_expires_at = db.Column(db.DateTime, nullable=True)
+    reset_token_hash = db.Column(db.String(64), nullable=True)
+    reset_token_expires_at = db.Column(db.DateTime, nullable=True)
 
 
     # relationships

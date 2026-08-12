@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from app.utils.time import utcnow
 
 
 class Payout(db.Model):
@@ -12,7 +12,7 @@ class Payout(db.Model):
     conversation_id = db.Column(db.String(50), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default='Pending')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
 
     farmer = db.relationship('User', backref='payouts', lazy=True)

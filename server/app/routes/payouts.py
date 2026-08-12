@@ -4,6 +4,7 @@ from app.models.payout import Payout
 from app.models.user import User
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
+from app.utils.http import json_object
 
 payouts_bp = Blueprint('payouts', __name__)
 
@@ -11,12 +12,14 @@ payouts_bp = Blueprint('payouts', __name__)
 @jwt_required()
 def initiate_payout():
     current_user_id = int(get_jwt_identity())
-    user = User.query.get_or_404(current_user_id)
+    user = db.get_or_404(User, current_user_id)
 
     if user.role != 'farmer':
         return jsonify({'message': 'Access restricted. Only farmers can initiate payouts.'}), 403
 
-    data = request.get_json() or {}
+    data, error = json_object()
+    if error:
+        return error
     amount = data.get('amount')
     mpesa_number = data.get('mpesa_number')
 

@@ -23,7 +23,7 @@ import Marketplace from '../pages/Marketplace';
 // 1. Fixed: Structural application parent shell container using native Outlet
 function AppLayout() {
   return (
-    <div className="flex bg-slate-50 min-h-screen text-slate-600 antialiased font-sans">
+    <div className="flex min-h-screen bg-[#F8FAFC] text-[#0F172A] antialiased font-sans">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden max-h-screen">
         {/* Main scroll container block workspace */}

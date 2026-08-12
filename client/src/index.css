@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+:root {
+    --acreage-forest: #166534;
+    --acreage-forest-dark: #052e16;
+    --acreage-leaf: #15803d;
+    --acreage-mist: #f8fafc;
+    --acreage-ink: #0f172a;
+}
+
 body {
     font-family: 'Inter', sans-serif;
+    background: var(--acreage-mist);
+    color: var(--acreage-ink);
 }
+
+/* Keep existing utility-based pages visually aligned with the landing palette. */
+.bg-green-600 { background-color: var(--acreage-forest) !important; }
+.bg-green-50 { background-color: #dcfce7 !important; }
+.text-green-600, .text-green-700 { color: var(--acreage-leaf) !important; }
+.border-green-100, .border-green-200 { border-color: #bbf7d0 !important; }
+.hover\:bg-green-700:hover { background-color: var(--acreage-forest-dark) !important; }
+.hover\:text-green-900:hover { color: var(--acreage-forest-dark) !important; }

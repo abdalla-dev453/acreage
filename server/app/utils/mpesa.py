@@ -1,6 +1,9 @@
 import os
+import logging
 import requests
 from requests.auth import HTTPBasicAuth
+
+logger = logging.getLogger(__name__)
 
 def get_mpesa_access_token():
     consumer_key = os.getenv('MPESA_CONSUMER_KEY')
@@ -15,6 +18,6 @@ def get_mpesa_access_token():
         if response.status_code == 200:
             return response.json().get('access_token')
         return None
-    except Exception as e:
-        print(f"Daraja OAuth Authentication Error: {str(e)}")
+    except requests.RequestException:
+        logger.exception("Daraja OAuth authentication failed")
         return None
