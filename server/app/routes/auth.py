@@ -41,7 +41,7 @@ def register():
     db.session.commit()
     return jsonify({"message": "User registered successfully"}), 201
 
-@auth_bp.route("/login", methods=["POST"]
+@auth_bp.route("/login", methods=["POST"])
 Bdef login():
     data = request.get_json() or {}
     username = data.get("username") or data.get("email")
