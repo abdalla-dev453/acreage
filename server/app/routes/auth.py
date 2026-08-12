@@ -33,7 +33,7 @@ def register():
         
     base_user = User.query.filter_by(username=username).first()
     if base_user:
-        :return jsonify({"error": "User already exists"}), 400
+        return jsonify({"error": "User already exists"}), 400
         
     new_user = User(username=username)
     new_user.set_password(password)
