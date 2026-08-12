@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
-from .. import db
+from app import db
  
 auth_bp = Blueprint("auth", __name__)
 
@@ -12,13 +12,13 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     
-    def set_password(self, passwore):
+    def set_password(self, password):
         self.password_hash = generate_password_hash(password)
         
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-Aauth_bp.before_app_request
+@auth_bp.before_app_request
 def create_tables():
     db.create_all()
 
@@ -42,7 +42,7 @@ def register():
     return jsonify({"message": "User registered successfully"}), 201
 
 @auth_bp.route("/login", methods=["POST"])
-Bdef login():
+def login():
     data = request.get_json() or {}
     username = data.get("username") or data.get("email")
     password = data.get("password")
@@ -52,7 +52,7 @@ Bdef login():
         
     current_user = User.query.filter_by(username=username).first()
     if not current_user or not current_user.check_password(password):
-        return jsonify({"nerror": "Invalid credentials"}), 401
+        return jsonify({"error": "Invalid credentials"}), 401
         
     access_token = create_access_token(identity=username)
     return jsonify({"access_token": access_token}), 200
