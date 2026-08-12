@@ -17,7 +17,7 @@ def create_app(config_class=None):
     if config_class:
         app.config.from_object(config_class)
     else:
-        from config import Config
+        from .config import Config
         app.config.from_object(Config)
         
     db.init_app(app)
@@ -28,7 +28,7 @@ def create_app(config_class=None):
     if app.config.get("USING_DEFAULT_SECRETS") and not app.debug:
         logging.warning("WARNING: Using default security keys in a non-debug environment!")
 
-    from auth import auth_bp
+    from .routes.auth import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
     @app.route("/health")
