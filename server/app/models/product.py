@@ -18,4 +18,4 @@ class Product(db.Model):
 
 
     # Relationships
-    order_items = db.relationship('OrderItem', backref='product', lazy=True)
+    order_items = db.relationship('OrderItem', back_populates='product', lazy=True)

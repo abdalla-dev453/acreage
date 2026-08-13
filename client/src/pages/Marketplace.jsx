@@ -81,32 +81,64 @@ export default function Marketplace() {
   };
 
   // Buyer Action: Place Checkout Request Order Instantly
-  const handlePlaceOrder = async (productId, farmerId, maxStock) => {
-    const qty = parseFloat(orderQuantities[productId] || 1);
+  // const handlePlaceOrder = async (productId, farmerId, maxStock) => {
+  //   const qty = parseFloat(orderQuantities[productId] || 1);
     
-    if (qty <= 0 || qty > maxStock) {
-      alert(`Invalid quantity. Available supply threshold is ${maxStock} units.`);
-      return;
-    }
+  //   if (qty <= 0 || qty > maxStock) {
+  //     alert(`Invalid quantity. Available supply threshold is ${maxStock} units.`);
+  //     return;
+  //   }
 
-    try {
-      setActionStatus({ type: 'success', text: 'Processing order request...' });
+  //   try {
+  //     setActionStatus({ type: 'success', text: 'Processing order request...' });
       
-      await API.post('/orders/', {
-        items: [{ product_id: productId, quantity: qty }],
-        payment_status: 'unpaid',
-        delivery_address: 'Fulfillment Warehouse, Nairobi',
-        contact_phone: user?.phone || '+254 700 000 000'
-      });
+  //     await API.post('/orders/', {
+  //       items: [{ product_id: productId, quantity: qty }],
+  //       payment_status: 'unpaid',
+  //       delivery_address: 'Fulfillment Warehouse, Nairobi',
+  //       contact_phone: user?.phone || '+254 700 000 000'
+  //     });
 
-      alert('Order placed successfully! Reconciling marketplace balances.');
-      fetchProducts();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Checkout connection error.');
-    } finally {
-      setActionStatus({ type: '', text: '' });
-    }
-  };
+  //     alert('Order placed successfully! Reconciling marketplace balances.');
+  //     fetchProducts();
+  //   } catch (err) {
+  //     alert(err.response?.data?.message || 'Checkout connection error.');
+  //   } finally {
+  //     setActionStatus({ type: '', text: '' });
+  //   }
+  // };
+  // Marketplace.jsx - Updated handlePlaceOrder function
+const handlePlaceOrder = async (productId, farmerId, maxStock) => {
+  const qty = parseFloat(orderQuantities[productId] || 1);
+  
+  if (qty <= 0 || qty > maxStock) {
+    alert(`Invalid quantity. Available supply threshold is ${maxStock} units.`);
+    return;
+  }
+
+  try {
+    setActionStatus({ type: 'success', text: 'Processing order request...' });
+    
+    // Explicit payload targeting both item array and root fields
+    const payload = {
+      product_id: productId,
+      quantity: qty,
+      items: [{ product_id: productId, quantity: qty }],
+      payment_status: 'unpaid',
+      delivery_address: 'Fulfillment Warehouse, Nairobi',
+      contact_phone: user?.phone || user?.phone_number || ''
+    };
+
+    await API.post('/orders/', payload);
+
+    alert('Order placed successfully!');
+    fetchProducts();
+  } catch (err) {
+    alert(err.response?.data?.message || 'Checkout connection error.');
+  } finally {
+    setActionStatus({ type: '', text: '' });
+  }
+};
 
   const handleQtyChange = (productId, val) => {
     setOrderQuantities({ ...orderQuantities, [productId]: val });

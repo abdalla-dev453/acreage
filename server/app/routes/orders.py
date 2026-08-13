@@ -22,12 +22,20 @@ logger = logging.getLogger(__name__)
 @jwt_required()
 def get_orders():
     user_id = int(get_jwt_identity())
-    role = request.args.get('role', 'farmer')
+    user = db.get_or_404(User, user_id)
+    
+    # Check explicit query parameter, or fall back to logged-in user's role
+    role = request.args.get('role', user.role)
 
     if role == 'farmer':
         orders = Order.query.filter_by(farmer_id=user_id).order_by(Order.created_at.desc()).all()
-    else:
+    elif role == 'buyer':
         orders = Order.query.filter_by(buyer_id=user_id).order_by(Order.created_at.desc()).all()
+    else:
+        # Fallback: Return all orders linked to this account
+        orders = Order.query.filter(
+            (Order.buyer_id == user_id) | (Order.farmer_id == user_id)
+        ).order_by(Order.created_at.desc()).all()
 
     return orders_schema.jsonify(orders), 200
 
