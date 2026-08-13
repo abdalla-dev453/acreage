@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import API from '../../services/api';
 
-export default function OrderTable({ orders = [], onRefresh }) {
+export default function OrderTable({ orders = [], onRefresh, userRole = 'buyer' }) {
   const [updatingId, setUpdatingId] = useState(null);
-  const userRole = localStorage.getItem('role') || 'buyer';
 
   const getStatusBadge = (status = '') => {
     const cleanStatus = status.trim().toLowerCase();
@@ -72,13 +71,10 @@ export default function OrderTable({ orders = [], onRefresh }) {
 
                 return (
                   <tr key={order?.id || Math.random()} className="hover:bg-slate-50/50 transition-all">
-                    {/* Order Code */}
                     <td className="px-6 py-4 font-bold text-slate-900">{displayCode}</td>
 
-                    {/* Customer */}
                     <td className="px-6 py-4 font-medium text-slate-800">{buyerName}</td>
 
-                    {/* Order Items Breakdown */}
                     <td className="px-6 py-4">
                       {order?.items && order.items.length > 0 ? (
                         <div className="space-y-1">
@@ -98,17 +94,14 @@ export default function OrderTable({ orders = [], onRefresh }) {
                       )}
                     </td>
 
-                    {/* Total Amount */}
                     <td className="px-6 py-4 font-bold text-emerald-600">{totalAmt}</td>
 
-                    {/* Payment Status */}
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${getPaymentBadge(order?.payment_status)}`}>
                         {order?.payment_status || 'unpaid'}
                       </span>
                     </td>
 
-                    {/* Fulfillment Status Badge */}
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1 capitalize ${getStatusBadge(order?.status)}`}>
                         <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
@@ -116,7 +109,6 @@ export default function OrderTable({ orders = [], onRefresh }) {
                       </span>
                     </td>
 
-                    {/* Location & Contact Phone */}
                     <td className="px-6 py-4 text-xs">
                       <div className="text-slate-800 max-w-xs truncate font-medium">
                         {order?.delivery_address || 'N/A'}
@@ -126,7 +118,6 @@ export default function OrderTable({ orders = [], onRefresh }) {
                       </div>
                     </td>
 
-                    {/* Farmer Action Status Control */}
                     {userRole === 'farmer' && (
                       <td className="px-6 py-4">
                         {isLocked ? (

@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, 
   BarChart2, 
@@ -21,15 +22,17 @@ import { AuthContext } from '../../context/AuthContext';
 export default function Sidebar() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false); // Mobile toggle state
+  const location = useLocation();
+  
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
-    setIsOpen(false);
+    setIsMobileOpen(false);
   };
 
-  // Completed Nav Items menu mapping all current application pages
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['farmer', 'buyer'] },
     { name: 'Analytics', path: '/analytics', icon: BarChart2, roles: ['farmer'] },
@@ -40,126 +43,123 @@ export default function Sidebar() {
     { name: 'Reviews', path: '/reviews', icon: Star, roles: ['farmer', 'buyer'] },
     { name: 'Chats', path: '/chats', icon: MessageSquare, roles: ['farmer', 'buyer'] },
     { name: 'Wallet', path: '/wallet', icon: Wallet, roles: ['farmer', 'buyer'] },
-    { name: 'Profile Settings', path: '/profile', icon: User, roles: ['farmer', 'buyer'] }, // Added Profile
-    { name: 'Home', path: '/', icon: Home, roles: ['farmer', 'buyer'], onClick: handleLogout }
+    { name: 'Profile Settings', path: '/profile', icon: User, roles: ['farmer', 'buyer'] }, 
+    { name: 'Home', path: '/', icon: Home, roles: ['farmer', 'buyer'] }
   ];
 
-  const visibleNavItems = navItems.filter(item => 
-    user && item.roles.includes(user.role)
-  );
+  const visibleNavItems = navItems.filter(item => user && item.roles.includes(user.role));
+  const luxurySpring = { type: "spring", stiffness: 220, damping: 28, mass: 0.8 };
 
   return (
     <>
-      {/* 1. Mobile Floating Navbar Header Trigger Panel — glass strip */}
-      <div className="lg:hidden fixed top-0 inset-x-0 h-16 bg-emerald-950/60 backdrop-blur-xl border-b border-white/10 px-4 flex items-center justify-between z-30 shadow-lg shadow-black/20">
-        <div className="flex items-center space-x-2">
-          <div className="p-1.5 bg-gradient-to-br from-green-500 to-green-600 rounded-lg text-white shadow-md shadow-green-600/30">
-            <Sprout className="w-5 h-5" />
-          </div>
-          <span className="font-black text-base tracking-wider text-white uppercase">ACREAGE</span>
-        </div>
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle Navigation Menu"
-          className="p-2 hover:bg-white/10 rounded-xl text-white/80 transition-colors cursor-pointer active:scale-95"
-        >
-          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 inset-x-0 h-16 bg-black/60 backdrop-blur-lg border-b border-white/10 px-6 flex items-center justify-between z-30">
+        <span className="font-black text-xs tracking-[0.3em] text-white">ACREAGE</span>
+        <button onClick={() => setIsMobileOpen(!isMobileOpen)} className="p-2 text-white/70">
+          {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {/* 2. Mobile Blackout Overlay Overlay Backdrop */}
-      {isOpen && (
+      <AnimatePresence>
+        {isMobileOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+            className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+            onClick={() => setIsMobileOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.aside 
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        animate={{ width: isHovered ? 260 : 80 }}
+        transition={luxurySpring}
+        className={`fixed lg:sticky top-0 bottom-0 left-0 h-screen flex flex-col justify-between p-4 z-50 lg:z-20 overflow-hidden border-r border-white/10 bg-black shadow-2xl lg:translate-x-0 ${
+          isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:w-20'
+        }`}
+      >
+        {/* Background Layer: Using your provided image with a heavy black mask for a premium feel */}
         <div 
-          className="lg:hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 transition-opacity animate-fade-in"
-          onClick={() => setIsOpen(false)}
+            className="absolute inset-0 -z-20 bg-cover bg-center" 
+            style={{ backgroundImage: `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdiWIug24cirN-tE2IcGYzyY2PUYjqFUSf2K1MzdvhsA&s=10')` }} 
         />
-      )}
+        <div className="absolute inset-0 -z-10 bg-black/80 backdrop-blur-[2px]" />
 
-      {/* 3. Universal Navigation Container (Responsive Drawer Panel) */}
-      <aside className={`fixed lg:sticky top-0 bottom-0 left-0 w-64 h-screen flex flex-col justify-between p-5 transition-transform duration-300 ease-out z-50 lg:z-20 lg:translate-x-0 overflow-hidden ${
-        isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
-      }`}>
-
-        {/* Background image layer — blurred agribusiness photograph */}
-        <div 
-          className="absolute inset-0 -z-20 bg-cover bg-center scale-110 blur-[2px]"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=80')"
-          }}
-        />
-
-        {/* Tint + gradient wash for legibility, tuned to agric/harvest palette */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-emerald-950/90 via-emerald-950/85 to-slate-950/95" />
-
-        {/* Glass panel surface */}
-        <div className="absolute inset-0 -z-10 bg-white/5 backdrop-blur-xl border-r border-white/10" />
-
-        <div className="relative">
-          {/* Sidebar Top Branding Header Row */}
-          <div className="flex items-center justify-between px-2 py-3 mb-6 border-b border-white/10 pb-5">
-            <div className="flex items-center space-x-2.5">
-              <div className="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-xl text-white shadow-lg shadow-green-600/30 ring-1 ring-white/20">
-                <Sprout className="w-5 h-5 stroke-[2.2]" />
+        <div className="relative w-full">
+          <div className="flex items-center justify-between h-14 px-2 mb-8 border-b border-white/10 pb-4">
+            <div className="flex items-center min-w-[200px]">
+              <div className="p-2.5 bg-gradient-to-tr from-green-500 to-green-800 rounded-lg text-black shadow-lg shadow-green-500/20">
+                <Sprout className="w-4 h-4 stroke-[3]" />
               </div>
-              <span className="font-extrabold text-xl tracking-widest text-white uppercase drop-shadow-sm">ACREAGE</span>
+              <AnimatePresence>
+                {(isHovered || window.innerWidth < 1024) && (
+                  <motion.span className="font-black text-[15px] tracking-[0.3em] text-white/90 ml-4">ACREAGE</motion.span>
+                )}
+              </AnimatePresence>
             </div>
-            {/* Close trigger on mobile view sizes */}
-            <button className="lg:hidden p-1.5 hover:bg-white/10 text-white/50 hover:text-white rounded-lg cursor-pointer" onClick={() => setIsOpen(false)}>
-              <X className="w-4.5 h-4.5" />
-            </button>
           </div>
 
-          {/* Core Interactive Path Links Mapping Feed */}
-          <nav className="space-y-1 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1 scrollbar-thin">
-            {visibleNavItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                onClick={() => setIsOpen(false)} // Snap-closes drawer on selection click
-                className={({ isActive }) =>
-                  `flex items-center space-x-3 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 group border ${
-                    isActive
-                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-600/30 border-white/20 scale-[1.01]'
-                      : 'text-white/60 border-transparent hover:bg-white/10 hover:text-white hover:border-white/10 backdrop-blur-sm'
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <item.icon className={`w-4.5 h-4.5 transition-transform duration-200 group-hover:scale-105 ${
-                      isActive ? 'text-white stroke-[2.5]' : 'text-white/40 group-hover:text-green-300'
+          <nav className="space-y-1">
+            {visibleNavItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  onClick={() => setIsMobileOpen(false)}
+                  className="flex items-center h-12 rounded-lg font-medium text-[10px] uppercase tracking-[0.2em] transition-all relative group w-full"
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTabBackground"
+                      className="absolute inset-0 bg-white/5 border border-white/10 rounded-lg -z-10"
+                    />
+                  )}
+                  <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                    <item.icon className={`w-4 h-4 transition-all duration-300 ${
+                      isActive ? 'text-green-600' : 'text-white/40 group-hover:text-white'
                     }`} />
-                    <span>{item.name}</span>
-                  </>
-                )}
-              </NavLink>
-            ))}
+                  </div>
+                  <AnimatePresence>
+                    {(isHovered || window.innerWidth < 1024) && (
+                      <motion.span className={`pl-2 transition-colors duration-300 ${isActive ? 'text-white' : 'text-white/50 group-hover:text-white'}`}>
+                        {item.name}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </NavLink>
+              );
+            })}
           </nav>
         </div>
 
-        {/* Bottom Profile Status & Session Action Footers Area */}
-        <div className="relative pt-4 border-t border-white/10">
+        <div className="relative pt-4 border-t border-white/10 space-y-2">
           {user && (
-            <div className="px-3 py-2.5 mb-3 bg-white/10 border border-white/15 rounded-xl flex items-center space-x-3 shadow-lg shadow-black/10 backdrop-blur-md group hover:border-green-400/40 hover:bg-white/15 transition-all cursor-pointer" onClick={() => { navigate('/profile'); setIsOpen(false); }}>
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-green-600 text-white font-extrabold text-xs flex items-center justify-center uppercase shrink-0 shadow-md shadow-green-600/30">
+            <div className="h-12 flex items-center overflow-hidden w-full px-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-green-500 to-green-800 flex items-center justify-center text-[10px] font-bold text-black uppercase">
                 {user.username.charAt(0)}
               </div>
-              <div className="min-w-0 flex-1 text-left">
-                <p className="text-xs font-extrabold text-white truncate leading-tight">@{user.username}</p>
-                <p className="text-[10px] font-bold text-green-300 uppercase tracking-widest leading-none mt-0.5">{user.role}</p>
-              </div>
+              <AnimatePresence>
+                {(isHovered || window.innerWidth < 1024) && (
+                  <motion.div className="ml-3 overflow-hidden">
+                    <p className="text-[10px] font-bold text-white uppercase">{user.username}</p>
+                    <p className="text-[8px] text-white/40 uppercase tracking-widest">{user.role}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
-          
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-3 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white/60 hover:bg-rose-500/10 hover:text-rose-300 border border-transparent hover:border-rose-400/20 backdrop-blur-sm transition-all w-full text-left cursor-pointer group active:scale-[0.98]"
-          >
-            <LogOut className="w-4.5 h-4.5 text-white/40 group-hover:text-rose-400 transition-colors" />
-            <span>Logout Session</span>
+
+          <button onClick={handleLogout} className="w-full h-12 flex items-center text-white/40 hover:text-red-600 transition-colors group">
+            <div className="w-12 h-12 flex items-center justify-center shrink-0">
+              <LogOut className="w-4 h-4" />
+            </div>
+            {(isHovered || window.innerWidth < 1024) && (
+              <span className="text-[10px] uppercase tracking-[0.2em] pl-2">Logout</span>
+            )}
           </button>
         </div>
-      </aside>
+      </motion.aside>
     </>
   );
 }

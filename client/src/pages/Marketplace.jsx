@@ -185,7 +185,7 @@ const handlePlaceOrder = async (productId, farmerId, maxStock) => {
       {isLoading ? (
         <div className="py-24 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-100">
           <Loader2 className="w-6 h-6 text-green-600 animate-spin" />
-          <p className="text-xs text-slate-400 font-bold mt-2 uppercase tracking-widest">Querying active regional inventory grids...</p>
+          <p className="text-xs text-slate-500 font-bold mt-2 uppercase tracking-widest">Querying active regional inventory grids...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -217,16 +217,16 @@ const handlePlaceOrder = async (productId, farmerId, maxStock) => {
                 <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-1">
                     <h3 className="font-extrabold text-slate-800 text-sm tracking-tight truncate">{prod.title}</h3>
-                    <p className="text-xs text-slate-400 font-medium line-clamp-2 min-h-[2rem] leading-relaxed">{prod.description || 'Premium harvested regional agriculture lot available for immediate dispatch routing channels.'}</p>
+                    <p className="text-xs text-slate-500 font-medium line-clamp-2 min-h-[2rem] leading-relaxed">{prod.description || 'Premium harvested regional agriculture lot available for immediate dispatch routing channels.'}</p>
                   </div>
 
                   <div className="pt-2 border-t border-slate-50 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Price Per Unit</span>
-                      <p className="text-sm font-black text-slate-800 font-mono">KES {prod.price_per_unit} <span className="text-xs font-bold text-slate-400">/{prod.unit}</span></p>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 block">Price Per Unit</span>
+                      <p className="text-sm font-black text-slate-800 font-mono">KES {prod.price_per_unit} <span className="text-xs font-bold text-slate-500">/{prod.unit}</span></p>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Available Supply</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 block">Available Supply</span>
                       <p className="text-xs font-extrabold text-green-600 font-mono">{prod.stock_quantity} {prod.unit}s</p>
                     </div>
                   </div>
@@ -253,7 +253,7 @@ const handlePlaceOrder = async (productId, farmerId, maxStock) => {
                   )}
 
                   {isFarmer && (
-                    <div className="pt-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 py-2 rounded-xl border border-slate-100">
+                    <div className="pt-2 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50 py-2 rounded-xl border border-slate-100">
                       {prod.farmer_id === user?.id ? 'Your Active Listing Asset' : 'External Partner Lot'}
                     </div>
                   )}
@@ -261,7 +261,7 @@ const handlePlaceOrder = async (productId, farmerId, maxStock) => {
               </div>
             ))
           ) : (
-            <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-slate-100 text-slate-400 font-medium text-xs">
+            <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-slate-100 text-slate-500 font-medium text-xs">
               No agricultural listings available under this specific filter track layout context.
             </div>
           )}
@@ -274,7 +274,7 @@ const handlePlaceOrder = async (productId, farmerId, maxStock) => {
           <div className="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 border border-slate-100 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-800 text-sm tracking-tight uppercase">Configure New Market Commodity</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer">
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-slate-600 font-bold text-sm cursor-pointer">
                 ✕
               </button>
             </div>

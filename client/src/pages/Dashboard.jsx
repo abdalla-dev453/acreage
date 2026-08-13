@@ -118,7 +118,7 @@ export default function Dashboard() {
       </div>
 
       {/* 3. Action Navigation Footer Link Banner */}
-      <div className="bg-gradient-to-r from-green-600 to-green-900 rounded-2xl p-6 text-white shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:shadow-md">
+      <div className="bg-gradient-to-r from-green-800 to-green-900 rounded-2xl p-6 text-white shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:shadow-md">
         <div className="text-center sm:text-left">
           <h4 className="font-bold text-lg">Marketplace Inventory Control</h4>
           <p className="text-xs text-green-100 mt-1">Review active produce listings, configure price thresholds, or fulfill outstanding orders.</p>

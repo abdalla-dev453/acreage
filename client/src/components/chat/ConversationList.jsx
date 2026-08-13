@@ -49,18 +49,18 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
           <span>Inbox Hub</span>
           <MessageSquare className="w-4 h-4 text-green-500" />
         </h2>
-        <p className="text-[11px] text-slate-400 mt-0.5 font-medium">Real-time marketplace negotiation threads</p>
+        <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Real-time marketplace negotiation threads</p>
       </div>
       
       {/* Glassmorphic Search Input Component Field */}
       <div className="relative mb-4">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 stroke-[2.2]" />
+        <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3 stroke-[2.2]" />
         <input
           type="text"
           placeholder="Search contact handles..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder-slate-400"
+          className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder-slate-500"
         />
       </div>
 
@@ -99,14 +99,14 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                       @{contactName}
                     </p>
                     {hasConversation && (
-                      <span className="text-[9px] font-bold text-slate-400 font-mono">
+                      <span className="text-[9px] font-bold text-slate-500 font-mono">
                         {contact.lastMessageTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     )}
                   </div>
                   
                   {/* Real-Time Last Message Text Segment Fragment Row */}
-                  <div className="flex items-center space-x-1.5 text-xs text-slate-400 font-medium">
+                  <div className="flex items-center space-x-1.5 text-xs text-slate-500 font-medium">
                     {contact.isLastMessageFromMe && (
                       <span className="shrink-0 text-slate-300">
                         {contact.isLastMessageRead ? (
@@ -117,14 +117,14 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                       </span>
                     )}
                     <p className={`truncate text-[11px] leading-tight flex-1 ${
-                      contact.unreadCount > 0 && !isActive ? 'text-slate-900 font-black' : 'text-slate-400 font-medium'
+                      contact.unreadCount > 0 && !isActive ? 'text-slate-900 font-black' : 'text-slate-500 font-medium'
                     }`}>
                       {contact.lastMessageText}
                     </p>
                   </div>
 
                   {/* Account Classification Badge Track Tags */}
-                  <span className="inline-block text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-green-600/80 transition-colors mt-1">
+                  <span className="inline-block text-[9px] font-black uppercase tracking-widest text-slate-500 group-hover:text-green-600/80 transition-colors mt-1">
                     {contact.role || 'Member'}
                   </span>
                 </div>
@@ -142,9 +142,9 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
           })
         ) : (
           /* Missing Records Alternative Empty State Layout View */
-          <div className="text-center py-16 text-slate-400 font-medium text-xs flex flex-col items-center justify-center space-y-2">
+          <div className="text-center py-16 text-slate-500 font-medium text-xs flex flex-col items-center justify-center space-y-2">
             <CircleDot className="w-6 h-6 text-slate-200 stroke-[1.5]" />
-            <span className="uppercase tracking-wider text-[10px] font-black text-slate-300">No active streams found</span>
+            <span className="uppercase tracking-wider text-[10px] font-black text-slate-500">No active streams found</span>
           </div>
         )}
       </div>
