@@ -1,3 +1,4 @@
+from email.mime import image
 import os
 from datetime import datetime, date, timedelta
 from app import create_app, db
@@ -40,10 +41,10 @@ def seed_database():
     db.session.commit()  # Commit to get IDs
 
     print("🍎 Creating Products...")
-    prod1 = Product(farmer_id=farmer1.id, title="Organic Tomatoes", category="Vegetables", description="Freshly picked plum tomatoes.", price_per_unit=150.0, unit="kg", stock_quantity=100.0, is_available=True)
-    prod2 = Product(farmer_id=farmer1.id, title="White Onions", category="Vegetables", description="Sweet bulb onions.", price_per_unit=120.0, unit="kg", stock_quantity=250.0, is_available=True)
-    prod3 = Product(farmer_id=farmer2.id, title="Fresh Avocados", category="Fruits", description="Export quality Hass avocados.", price_per_unit=40.0, unit="piece", stock_quantity=500.0, is_available=True)
-    prod4 = Product(farmer_id=farmer2.id, title="Grade A Potatoes", category="Grains & Tubers", description="Perfect for french fries.", price_per_unit=3000.0, unit="bag", stock_quantity=15.0, is_available=True)
+    prod1 = Product(farmer_id=farmer1.id, title="Organic Tomatoes", category="Vegetables", description="Freshly picked plum tomatoes.", price_per_unit=150.0, unit="kg", stock_quantity=100.0,image_url="https://unsplash.com", is_available=True)
+    prod2 = Product(farmer_id=farmer1.id, title="White Onions", category="Vegetables", description="Sweet bulb onions.", price_per_unit=120.0, unit="kg", stock_quantity=250.0, image_url="https://unsplash.com", is_available=True)
+    prod3 = Product(farmer_id=farmer2.id, title="Fresh Avocados", category="Fruits", description="Export quality Hass avocados.", price_per_unit=40.0, unit="piece", stock_quantity=500.0, image_url="https://unsplash.com", is_available=True)
+    prod4 = Product(farmer_id=farmer2.id, title="Grade A Potatoes", category="Grains & Tubers", description="Perfect for french fries.", price_per_unit=3000.0, unit="bag", stock_quantity=15.0, image_url="https://unsplash.com", is_available=True)
 
     db.session.add_all([prod1, prod2, prod3, prod4])
     db.session.commit()
