@@ -21,14 +21,12 @@ class User(db.Model):
     reset_token_hash = db.Column(db.String(64), nullable=True)
     reset_token_expires_at = db.Column(db.DateTime, nullable=True)
 
-
     # relationships
     products = db.relationship('Product', backref='farmer', lazy=True)
     farm_orders = db.relationship('Order', foreign_keys='Order.farmer_id', back_populates='farmer', lazy=True)
     buyer_orders = db.relationship('Order', foreign_keys='Order.buyer_id', back_populates='buyer', lazy=True)
     farm_logs = db.relationship('FarmLog', backref='farmer', lazy=True)
     reviews_written = db.relationship('Review', foreign_keys='Review.reviewer_id', backref='reviewer', lazy=True)
-
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

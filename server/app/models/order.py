@@ -16,9 +16,11 @@ class Order(db.Model):
     contact_phone = db.Column(db.String(20), nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow)
 
-    # Relationships with explicit foreign_keys to prevent ambiguity with User model
-    buyer = db.relationship('User', foreign_keys=[buyer_id])
-    farmer = db.relationship('User', foreign_keys=[farmer_id])
+    # Relationships with explicit foreign_keys to prevent ambiguity with User model.
+    # back_populates must point at the matching collection on User (buyer_orders /
+    # farm_orders) so both sides of each relationship stay in sync within a session.
+    buyer = db.relationship('User', foreign_keys=[buyer_id], back_populates='buyer_orders')
+    farmer = db.relationship('User', foreign_keys=[farmer_id], back_populates='farm_orders')
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade="all, delete-orphan")
 
     def to_dict(self):
