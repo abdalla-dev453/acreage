@@ -15,4 +15,4 @@ class Review(db.Model):
     image_url = db.Column(db.String(255), nullable=True)
 
 
-    reviewer = db.relationship('User', foreign_keys=[reviewer_id])
+    reviewer = db.relationship('User', foreign_keys=[reviewer_id], overlaps="author, reviews_written")
