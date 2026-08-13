@@ -12,3 +12,7 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)  # 1 to 5 stars
     comment = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=utcnow)
+    image_url = db.Column(db.String(255), nullable=True)
+
+
+    reviewer = db.relationship('User', foreign_keys=[reviewer_id])
