@@ -1,32 +1,49 @@
 import { useState, useMemo } from 'react';
 import { Search, MessageSquare, Check, CheckCheck, CircleDot } from 'lucide-react';
 
-export default function ConversationList({ contacts = [], activeId, onSelect, messages = [], currentUserId }) {
+export default function ConversationList({ 
+  contacts = [], 
+  activeId, 
+  onSelect, 
+  messages = [], 
+  currentUserId,
+  typingContactIds = [] // New prop Array: passes IDs of contacts currently typing
+}) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // REVOLUTIONARY ENGINE: Dynamically enrich contact profiles with active message metadata and sort them
+  // DYNAMIC FILTER ENGINE: Processes metadata enrichment, sorting rules, and text match metrics
   const processedContacts = useMemo(() => {
     const list = contacts.map((contact) => {
+      // Stringify IDs to guarantee precise evaluation regardless of Integer vs UUID variations
+      const contactIdStr = String(contact.id);
+      const currentUserIdStr = String(currentUserId);
+
       // 1. Gather all messages shared between the current user and this specific contact
-      const sharedMessages = messages.filter(
-        (m) =>
-          (m.sender_id === contact.id && m.receiver_id == currentUserId) ||
-          (m.sender_id == currentUserId && m.receiver_id === contact.id)
-      );
+      const sharedMessages = messages.filter((m) => {
+        const senderIdStr = String(m.sender_id);
+        const receiverIdStr = String(m.receiver_id);
+        return (
+          (senderIdStr === contactIdStr && receiverIdStr === currentUserIdStr) ||
+          (senderIdStr === currentUserIdStr && receiverIdStr === contactIdStr)
+        );
+      });
 
       // 2. Identify the absolute latest message object node
       const latestMessage = sharedMessages.length > 0 ? sharedMessages[sharedMessages.length - 1] : null;
 
       // 3. Compute the unread count badge parameters for incoming items
-      const unreadCount = sharedMessages.filter((m) => m.sender_id === contact.id && !m.is_read).length;
+      const unreadCount = sharedMessages.filter(
+        (m) => String(m.sender_id) === contactIdStr && !m.is_read
+      ).length;
 
       return {
         ...contact,
         lastMessageText: latestMessage ? latestMessage.message : 'No conversation established yet.',
         lastMessageTime: latestMessage ? new Date(latestMessage.created_at) : new Date(0), // Epoch baseline fallback
-        isLastMessageFromMe: latestMessage ? latestMessage.sender_id == currentUserId : false,
+        isLastMessageFromMe: latestMessage ? String(latestMessage.sender_id) === currentUserIdStr : false,
         isLastMessageRead: latestMessage ? latestMessage.is_read : false,
         unreadCount: unreadCount,
+        hasConversation: latestMessage !== null,
       };
     });
 
@@ -36,8 +53,17 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
       return name.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
-    // 5. CRUCIAL RULE: Sort by timestamp descending so the latest active conversation bubbles to the top instantly!
-    return filtered.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
+    // 5. SORTING ORDER RULE: 
+    // - Active conversations sorted descending by time.
+    // - No-conversation profiles are kept and grouped below active streams.
+    return filtered.sort((a, b) => {
+      if (a.hasConversation && b.hasConversation) {
+        return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
+      }
+      if (a.hasConversation && !b.hasConversation) return -1; // Pull active streams up
+      if (!a.hasConversation && b.hasConversation) return 1;  // Push no-message streams down
+      return 0; // Maintain base declaration index array positions
+    });
   }, [contacts, messages, searchTerm, currentUserId]);
 
   return (
@@ -70,8 +96,8 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
           processedContacts.map((contact) => {
             const contactName = contact?.username || 'Trader';
             const initial = contactName.trim().charAt(0).toUpperCase() || '?';
-            const isActive = activeId === contact.id;
-            const hasConversation = contact.lastMessageTime.getTime() > 0;
+            const isActive = String(activeId) === String(contact.id);
+            const isTyping = typingContactIds.map(String).includes(String(contact.id));
 
             return (
               <div
@@ -98,29 +124,39 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                     <p className="text-xs font-black text-slate-800 truncate group-hover:text-green-600 transition-colors">
                       @{contactName}
                     </p>
-                    {hasConversation && (
+                    {contact.hasConversation && (
                       <span className="text-[9px] font-bold text-slate-500 font-mono">
                         {contact.lastMessageTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     )}
                   </div>
                   
-                  {/* Real-Time Last Message Text Segment Fragment Row */}
-                  <div className="flex items-center space-x-1.5 text-xs text-slate-500 font-medium">
-                    {contact.isLastMessageFromMe && (
-                      <span className="shrink-0 text-slate-300">
-                        {contact.isLastMessageRead ? (
-                          <CheckCheck className="w-3.5 h-3.5 text-green-500" />
-                        ) : (
-                          <Check className="w-3.5 h-3.5" />
+                  {/* Real-Time Last Message Text / Typing Context Element Segment Row */}
+                  <div className="flex items-center space-x-1.5 text-xs font-medium h-4">
+                    {isTyping ? (
+                      <p className="text-[11px] leading-tight text-green-600 font-extrabold animate-pulse">
+                        typing....
+                      </p>
+                    ) : (
+                      <>
+                        {contact.isLastMessageFromMe && contact.hasConversation && (
+                          <span className="shrink-0 text-slate-300">
+                            {contact.isLastMessageRead ? (
+                              <CheckCheck className="w-3.5 h-3.5 text-green-500" />
+                            ) : (
+                              <Check className="w-3.5 h-3.5" />
+                            )}
+                          </span>
                         )}
-                      </span>
+                        <p className={`truncate text-[11px] leading-tight flex-1 ${
+                          contact.unreadCount > 0 && !isActive 
+                            ? 'text-slate-900 font-black' 
+                            : 'text-slate-500 font-medium'
+                        }`}>
+                          {contact.lastMessageText}
+                        </p>
+                      </>
                     )}
-                    <p className={`truncate text-[11px] leading-tight flex-1 ${
-                      contact.unreadCount > 0 && !isActive ? 'text-slate-900 font-black' : 'text-slate-500 font-medium'
-                    }`}>
-                      {contact.lastMessageText}
-                    </p>
                   </div>
 
                   {/* Account Classification Badge Track Tags */}
@@ -130,7 +166,7 @@ export default function ConversationList({ contacts = [], activeId, onSelect, me
                 </div>
 
                 {/* HIGH-UX METRIC: Unread Badge Alert Notification Bubble */}
-                {contact.unreadCount > 0 && !isActive && (
+                {contact.unreadCount > 0 && !isActive && !isTyping && (
                   <div className="flex flex-col items-center justify-center shrink-0 self-center">
                     <span className="min-w-[16px] h-4 px-1 bg-green-600 text-white font-black text-[9px] rounded-full flex items-center justify-center shadow-sm shadow-green-600/20 animate-pulse">
                       {contact.unreadCount}
