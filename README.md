@@ -120,8 +120,6 @@ acreage/
 ---
 
 ## 📊 Data Model
-
-```mermaid
 erDiagram
     USERS ||--o{ PRODUCTS : lists
     USERS ||--o{ ORDERS : "places (buyer)"
@@ -135,14 +133,14 @@ erDiagram
 
     USERS {
         int id PK
-        string username UNIQUE
-        string email UNIQUE
+        string username UK
+        string email UK
         string password_hash
         string role "farmer | buyer"
         string phone_number
         string location
         boolean email_verified
-        datetime created_at
+        string created_at
     }
 
     PRODUCTS {
@@ -154,20 +152,20 @@ erDiagram
         string unit "kg | piece | crate | bag"
         float stock_quantity
         boolean is_available
-        datetime created_at
+        string created_at
     }
 
     ORDERS {
         int id PK
         int buyer_id FK
         int farmer_id FK
-        string order_code UNIQUE
+        string order_code UK
         float total_amount
         string status "pending | on delivery | delivered | cancelled"
         string payment_status "unpaid | paid | failed"
         string delivery_address
         string contact_phone
-        datetime created_at
+        string created_at
     }
 
     ORDER_ITEMS {
@@ -184,8 +182,8 @@ erDiagram
         string field_name
         string activity_type "Planting | Fertilizer | Irrigation | Harvest"
         string inputs_used
-        date estimated_harvest_date
-        datetime logged_at
+        string estimated_harvest_date
+        string logged_at
     }
 
     PAYOUTS {
@@ -195,7 +193,7 @@ erDiagram
         string conversation_id
         float amount
         string status
-        datetime created_at
+        string created_at
     }
 
     REVIEWS {
@@ -204,9 +202,9 @@ erDiagram
         int farmer_id FK
         int rating
         string comment
-        datetime created_at
+        string created_at
     }
-```
+
 
 ---
 
