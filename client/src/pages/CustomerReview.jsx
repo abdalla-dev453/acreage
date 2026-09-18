@@ -9,6 +9,21 @@ export default function CustomerReview() {
   const [stats, setStats] = useState({ average_rating: 4.8, total_reviews: 24 });
   const [isLoading, setIsLoading] = useState(true);
 
+  const sanitizeImageUrl = (value) => {
+    if (!value || typeof value !== 'string') return '';
+    try {
+      const parsed = new URL(value, window.location.origin);
+      const isSafeProtocol =
+        parsed.protocol === 'https:' ||
+        parsed.protocol === 'http:' ||
+        parsed.protocol === 'blob:' ||
+        (parsed.protocol === 'data:' && value.startsWith('data:image/'));
+      return isSafeProtocol ? parsed.href : '';
+    } catch {
+      return '';
+    }
+  };
+
   // Verification & Form State
   const [hasCompletedTransaction, setHasCompletedTransaction] = useState(false);
   const [rating, setRating] = useState(5);
@@ -396,6 +411,7 @@ export default function CustomerReview() {
                   : 'Recent';
 
                 const clientName = rev?.reviewer?.username || 'Verified Buyer';
+                const reviewImageUrl = sanitizeImageUrl(rev.image_url || rev.verification_photo);
 
                 return (
                   <div key={rev.id || idx} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3 group transition-all hover:shadow-md hover:border-slate-200/50 animate-fade-in">
@@ -426,14 +442,14 @@ export default function CustomerReview() {
                     </p>
 
                     {/* Display attached verification photo if present */}
-                    {(rev.image_url || rev.verification_photo) && (
+                    {reviewImageUrl && (
                       <div className="pt-1">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Attached Verification Photo:</p>
                         <img
-                          src={rev.image_url || rev.verification_photo}
+                          src={reviewImageUrl}
                           alt="Product verification photo"
                           className="w-32 h-32 object-cover rounded-xl border border-slate-200 hover:opacity-95 cursor-pointer transition-opacity"
-                          onClick={() => window.open(rev.image_url || rev.verification_photo, '_blank')}
+                          onClick={() => window.open(reviewImageUrl, '_blank')}
                         />
                       </div>
                     )}
