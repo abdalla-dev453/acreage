@@ -3,6 +3,9 @@ name: Acreage CI Pipeline
 # Universal triggers: forces the pipeline to fire on every push, pull request, or manual button click
 on: [push, pull_request, workflow_dispatch]
 
+permissions:
+  contents: read
+
 jobs:
   # --- BACKEND VERIFICATION JOB ---
   backend-test:
