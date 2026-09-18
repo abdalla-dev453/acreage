@@ -1,8 +1,15 @@
 import axios from 'axios';
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL
+  || process.env.VITE_API_URL
+  || process.env.REACT_APP_API_URL
+  || import.meta.env.VITE_API_URL
+  || import.meta.env.VITE_API_BASE_URL
+  || 'http://localhost:5000';
+
 const API = axios.create({
-  // Fallbacks cleanly to your Flask backend route context
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL: `${API_BASE_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
