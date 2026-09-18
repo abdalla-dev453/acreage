@@ -48,6 +48,10 @@ def create_app(config_class=None):
     
     limiter.init_app(app)
 
+    # Disable rate limiting in development for smoother testing
+    if not app.config.get('IS_PROD'):
+        limiter.enabled = False
+
     # Register every model before schemas are imported by the route modules.
     # SQLAlchemy otherwise tries to configure User's relationships before
     # Product, Order, and the other related models exist in its registry.

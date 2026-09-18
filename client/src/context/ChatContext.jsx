@@ -7,7 +7,6 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [activeRecipient, setActiveRecipient] = useState(null);
 
-  // 1. Updated path to match backend: /api/chat/ (singular)
   const fetchThread = async (userId) => {
     try {
       const res = await API.get(`/chat/${userId}`);
@@ -17,11 +16,10 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // 2. Updated path to match backend: /api/chat/ (singular)
   const sendMessage = async (receiverId, messageText) => {
     try {
       const res = await API.post('/chat/', {
-        receiver_id: receiverId, // Correct: matches Flask model attribute layout
+        receiver_id: receiverId,
         message: messageText,
       });
       

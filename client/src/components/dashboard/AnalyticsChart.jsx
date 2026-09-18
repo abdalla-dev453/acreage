@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 export default function AnalyticsChart({ overview = { top_ordered_pct: 52, growth_rate: '+12%' } }) {
   const percentage = overview?.top_ordered_pct ?? 52;
   
-  // 1. Math formulas for SVG ring dimensions
   const radius = 50;
   const circumference = 2 * Math.PI * radius; // ~314.16
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -20,7 +19,6 @@ export default function AnalyticsChart({ overview = { top_ordered_pct: 52, growt
         <p className="text-xs text-slate-400">Total volume of top-ordered category this week</p>
       </div>
 
-      {/* 2. Enhanced Dynamic Anchor: Animated SVG Ring Graph */}
       <div className="flex items-center justify-center my-6 relative">
         <svg className="w-36 h-36 transform -rotate-90" viewBox="0 0 120 120">
           {/* Background Ring Track Line */}
@@ -50,7 +48,7 @@ export default function AnalyticsChart({ overview = { top_ordered_pct: 52, growt
           />
         </svg>
 
-        {/* Text Metadata Overlay Node Box inside circle absolute space */}
+        {/* Text Metadata Overlay inside circle */}
         <div className="absolute text-center">
           <span className="font-extrabold text-slate-800 text-2xl block tracking-tight">
             {percentage}%

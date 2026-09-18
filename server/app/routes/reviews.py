@@ -29,8 +29,8 @@ def get_global_reviews():
     # 2. Calculate platform-wide average score
     avg_rating = db.session.query(func.avg(Review.rating)).scalar() or 0.0
     
-    # 3. Check if current user has completed transactions (e.g. orders with status 'completed' or 'delivered')
-    completed_orders_count = Order.query.filter_by(buyer_id=user_id, status='completed').count()
+    # 3. Check if current user has completed transactions (e.g. orders with status 'delivered')
+    completed_orders_count = Order.query.filter_by(buyer_id=user_id, status='delivered').count()
     can_review = completed_orders_count > 0
 
     return jsonify({
@@ -47,10 +47,10 @@ def get_global_reviews():
 def create_review(farmer_id=None):
     reviewer_id = int(get_jwt_identity())
 
-    # 1. Transaction Verification Guard: User MUST have at least one completed transaction
+    # 1. Transaction Verification Guard: User MUST have at least one delivered transaction
     has_completed_transaction = Order.query.filter_by(
-        buyer_id=reviewer_id, 
-        status='completed'
+        buyer_id=reviewer_id,
+        status='delivered'
     ).first() is not None
 
     if not has_completed_transaction:

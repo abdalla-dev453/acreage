@@ -56,6 +56,6 @@ class Config:
     MPESA_SHORTCODE = os.getenv("MPESA_SHORTCODE", "174379")
     MPESA_PASSKEY = os.getenv("MPESA_PASSKEY", "")
     MPESA_CALLBACK_URL = os.getenv(
-        "MPESA_CALLBACK_URL", 
-        "http://localhost:5000/api/payouts/callback"
+        "MPESA_CALLBACK_URL",
+        "http://localhost:5000/api/orders/mpesa-callback"
     )

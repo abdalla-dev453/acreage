@@ -11,6 +11,7 @@ import {
   Tractor
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import SEO from '../components/common/SEO';
 
 const MARKET_ROWS = [
   { crop: 'MAIZE', unit: '90KG BAG', price: 'KES 4,250', delta: '+3.2%', up: true },
@@ -74,9 +75,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-[Inter,sans-serif] antialiased selection:bg-[#15803D] selection:text-white relative overflow-x-hidden">
+      <SEO
+        title="Acreage | Digital Agriculture Marketplace"
+        description="Connect with verified farmers and buyers. List crops, take orders, track sales, and settle via M-Pesa — all in one platform built for modern agriculture."
+      />
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,600&family=IBM+Plex+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
-
         .font-display { font-family: 'Fraunces', serif; }
         .font-mono-label { font-family: 'IBM Plex Mono', monospace; }
 
@@ -417,9 +420,9 @@ export default function Home() {
             </p>
           </div>
           <div className="flex gap-6 font-mono-label text-xs font-bold uppercase tracking-widest text-[#0F172A]/70">
-            <a href="#privacy" className="hover:text-[#166534] transition-colors">Privacy</a>
-            <a href="#terms" className="hover:text-[#166534] transition-colors">Terms</a>
-            <a href="#support" className="hover:text-[#166534] transition-colors">Support</a>
+            <Link to="/privacy" className="hover:text-[#166534] transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-[#166534] transition-colors">Terms</Link>
+            <Link to="/login" className="hover:text-[#166534] transition-colors">Support</Link>
           </div>
         </div>
       </footer>

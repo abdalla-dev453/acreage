@@ -6,8 +6,8 @@ from requests.auth import HTTPBasicAuth
 logger = logging.getLogger(__name__)
 
 def get_mpesa_access_token():
-    consumer_key = os.getenv('MPESA_CONSUMER_KEY')
-    consumer_secret = os.getenv('MPESA_CONSUMER_SECRET')
+    consumer_key = str(os.getenv('MPESA_CONSUMER_KEY'))
+    consumer_secret = str(os.getenv('MPESA_CONSUMER_SECRET'))
     env = os.getenv('MPESA_ENV', 'sandbox')
     
     base_url = "https://sandbox.safaricom.co.ke" if env == "sandbox" else "https://api.safaricom.co.ke"

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { createPortal } from 'react-dom'; // 1. Added React Portal engine binding
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) {
@@ -21,22 +21,18 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
   if (!isOpen) return null;
 
-  // 2. Wrap layout structure inside createPortal to mount directly at the HTML document body root level
   return createPortal(
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="dialog"      // Accessibility tag
-      aria-modal="true"  // Traps keyboard visibility reader scopes
+      role="dialog"
+      aria-modal="true"
     >
-      {/* Dynamic Backdrop Layer */}
-      <div 
+      <div
         className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 animate-fade-in"
         onClick={onClose}
       />
 
-      {/* Modal Dialog Card Panel */}
       <div className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-xl border border-slate-100 p-6 z-10 transform transition-all duration-300 scale-100 max-h-[90vh] flex flex-col`}>
-        {/* Banner Section Header bar */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
           <h3 className="text-lg font-extrabold text-slate-800 tracking-tight">{title}</h3>
           <button
@@ -48,12 +44,11 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
           </button>
         </div>
 
-        {/* Interior Context Wrapper Area: Added auto overflow scroll for massive modal content items */}
         <div className="mt-4 overflow-y-auto pr-1 flex-1 text-sm text-slate-600 leading-relaxed">
           {children}
         </div>
       </div>
     </div>,
-    document.body // Appends modal HTML elements out of deeply nested DOM hierarchies directly to body root
+    document.body
   );
 }

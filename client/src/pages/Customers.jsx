@@ -3,6 +3,7 @@ import { Mail, MapPin, Phone, Users, Search, ShoppingBag } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
+import SEO from '../components/common/SEO';
 
 export default function Customers() {
   const { user: currentUser } = useContext(AuthContext);
@@ -30,18 +31,17 @@ export default function Customers() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  // Live client-side text filtering logic
   const filteredCustomers = customers.filter(c => 
     c.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="space-y-6 w-full animate-fade-in pb-12">
+    <div className="space-y-6 w-full pb-12">
+      <SEO title="Customers | Acreage" description="Browse verified buyers and manage customer relationships." />
       <Navbar title="Client & Buyer Directory" />
 
-      {/* Toolbar Filter Control Panel */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-4 items-center justify-between">
+    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div>
           <h2 className="text-base font-bold text-slate-800">Verified Buyers Ledger</h2>
           <p className="text-xs text-slate-400 mt-0.5">Review active regional consumer accounts sourcing from your acreage listings</p>
@@ -72,7 +72,6 @@ export default function Customers() {
                 key={customer.id} 
                 className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-start space-x-4 group hover:shadow-md hover:border-green-100/70 transition-all"
               >
-                {/* Visual Avatar Placeholder Initials Icon Bubble */}
                 <div className="w-12 h-12 rounded-xl bg-green-50 text-green-700 font-extrabold text-sm flex items-center justify-center uppercase shrink-0 transition-transform group-hover:scale-105 shadow-sm border border-green-100/30">
                   {customer.username.trim().charAt(0)}
                 </div>

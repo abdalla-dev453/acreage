@@ -172,3 +172,81 @@ def get_profile():
     current_user_id = get_jwt_identity()
     user = db.get_or_404(User, current_user_id)
     return user_schema.jsonify(user), 200
+
+
+@auth_bp.route('/profile', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    """Update the authenticated user's profile (partial updates supported)."""
+    current_user_id = get_jwt_identity()
+    user = db.get_or_404(User, current_user_id)
+
+    data, error = json_object()
+    if error:
+        return error
+
+    # Map frontend field names to model attributes
+    username = sanitize_string(data.get('username'))
+    email = sanitize_string(data.get('email'))
+    phone = sanitize_string(data.get('phone') or data.get('phone_number'))
+    location = sanitize_string(data.get('location'))
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+
+    # Update basic profile fields when provided
+    if username is not None:
+        if username != user.username and User.query.filter_by(username=username).first():
+            return jsonify({'message': 'Username already taken'}), 400
+        user.username = username
+
+    if email is not None:
+        if not validate_email(email):
+            return jsonify({'message': 'Invalid email format'}), 400
+        if email != user.email and User.query.filter_by(email=email).first():
+            return jsonify({'message': 'Email already in use'}), 400
+        user.email = email
+
+    if phone is not None:
+        user.phone_number = phone
+
+    if location is not None:
+        user.location = location
+
+    # Handle password change if new_password is provided
+    if new_password:
+        if not current_password:
+            return jsonify({'message': 'Current password is required to change your password'}), 400
+        if not user.check_password(current_password):
+            return jsonify({'message': 'Current password is incorrect'}), 403
+        valid, msg = validate_password(new_password)
+        if not valid:
+            return jsonify({'message': msg}), 400
+        user.set_password(new_password)
+
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception('Profile update failed', extra={'user_id': user.id})
+        return jsonify({'message': 'Unable to update profile. Please try again.'}), 500
+
+    return jsonify({
+        'message': 'Profile updated successfully',
+        'user': user_schema.dump(user)
+    }), 200
+
+
+@auth_bp.route('/users', methods=['GET'])
+@jwt_required()
+def list_users():
+    """Return all registered users except the caller — used by the chat contacts list."""
+    current_user_id = int(get_jwt_identity())
+    users = User.query.filter(User.id != current_user_id).order_by(User.username.asc()).all()
+    return jsonify([{
+        'id': u.id,
+        'username': u.username,
+        'email': u.email,
+        'role': u.role,
+        'location': u.location or '',
+        'phone_number': u.phone_number or ''
+    } for u in users]), 200

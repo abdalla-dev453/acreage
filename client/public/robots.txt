@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard
+Disallow: /orders
+Disallow: /marketplace
+Disallow: /chats
+Disallow: /wallet
+Disallow: /customers
+Disallow: /analytics
+Disallow: /farm-logs
+Disallow: /profile
+Disallow: /login
+Disallow: /register
+Disallow: /thank-you
+
+Sitemap: https://acreage.co.ke/sitemap.xml

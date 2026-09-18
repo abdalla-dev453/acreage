@@ -14,11 +14,9 @@ export default function ConversationList({
   // DYNAMIC FILTER ENGINE: Processes metadata enrichment, sorting rules, and text match metrics
   const processedContacts = useMemo(() => {
     const list = contacts.map((contact) => {
-      // Stringify IDs to guarantee precise evaluation regardless of Integer vs UUID variations
       const contactIdStr = String(contact.id);
       const currentUserIdStr = String(currentUserId);
 
-      // 1. Gather all messages shared between the current user and this specific contact
       const sharedMessages = messages.filter((m) => {
         const senderIdStr = String(m.sender_id);
         const receiverIdStr = String(m.receiver_id);
@@ -28,10 +26,8 @@ export default function ConversationList({
         );
       });
 
-      // 2. Identify the absolute latest message object node
       const latestMessage = sharedMessages.length > 0 ? sharedMessages[sharedMessages.length - 1] : null;
 
-      // 3. Compute the unread count badge parameters for incoming items
       const unreadCount = sharedMessages.filter(
         (m) => String(m.sender_id) === contactIdStr && !m.is_read
       ).length;
@@ -47,15 +43,11 @@ export default function ConversationList({
       };
     });
 
-    // 4. Run your case-insensitive textual string filter parameter block
     const filtered = list.filter((contact) => {
       const name = contact?.username || '';
       return name.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
-    // 5. SORTING ORDER RULE: 
-    // - Active conversations sorted descending by time.
-    // - No-conversation profiles are kept and grouped below active streams.
     return filtered.sort((a, b) => {
       if (a.hasConversation && b.hasConversation) {
         return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
@@ -69,7 +61,6 @@ export default function ConversationList({
   return (
     <div className="w-80 bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col h-[calc(100vh-2rem)] shrink-0">
       
-      {/* Dynamic Upper Summary Block */}
       <div className="mb-4">
         <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
           <span>Inbox Hub</span>
@@ -90,7 +81,6 @@ export default function ConversationList({
         />
       </div>
 
-      {/* Main Filtered Scrolling Context Layout Container */}
       <div className="space-y-1.5 overflow-y-auto flex-1 pr-1 scrollbar-thin">
         {processedContacts.length > 0 ? (
           processedContacts.map((contact) => {
@@ -109,7 +99,6 @@ export default function ConversationList({
                     : 'hover:bg-slate-50/80 hover:border-slate-100'
                 }`}
               >
-                {/* Visual Initial Placeholder Avatar Bubble */}
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shadow-sm shrink-0 transition-transform group-hover:scale-105 border uppercase ${
                   isActive 
                     ? 'bg-green-600 text-white border-transparent' 
@@ -118,7 +107,6 @@ export default function ConversationList({
                   {initial}
                 </div>
 
-                {/* Main Dynamic Meta Information Column Wrapper */}
                 <div className="flex-1 min-w-0 space-y-0.5">
                   <div className="flex justify-between items-baseline">
                     <p className="text-xs font-black text-slate-800 truncate group-hover:text-green-600 transition-colors">
@@ -165,7 +153,6 @@ export default function ConversationList({
                   </span>
                 </div>
 
-                {/* HIGH-UX METRIC: Unread Badge Alert Notification Bubble */}
                 {contact.unreadCount > 0 && !isActive && !isTyping && (
                   <div className="flex flex-col items-center justify-center shrink-0 self-center">
                     <span className="min-w-[16px] h-4 px-1 bg-green-600 text-white font-black text-[9px] rounded-full flex items-center justify-center shadow-sm shadow-green-600/20 animate-pulse">
@@ -177,7 +164,6 @@ export default function ConversationList({
             );
           })
         ) : (
-          /* Missing Records Alternative Empty State Layout View */
           <div className="text-center py-16 text-slate-500 font-medium text-xs flex flex-col items-center justify-center space-y-2">
             <CircleDot className="w-6 h-6 text-slate-200 stroke-[1.5]" />
             <span className="uppercase tracking-wider text-[10px] font-black text-slate-500">No active streams found</span>

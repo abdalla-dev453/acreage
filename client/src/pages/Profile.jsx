@@ -3,6 +3,7 @@ import { User, Building2, CreditCard, Lock, Save, Loader2, Phone, Mail, MapPin, 
 import { AuthContext } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
 import API from '../services/api';
+import SEO from '../components/common/SEO';
 
 export default function Profile() {
   const { user, setUser } = useContext(AuthContext);
@@ -67,7 +68,8 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-8 space-y-6 max-w-5xl mx-auto pb-16 animate-fade-in">
+    <div className="p-8 space-y-6 max-w-5xl mx-auto pb-16">
+      <SEO title="Profile & Settings | Acreage" description="Update your account profile, payment channels, and security credentials." />
       <Navbar title={isFarmer ? "Account & Farm Settings" : "Account Settings"} />
 
       {/* Profile Overview Banner Card */}
@@ -88,7 +90,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Dynamic Tab Navigation Tracks */}
       <div className="flex border-b border-slate-200 space-x-6 text-xs font-bold uppercase tracking-wider">
         {[
           { id: 'farm', label: isFarmer ? 'Farm Details' : 'Business Profile', icon: Building2 },
@@ -126,7 +127,6 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Active Form Inputs Block */}
       <form onSubmit={handleSave} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
         
         {/* TAB 1: FARM / BUSINESS PROFILE DETAILS */}
@@ -328,7 +328,6 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Action Button Footer */}
         <div className="pt-4 border-t border-slate-100 flex justify-end">
           <button
             type="submit"

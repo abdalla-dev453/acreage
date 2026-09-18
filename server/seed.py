@@ -68,6 +68,7 @@ def seed_database():
     item2 = OrderItem(order_id=order1.id, product_id=prod2.id, quantity=22.5, unit_price=120.0) # 2700
     db.session.add_all([item1, item2])
 
+
     print("📓 Creating Farm Logs...")
     log1 = FarmLog(
         farmer_id=farmer1.id,
@@ -75,6 +76,9 @@ def seed_database():
         activity_type="Weeding & Pruning",
         description="Removed lateral shoots from tomato vines.",
         inputs_used="None",
+        status="Completed",
+        log_date=date.today(),               # Added required date
+        log_time="08:00",                     # Added required time
         estimated_harvest_date=date.today() + timedelta(days=30)
     )
     log2 = FarmLog(
@@ -83,9 +87,13 @@ def seed_database():
         activity_type="Fertilizer Application",
         description="Applied organic compost to young avocado trees.",
         inputs_used="Organic Compost NPK",
+        status="Completed",
+        log_date=date.today(),               # Added required date
+        log_time="10:00",                     # Added required time
         estimated_harvest_date=date.today() + timedelta(days=90)
     )
     db.session.add_all([log1, log2])
+
 
     print("💬 Creating Chat Messages...")
     chat1 = ChatMessage(sender_id=buyer1.id, receiver_id=farmer1.id, message="Hi John, are the tomatoes ready for delivery tomorrow?", is_read=False)

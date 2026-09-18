@@ -1,10 +1,8 @@
 export default function TopSelling({ items = [] }) {
-  // 1. Identify the maximum quantity to calculate percentage baselines for the layout bars
   const maxQuantity = items.length > 0 ? Math.max(...items.map(i => i.quantity || 1)) : 1;
 
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col h-full min-w-[320px]">
-      {/* Header Container Layout */}
       <div className="flex justify-between items-center mb-1">
         <h3 className="font-bold text-slate-800 text-base">Top Selling Products</h3>
         <button className="text-xs text-green-600 hover:text-green-700 font-semibold transition-colors bg-green-50 px-2.5 py-1 rounded-lg">
@@ -13,7 +11,6 @@ export default function TopSelling({ items = [] }) {
       </div>
       <p className="text-xs text-slate-400 mb-5">Most popular inventory assets ordered this week</p>
       
-      {/* List Mapping Wrapper Area */}
       <div className="space-y-4 flex-1 overflow-y-auto pr-1">
         {items.length > 0 ? (
           items.map((item, idx) => {
@@ -46,7 +43,6 @@ export default function TopSelling({ items = [] }) {
                   </div>
                 </div>
 
-                {/* 2. Enhanced Visual Anchor: Progress visual indicator track bar */}
                 <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100/50">
                   <div 
                     className="h-full bg-green-600 rounded-full transition-all duration-500 ease-out group-hover:bg-green-500"

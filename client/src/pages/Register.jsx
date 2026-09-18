@@ -1,17 +1,18 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Sprout } from 'lucide-react'; // Brand anchor visual match
+import { Sprout } from 'lucide-react';
+import SEO from '../components/common/SEO';
 
 export default function Register() {
-  const [formData, setFormData] = useState({ 
-    username: '', 
-    email: '', 
-    password: '', 
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
     role: 'farmer',
-    location: '' // Added matching your backend user schema models
+    location: ''
   });
-  
+
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,11 +32,14 @@ export default function Register() {
         formData.role,
         formData.location.trim()
       );
-      
-      // Navigate to login after account initialization success
-      navigate('/login');
+
+      navigate('/thank-you');
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.error || 'Registration failed. Try a different username or email.');
+      if (err.code === 'ERR_NETWORK' || !err.response) {
+        setError('Unable to reach the server. Check that the backend is running.');
+      } else {
+        setError(err.response?.data?.message || err.response?.data?.error || 'Registration failed. Try a different username or email.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -43,7 +47,8 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4 py-8">
-      {/* Visual Brand Identifier */}
+      <SEO title="Register | Acreage" description="Create your Acreage merchant or buyer account to start trading farm produce directly." />
+
       <div className="flex items-center space-x-2 mb-6">
         <div className="p-2 bg-green-600 rounded-xl text-white shadow-sm">
           <Sprout className="w-6 h-6" />
@@ -55,8 +60,7 @@ export default function Register() {
         <h2 className="text-xl font-bold text-slate-800 text-center mb-1">Create Account</h2>
         <p className="text-xs text-slate-400 text-center mb-6">Join the digital marketplace connecting farmers and buyers</p>
         
-        {/* Error Notification Alert Banner */}
-        {error && (
+      {error && (
           <div className="mb-4 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 p-3 rounded-xl text-center">
             {error}
           </div>
@@ -128,9 +132,8 @@ export default function Register() {
             </select>
           </div>
 
-          {/* Action Submission Control Button */}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isSubmitting}
             className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-xl transition shadow-sm inline-flex items-center justify-center gap-2"
           >

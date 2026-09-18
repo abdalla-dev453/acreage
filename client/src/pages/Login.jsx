@@ -1,14 +1,15 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Sprout } from 'lucide-react'; // Added visual brand anchor
+import { Sprout } from 'lucide-react';
+import SEO from '../components/common/SEO';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false); // Submissions tracker
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -29,7 +30,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4">
-      {/* Brand Header Visual Layout */}
+      <SEO title="Sign In | Acreage" description="Sign in to your Acreage account to manage your farm, orders, and sales." />
       <div className="flex items-center space-x-2 mb-6">
         <div className="p-2 bg-green-600 rounded-xl text-white shadow-sm">
           <Sprout className="w-6 h-6" />
@@ -41,7 +42,6 @@ export default function Login() {
         <h2 className="text-xl font-bold text-slate-800 text-center mb-1">Welcome Back</h2>
         <p className="text-xs text-slate-400 text-center mb-6">Sign in to manage your acreage ecosystem</p>
         
-        {/* Error Alert Pane Anchor */}
         {error && (
           <div className="mb-4 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 p-3 rounded-xl text-center animate-shake">
             {error}
@@ -79,8 +79,7 @@ export default function Login() {
             />
           </div>
 
-          {/* Dynamic Action Button */}
-          <button 
+          <button
             type="submit" 
             disabled={isSubmitting}
             className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-xl transition shadow-sm inline-flex items-center justify-center gap-2"

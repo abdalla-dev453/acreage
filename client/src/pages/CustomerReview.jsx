@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { Star, MessageSquare, ShieldCheck, ImagePlus, X, Send, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
+import SEO from '../components/common/SEO';
 
 export default function CustomerReview() {
   const [reviews, setReviews] = useState([]);
@@ -160,11 +161,11 @@ export default function CustomerReview() {
   }, [reviews]);
 
   return (
-    <div className="space-y-6 w-full animate-fade-in pb-12">
+    <div className="space-y-6 w-full pb-12">
+      <SEO title="Reviews | Acreage" description="Read verified buyer reviews of farm produce and post your own feedback." />
       <Navbar title="Marketplace Feedback Ledger" />
 
-      {/* Dual-Column Metric Spotlight Board */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
         <div className="md:col-span-1 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between text-center md:text-left h-full">
           <div>
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">Reputation Summary</h3>
@@ -375,7 +376,6 @@ export default function CustomerReview() {
         </div>
       )}
 
-      {/* Review Comments Stream Feed Layout */}
       <div className="space-y-3">
         <div className="px-1">
           <h3 className="text-base font-bold text-slate-800">Historical Testimonials</h3>

@@ -21,6 +21,7 @@ import {
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
 import Modal from '../components/common/Modal';
+import SEO from '../components/common/SEO';
 
 // WMO Weather Code Mapper to Icons and Descriptions
 const getWeatherDetails = (code) => {
@@ -262,7 +263,8 @@ export default function FarmingLog() {
   const selectedDayWeather = weatherMap[selectedDate];
 
   return (
-    <div className="p-6 space-y-6 w-full max-w-7xl mx-auto pb-16 animate-fade-in">
+    <div className="p-6 space-y-6 w-full max-w-7xl mx-auto pb-16">
+      <SEO title="Farm Logs | Acreage" description="Track daily farming activities, harvest schedules, and field operations in your digital farm diary." />
       <Navbar title="Farmer's Diary & Activity Scheduler" />
 
       {/* Diary Control Header */}

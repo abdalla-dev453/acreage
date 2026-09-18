@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { Smartphone, Loader2 } from 'lucide-react';
 import API from '../../services/api';
+import { AuthContext } from '../../context/AuthContext';
 
-export default function OrderTable({ orders = [], onRefresh, userRole = 'buyer' }) {
+export default function OrderTable({ orders = [], onRefresh, userRole }) {
+  const resolvedRole = userRole || user?.role || localStorage.getItem('role') || 'buyer';
+
   const [updatingId, setUpdatingId] = useState(null);
+  const [payingId, setPayingId] = useState(null);
+  const [payMsg, setPayMsg] = useState({}); // { [orderId]: { type: 'success'|'error', text } }
 
   const getStatusBadge = (status = '') => {
     const cleanStatus = status.trim().toLowerCase();
@@ -45,20 +51,45 @@ export default function OrderTable({ orders = [], onRefresh, userRole = 'buyer' 
     }
   };
 
+  const handlePayViaMpesa = async (order) => {
+    setPayingId(order.id);
+    setPayMsg(prev => ({ ...prev, [order.id]: null }));
+    try {
+      const res = await API.post(`/orders/${order.id}/pay`);
+      setPayMsg(prev => ({
+        ...prev,
+        [order.id]: { type: 'success', text: res.data?.message || 'M-Pesa prompt sent! Check your phone.' }
+      }));
+      // Refresh after 4 s to reflect any callback-updated payment status
+      setTimeout(() => {
+        if (onRefresh) onRefresh();
+      }, 4000);
+    } catch (err) {
+      setPayMsg(prev => ({
+        ...prev,
+        [order.id]: { type: 'error', text: err.response?.data?.message || 'M-Pesa request failed. Try again.' }
+      }));
+    } finally {
+      setPayingId(null);
+    }
+  };
+
+  const colSpan = resolvedRole === 'farmer' ? 8 : 8;
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap">
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase text-xs tracking-wider">
             <tr>
-              <th className="px-6 py-4">Order Code</th>
-              <th className="px-6 py-4">Customer</th>
-              <th className="px-6 py-4">Items</th>
-              <th className="px-6 py-4">Total Amount</th>
-              <th className="px-6 py-4">Payment</th>
-              <th className="px-6 py-4">Fulfillment</th>
-              <th className="px-6 py-4">Address & Contact</th>
-              {userRole === 'farmer' && <th className="px-6 py-4">Action</th>}
+              <th className="px-4 md:px-6 py-4">Order Code</th>
+              <th className="px-4 md:px-6 py-4">Customer</th>
+              <th className="px-4 md:px-6 py-4">Items</th>
+              <th className="px-4 md:px-6 py-4">Total Amount</th>
+              <th className="px-4 md:px-6 py-4">Payment</th>
+              <th className="px-4 md:px-6 py-4">Fulfillment</th>
+              <th className="px-4 md:px-6 py-4">Address &amp; Contact</th>
+              <th className="px-4 md:px-6 py-4">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -68,14 +99,17 @@ export default function OrderTable({ orders = [], onRefresh, userRole = 'buyer' 
                 const buyerName = order?.customer || order?.buyer?.username || 'Anonymous Buyer';
                 const totalAmt = order?.total_amount ? `KES ${Number(order.total_amount).toLocaleString()}` : 'KES 0';
                 const isLocked = order?.status === 'delivered' || order?.status === 'cancelled';
+                const isPaid = (order?.payment_status || '').toLowerCase() === 'paid';
+                const isCancelled = (order?.status || '').toLowerCase() === 'cancelled';
+                const msg = payMsg[order?.id];
 
                 return (
                   <tr key={order?.id || Math.random()} className="hover:bg-slate-50/50 transition-all">
-                    <td className="px-6 py-4 font-bold text-slate-900">{displayCode}</td>
+                    <td className="px-4 md:px-6 py-4 font-bold text-slate-900">{displayCode}</td>
 
-                    <td className="px-6 py-4 font-medium text-slate-800">{buyerName}</td>
+                    <td className="px-4 md:px-6 py-4 font-medium text-slate-800">{buyerName}</td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       {order?.items && order.items.length > 0 ? (
                         <div className="space-y-1">
                           {order.items.map((item, idx) => (
@@ -94,23 +128,23 @@ export default function OrderTable({ orders = [], onRefresh, userRole = 'buyer' 
                       )}
                     </td>
 
-                    <td className="px-6 py-4 font-bold text-emerald-600">{totalAmt}</td>
+                    <td className="px-4 md:px-6 py-4 font-bold text-emerald-600">{totalAmt}</td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${getPaymentBadge(order?.payment_status)}`}>
                         {order?.payment_status || 'unpaid'}
                       </span>
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1 capitalize ${getStatusBadge(order?.status)}`}>
                         <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                         {order?.status || 'pending'}
                       </span>
                     </td>
 
-                    <td className="px-6 py-4 text-xs">
-                      <div className="text-slate-800 max-w-xs truncate font-medium">
+                    <td className="px-4 md:px-6 py-4 text-xs">
+                      <div className="text-slate-800 max-w-[180px] truncate font-medium">
                         {order?.delivery_address || 'N/A'}
                       </div>
                       <div className="text-slate-400 font-mono mt-0.5">
@@ -118,9 +152,37 @@ export default function OrderTable({ orders = [], onRefresh, userRole = 'buyer' 
                       </div>
                     </td>
 
-                    {userRole === 'farmer' && (
-                      <td className="px-6 py-4">
-                        {isLocked ? (
+                    {/* Action column — role-aware */}
+                    <td className="px-4 md:px-6 py-4">
+                      {resolvedRole === 'buyer' ? (
+                        <div className="space-y-1.5 min-w-[140px]">
+                          {!isPaid && !isCancelled ? (
+                            <button
+                              disabled={payingId === order?.id}
+                              onClick={() => handlePayViaMpesa(order)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-sm shadow-green-600/10 w-full justify-center"
+                            >
+                              {payingId === order?.id ? (
+                                <><Loader2 className="w-3 h-3 animate-spin" /><span>Sending...</span></>
+                              ) : (
+                                <><Smartphone className="w-3 h-3" /><span>Pay via M-Pesa</span></>
+                              )}
+                            </button>
+                          ) : isPaid ? (
+                            <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
+                              ✓ Payment Complete
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">Order Cancelled</span>
+                          )}
+                          {msg && (
+                            <p className={`text-[10px] font-medium leading-tight ${msg.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
+                              {msg.text}
+                            </p>
+                          )}
+                        </div>
+                      ) : resolvedRole === 'farmer' ? (
+                        isLocked ? (
                           <span className="text-xs text-slate-400 italic">Completed</span>
                         ) : (
                           <select
@@ -134,15 +196,15 @@ export default function OrderTable({ orders = [], onRefresh, userRole = 'buyer' 
                             <option value="delivered">Delivered</option>
                             <option value="cancelled">Cancel Order</option>
                           </select>
-                        )}
-                      </td>
-                    )}
+                        )
+                      ) : null}
+                    </td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan={userRole === 'farmer' ? 8 : 7} className="px-6 py-12 text-center text-slate-400 font-medium">
+                <td colSpan={colSpan} className="px-6 py-12 text-center text-slate-400 font-medium">
                   No orders listed in this ledger table
                 </td>
               </tr>

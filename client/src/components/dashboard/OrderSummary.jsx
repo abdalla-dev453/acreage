@@ -1,5 +1,4 @@
 export default function OrderSummary({ summary }) {
-  // 1. Map custom color tokens tailored directly to each specific state layout
   const stats = [
     { 
       label: 'On Delivery', 
@@ -37,7 +36,6 @@ export default function OrderSummary({ summary }) {
       <div className="flex justify-around items-center pt-2 pb-4 gap-2">
         {stats.map((stat, i) => (
           <div key={i} className="text-center flex-1 group">
-            {/* 2. Enhanced Dynamic Anchor: Specific colored progress rings */}
             <div className={`w-16 h-16 rounded-full border-4 flex items-center justify-center font-bold text-xs shadow-sm mx-auto mb-3 transition-transform duration-300 group-hover:scale-105 ${stat.borderClass}`}>
               {stat.pct}
             </div>

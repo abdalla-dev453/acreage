@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from app import db
-from app.models.order import Order, OrderItem 
+from app.models.order import Order, OrderItem
 from app.models.product import Product
-from app.models.user import User  
+from app.models.user import User
 from app.schemas.order import order_schema, orders_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 def get_orders():
     user_id = int(get_jwt_identity())
     user = db.get_or_404(User, user_id)
-    
+
     # Check explicit query parameter, or fall back to logged-in user's role
     role = request.args.get('role', user.role)
 
@@ -33,9 +33,11 @@ def get_orders():
         orders = Order.query.filter_by(buyer_id=user_id).order_by(Order.created_at.desc()).all()
     else:
         # Fallback: Return all orders linked to this account
-        orders = Order.query.filter(
-            (Order.buyer_id == user_id) | (Order.farmer_id == user_id)
-        ).order_by(Order.created_at.desc()).all()
+        orders = (
+            Order.query.filter((Order.buyer_id == user_id) | (Order.farmer_id == user_id))
+            .order_by(Order.created_at.desc())
+            .all()
+        )
 
     return orders_schema.jsonify(orders), 200
 
@@ -44,11 +46,11 @@ def get_orders():
 @jwt_required()
 def place_order():
     buyer_id = int(get_jwt_identity())
-    
+
     buyer_user = db.get_or_404(User, buyer_id)
     if buyer_user.role != 'buyer':
         return jsonify({'message': 'Only buyer accounts can place orders'}), 403
-    
+
     data, error = json_object()
     if error:
         return error
@@ -56,7 +58,9 @@ def place_order():
     if not items_data:
         return jsonify({'message': 'Order must contain at least one item'}), 400
 
-    if not all(isinstance(item, dict) and item.get('product_id') is not None for item in items_data):
+    if not all(
+        isinstance(item, dict) and item.get('product_id') is not None for item in items_data
+    ):
         return jsonify({'message': 'Each order item requires a product_id and quantity'}), 400
     first_product = db.get_or_404(Product, items_data[0]['product_id'])
     farmer_id = first_product.farmer_id
@@ -64,7 +68,7 @@ def place_order():
         return jsonify({'message': 'You cannot place an order for your own product'}), 400
 
     total_amount = 0.0
-    compiled_items = [] 
+    compiled_items = []
 
     # Process inventory items to calculate total amounts and reduce stock weight parameters
     for item in items_data:
@@ -79,7 +83,7 @@ def place_order():
             return jsonify({'message': 'An order can only contain products from one farmer'}), 400
         if not product.is_available:
             return jsonify({'message': f'Product {product.title} is unavailable'}), 400
-        
+
         if product.stock_quantity < qty:
             return jsonify({'message': f'Insufficient stock for product {product.title}'}), 400
 
@@ -87,11 +91,9 @@ def place_order():
         subtotal = product.price_per_unit * qty
         total_amount += subtotal
 
-        compiled_items.append(OrderItem(
-            product_id=product.id,
-            quantity=qty,
-            unit_price=product.price_per_unit
-        ))
+        compiled_items.append(
+            OrderItem(product_id=product.id, quantity=qty, unit_price=product.price_per_unit)
+        )
 
     # Clean phone numbers to strict 2547XXXXXXXX or 2541XXXXXXXX formats required by Safaricom
     raw_phone = str(data.get('contact_phone', '')).strip().replace('+', '').replace(' ', '')
@@ -103,7 +105,7 @@ def place_order():
         cleaned_phone = raw_phone
 
     new_order = Order(
-        order_code=f"ACR-{uuid.uuid4().hex[:6].upper()}", 
+        order_code=f"ACR-{uuid.uuid4().hex[:6].upper()}",
         buyer_id=buyer_id,
         farmer_id=farmer_id,
         total_amount=total_amount,
@@ -111,7 +113,7 @@ def place_order():
         payment_status=data.get('payment_status', 'unpaid'),
         delivery_address=data.get('delivery_address', 'Fulfillment Warehouse, Nairobi'),
         contact_phone=cleaned_phone,
-        items=compiled_items
+        items=compiled_items,
     )
 
     try:
@@ -122,9 +124,15 @@ def place_order():
         token = get_mpesa_access_token()
         if token:
             env = os.getenv('MPESA_ENV', 'sandbox')
-            base_url = "https://sandbox.safaricom.co.ke" if env == "sandbox" else "https://api.safaricom.co.ke"
+            base_url = (
+                "https://sandbox.safaricom.co.ke"
+                if env == "sandbox"
+                else "https://api.safaricom.co.ke"
+            )
             timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-            password = base64.b64encode(f"{os.getenv('MPESA_SHORTCODE', '174379')}{os.getenv('MPESA_PASSKEY', '')}{timestamp}".encode()).decode('utf-8')
+            password = base64.b64encode(
+                f"{os.getenv('MPESA_SHORTCODE', '174379')}{os.getenv('MPESA_PASSKEY', '')}{timestamp}".encode()
+            ).decode('utf-8')
             stk_payload = {
                 "BusinessShortCode": os.getenv('MPESA_SHORTCODE', '174379'),
                 "Password": password,
@@ -134,14 +142,19 @@ def place_order():
                 "PartyA": cleaned_phone,
                 "PartyB": os.getenv('MPESA_SHORTCODE', '174379'),
                 "PhoneNumber": cleaned_phone,
-                "CallBackURL": os.getenv('MPESA_CALLBACK_URL', 'http://localhost:5000/api/orders/mpesa-callback'),
+                "CallBackURL": current_app.config['MPESA_CALLBACK_URL'],
                 "AccountReference": f"ACR{new_order.id}",
-                "TransactionDesc": "Acreage Marketplace Escrow Purchase"
+                "TransactionDesc": "Acreage Marketplace Escrow Purchase",
             }
-    
+
             headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
             try:
-                requests.post(f"{base_url}/mpesa/stkpush/v1/processrequest", json=stk_payload, headers=headers, timeout=15)
+                requests.post(
+                    f"{base_url}/mpesa/stkpush/v1/processrequest",
+                    json=stk_payload,
+                    headers=headers,
+                    timeout=15,
+                )
             except requests.RequestException:
                 logger.exception('M-Pesa STK request failed', extra={'order_id': new_order.id})
 
@@ -150,7 +163,7 @@ def place_order():
         db.session.rollback()
         logger.exception('Order creation failed', extra={'buyer_id': buyer_id})
         return jsonify({'message': 'Unable to place order. Please try again.'}), 500
-    
+
     return order_schema.jsonify(new_order), 201
 
 
@@ -180,9 +193,113 @@ def update_order_status(order_id):
         logger.info('Order cancelled and stock restored', extra={'order_id': order.id})
     order.status = new_status
     db.session.commit()
-    
+
     return order_schema.jsonify(order), 200
 
+
+# BUYER-INITIATED M-PESA PAYMENT ENDPOINT
+@orders_bp.route('/<int:order_id>/pay', methods=['POST'])
+@jwt_required()
+def initiate_order_payment(order_id):
+    """
+    Allows a buyer to trigger (or re-trigger) an M-Pesa STK push for an unpaid order.
+    Called from the Orders page when the buyer clicks "Pay via M-Pesa".
+    """
+    buyer_id = int(get_jwt_identity())
+    order = db.get_or_404(Order, order_id)
+
+    if order.buyer_id != buyer_id:
+        return (
+            jsonify(
+                {'message': 'Unauthorized: only the buyer can initiate payment for this order'}
+            ),
+            403,
+        )
+
+    if order.payment_status == 'paid':
+        return jsonify({'message': 'This order has already been paid'}), 409
+
+    if order.status == 'cancelled':
+        return jsonify({'message': 'Cannot pay for a cancelled order'}), 409
+
+    phone = order.contact_phone
+    if not phone:
+        return (
+            jsonify({'message': 'No phone number on file for this order. Please contact support.'}),
+            400,
+        )
+
+    token = get_mpesa_access_token()
+    if not token:
+        return (
+            jsonify(
+                {'message': 'M-Pesa service temporarily unavailable. Please try again shortly.'}
+            ),
+            503,
+        )
+
+    env = os.getenv('MPESA_ENV', 'sandbox')
+    base_url = (
+        "https://sandbox.safaricom.co.ke" if env == "sandbox" else "https://api.safaricom.co.ke"
+    )
+    timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    shortcode = os.getenv('MPESA_SHORTCODE', '174379')
+    passkey = os.getenv('MPESA_PASSKEY', '')
+    password = base64.b64encode(f"{shortcode}{passkey}{timestamp}".encode()).decode('utf-8')
+
+    stk_payload = {
+        "BusinessShortCode": shortcode,
+        "Password": password,
+        "Timestamp": timestamp,
+        "TransactionType": "CustomerPayBillOnline",
+        "Amount": max(1, int(order.total_amount)),
+        "PartyA": phone,
+        "PartyB": shortcode,
+        "PhoneNumber": phone,
+        "CallBackURL": current_app.config['MPESA_CALLBACK_URL'],
+        "AccountReference": f"ACR{order.id}",
+        "TransactionDesc": f"Acreage Order {order.order_code}",
+    }
+
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    try:
+        resp = requests.post(
+            f"{base_url}/mpesa/stkpush/v1/processrequest",
+            json=stk_payload,
+            headers=headers,
+            timeout=15,
+        )
+        resp_data = resp.json()
+        checkout_request_id = resp_data.get('CheckoutRequestID')
+
+        if resp.status_code == 200 and resp_data.get('ResponseCode') == '0':
+            logger.info(
+                'STK push triggered',
+                extra={'order_id': order.id, 'checkout_id': checkout_request_id},
+            )
+            return (
+                jsonify(
+                    {
+                        'message': (
+                            'M-Pesa payment prompt sent to your phone. Enter your PIN to complete.'
+                        ),
+                        'checkout_request_id': checkout_request_id,
+                    }
+                ),
+                200,
+            )
+        else:
+            error_message = (
+                resp_data.get('errorMessage')
+                or resp_data.get('ResponseDescription')
+                or 'M-Pesa request failed'
+            )
+            logger.error('STK push rejected', extra={'order_id': order.id, 'response': resp_data})
+            return jsonify({'message': error_message}), 400
+
+    except requests.RequestException:
+        logger.exception('M-Pesa STK request failed', extra={'order_id': order.id})
+        return jsonify({'message': 'Network error reaching M-Pesa gateway. Please try again.'}), 503
 
 
 # MPESA CALLBACKS ENDPOINT
@@ -206,7 +323,6 @@ def mpesa_callback():
     merchant_request_id = stk_callback.get('MerchantRequestID')
     checkout_request_id = stk_callback.get('CheckoutRequestID')
 
-
     # Extract our unique acc tracking ref
     # saf sends  this inside the CallbackMetadata array if successfully processed
     metadata_items = stk_callback.get('CallbackMetadata', {}).get('Item', [])
@@ -217,8 +333,7 @@ def mpesa_callback():
             mpesa_receipt_number = item.get('Value')
             break
 
-
-    # Extract the custom structural tracking target from the acc ref string layout 
+    # Extract the custom structural tracking target from the acc ref string layout
     # IN place_order we formatted AccountReference as f"ACR{new_order.id}"
     # Lets extract the numeric ID
     account_ref = stk_callback.get('AccountReference', '')
@@ -229,7 +344,6 @@ def mpesa_callback():
     if order_id_str.isdigit():
         order = db.session.get(Order, int(order_id_str))
 
-
     if not order:
         # High-utility recovery mode query if string slicing misses matching index targets
         print(f"Callback mapping error. Order reference {account_ref} not found locally.")
@@ -238,17 +352,19 @@ def mpesa_callback():
     # 2. EVALUATE TRANSACTION LIFECYCLE RESULTS
     if result_code == 0:
         # Success code (0 means the customer entered the correct pin and funds transferred)
-        print(f"STK Push Payment Cleared for Order #{order.order_code}. Receipt: {mpesa_receipt_number}")
+        print(
+            f"STK Push Payment Cleared for Order #{order.order_code}. Receipt: {mpesa_receipt_number}"
+        )
         order.payment_status = 'paid'
         # Optional: You can attach the receipt number onto your order tracking text string notes if needed
         order.delivery_address += f" [M-Pesa Ref: {mpesa_receipt_number}]"
-        
+
     else:
         # Failure code (Customer cancelled, insufficient funds, timeout, etc.)
         print(f"STK Push Payment Rejected for Order #{order.order_code}. Reason: {result_desc}")
         order.payment_status = 'failed'
         order.status = 'cancelled'
-        
+
         # RESTORE PRODUCT STOCK: Since payment failed, release crop items back to the marketplace immediately
         for item in order.items:
             product = db.session.get(Product, item.product_id)
@@ -256,6 +372,9 @@ def mpesa_callback():
                 product.stock_quantity += item.quantity
 
     db.session.commit()
-    
+
     # Safaricom requires this exact JSON response signature acknowledgement to clear the queue layout parameters
-    return jsonify({"ResultCode": 0, "ResultDesc": "Callback processed and acknowledged cleanly."}), 200
+    return (
+        jsonify({"ResultCode": 0, "ResultDesc": "Callback processed and acknowledged cleanly."}),
+        200,
+    )
