@@ -5,6 +5,7 @@ from app.models.product import Product
 from app.models.user import User
 from app.schemas.order import order_schema, orders_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from sqlalchemy.orm import selectinload
 import uuid
 import os
 import datetime
@@ -14,8 +15,19 @@ import logging
 from app.utils.mpesa import get_mpesa_access_token
 from app.utils.http import json_object
 
+
 orders_bp = Blueprint('orders', __name__)
 logger = logging.getLogger(__name__)
+
+
+@orders_bp.route('/completed/check', methods=['GET'])
+@jwt_required()
+def check_completed_orders():
+    user_id = int(get_jwt_identity())
+    has_completed = Order.query.filter_by(
+        buyer_id=user_id, status='delivered'
+    ).first() is not None
+    return jsonify({'has_completed_orders': has_completed}), 200
 
 
 @orders_bp.route('/', methods=['GET'])
@@ -28,18 +40,67 @@ def get_orders():
     role = request.args.get('role', user.role)
 
     if role == 'farmer':
-        orders = Order.query.filter_by(farmer_id=user_id).order_by(Order.created_at.desc()).all()
+        base_q = Order.query.options(
+            selectinload(Order.items).selectinload(OrderItem.product),
+            selectinload(Order.buyer),
+            selectinload(Order.farmer),
+        ).filter_by(farmer_id=user_id)
     elif role == 'buyer':
-        orders = Order.query.filter_by(buyer_id=user_id).order_by(Order.created_at.desc()).all()
+        base_q = Order.query.options(
+            selectinload(Order.items).selectinload(OrderItem.product),
+            selectinload(Order.buyer),
+            selectinload(Order.farmer),
+        ).filter_by(buyer_id=user_id)
     else:
         # Fallback: Return all orders linked to this account
-        orders = (
-            Order.query.filter((Order.buyer_id == user_id) | (Order.farmer_id == user_id))
-            .order_by(Order.created_at.desc())
-            .all()
+        base_q = (
+            Order.query.options(
+                selectinload(Order.items).selectinload(OrderItem.product),
+                selectinload(Order.buyer),
+                selectinload(Order.farmer),
+            )
+            .filter((Order.buyer_id == user_id) | (Order.farmer_id == user_id))
         )
 
-    return orders_schema.jsonify(orders), 200
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 20, type=int), 100)
+    pagination = base_q.order_by(Order.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    return jsonify({
+        'items': orders_schema.dump(pagination.items),
+        'total': pagination.total,
+        'page': page,
+        'pages': pagination.pages,
+        'has_next': pagination.has_next,
+        'has_prev': pagination.has_prev,
+    }), 200
+
+
+@orders_bp.route('/<int:order_id>', methods=['GET'])
+@jwt_required()
+def get_order(order_id):
+    user_id = int(get_jwt_identity())
+    user = db.get_or_404(User, user_id)
+
+    order = db.session.get(
+        Order, order_id,
+        options=[
+            selectinload(Order.items).selectinload(OrderItem.product),
+            selectinload(Order.buyer),
+            selectinload(Order.farmer),
+        ]
+    )
+    if order is None:
+        return jsonify({'message': 'Order not found'}), 404
+
+    # Access control: only buyer or farmer on this order can view
+    is_participant = (order.buyer_id == user_id) or (order.farmer_id == user_id) or user.role == 'admin'
+    if not is_participant:
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    return order_schema.jsonify(order), 200
 
 
 @orders_bp.route('/', methods=['POST'])
@@ -170,7 +231,16 @@ def place_order():
 @orders_bp.route('/<int:order_id>/status', methods=['PATCH'])
 @jwt_required()
 def update_order_status(order_id):
-    order = db.get_or_404(Order, order_id)
+    order = db.session.get(
+        Order, order_id,
+        options=[
+            selectinload(Order.items).selectinload(OrderItem.product),
+            selectinload(Order.buyer),
+            selectinload(Order.farmer),
+        ]
+    )
+    if order is None:
+        return jsonify({'message': 'Order not found'}), 404
     user_id = int(get_jwt_identity())
     user = db.get_or_404(User, user_id)
     if user.role != 'farmer' or order.farmer_id != user_id:
@@ -346,22 +416,22 @@ def mpesa_callback():
 
     if not order:
         # High-utility recovery mode query if string slicing misses matching index targets
-        print(f"Callback mapping error. Order reference {account_ref} not found locally.")
+        logger.warning("Callback mapping error. Order reference %s not found locally.", account_ref)
         return jsonify({"ResultCode": 1, "ResultDesc": "Order identifier missing alignment"}), 400
 
     # 2. EVALUATE TRANSACTION LIFECYCLE RESULTS
     if result_code == 0:
-        # Success code (0 means the customer entered the correct pin and funds transferred)
-        print(
-            f"STK Push Payment Cleared for Order #{order.order_code}. Receipt: {mpesa_receipt_number}"
+        logger.info(
+            "STK Push Payment Cleared for Order #%s. Receipt: %s",
+            order.order_code, mpesa_receipt_number,
+            extra={'order_id': order.id, 'checkout_id': checkout_request_id},
         )
         order.payment_status = 'paid'
         # Optional: You can attach the receipt number onto your order tracking text string notes if needed
         order.delivery_address += f" [M-Pesa Ref: {mpesa_receipt_number}]"
 
     else:
-        # Failure code (Customer cancelled, insufficient funds, timeout, etc.)
-        print(f"STK Push Payment Rejected for Order #{order.order_code}. Reason: {result_desc}")
+        logger.warning("STK Push Payment Rejected for Order #%s. Reason: %s", order.order_code, result_desc)
         order.payment_status = 'failed'
         order.status = 'cancelled'
 

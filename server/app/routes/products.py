@@ -5,6 +5,7 @@ from app import db
 from app.schemas.product import product_schema, products_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.utils.http import json_object
+from sqlalchemy.orm import selectinload
 
 products_bp = Blueprint('products', __name__)
 
@@ -17,8 +18,20 @@ def get_products():
     if category:
         query = query.filter_by(category=category)
 
-    products = query.order_by(Product.created_at.desc()).all()
-    return products_schema.jsonify(products), 200
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 20, type=int), 100)
+
+    query = query.options(selectinload(Product.farmer)).order_by(Product.created_at.desc())
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify({
+        'items': products_schema.dump(pagination.items),
+        'total': pagination.total,
+        'page': page,
+        'pages': pagination.pages,
+        'has_next': pagination.has_next,
+        'has_prev': pagination.has_prev,
+    }), 200
 
 
 @products_bp.route('/<int:product_id>', methods=['GET'])

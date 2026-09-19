@@ -14,6 +14,8 @@ class Order(db.Model):
     payment_status = db.Column(db.String(20), default='unpaid')  # paid, unpaid, cash on delivery
     delivery_address = db.Column(db.String(255), nullable=False)
     contact_phone = db.Column(db.String(20), nullable=False)
+    delivery_lat = db.Column(db.Float, nullable=True)
+    delivery_lng = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, default=utcnow)
 
     # Relationships with explicit foreign_keys to prevent ambiguity with User model.

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { Star, MessageSquare, ShieldCheck, ImagePlus, X, Send, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Star, MessageSquare, ShieldCheck, ImagePlus, X, Send, Lock, CheckCircle2, AlertCircle, ThumbsUp } from 'lucide-react';
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
 import SEO from '../components/common/SEO';
@@ -8,6 +8,7 @@ export default function CustomerReview() {
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({ average_rating: 4.8, total_reviews: 24 });
   const [isLoading, setIsLoading] = useState(true);
+  const [commentInputs, setCommentInputs] = useState({});
 
   const sanitizeImageUrl = (value) => {
     if (!value || typeof value !== 'string') return '';
@@ -60,7 +61,6 @@ export default function CustomerReview() {
         }
       })
       .catch(() => {
-        // Fallback demo data matching your schema
         setReviews([
           { 
             id: 1, 
@@ -68,7 +68,10 @@ export default function CustomerReview() {
             rating: 5, 
             comment: 'Amazing avocados! Super creamy and fresh.', 
             created_at: '2026-08-06T08:22:00Z',
-            image_url: null 
+            image_url: null,
+            like_count: 3,
+            liked_by_current_user: false,
+            comments: [],
           },
           { 
             id: 2, 
@@ -76,7 +79,10 @@ export default function CustomerReview() {
             rating: 4, 
             comment: 'Good quality tomatoes, though packaging could be slightly improved.', 
             created_at: '2026-08-04T11:45:00Z',
-            image_url: null 
+            image_url: null,
+            like_count: 1,
+            liked_by_current_user: false,
+            comments: [],
           },
         ]);
         setStats({ average_rating: 4.5, total_reviews: 2 });
@@ -84,7 +90,41 @@ export default function CustomerReview() {
       .finally(() => setIsLoading(false));
   };
 
-  // Verify if user has completed orders eligible for review
+   const handleLike = async (reviewId) => {
+    try {
+      const res = await API.post(`/reviews/${reviewId}/like`);
+      const { like_count, liked_by_current_user } = res.data;
+      setReviews((prev) =>
+        prev.map((r) =>
+          r.id === reviewId
+            ? { ...r, like_count, liked_by_current_user }
+            : r
+        )
+      );
+    } catch (err) {
+      console.error('Failed to toggle like:', err);
+    }
+  };
+
+  const handleComment = async (reviewId) => {
+    const text = (commentInputs[reviewId] || '').trim();
+    if (!text) return;
+
+    try {
+      const res = await API.post(`/reviews/${reviewId}/comments`, { text });
+      const newComment = res.data;
+      setReviews((prev) =>
+        prev.map((r) =>
+          r.id === reviewId
+            ? { ...r, comments: [...(r.comments || []), newComment] }
+            : r
+        )
+      );
+      setCommentInputs((prev) => ({ ...prev, [reviewId]: '' }));
+    } catch (err) {
+      console.error('Failed to add comment:', err);
+    }
+  };
   const checkTransactionEligibility = () => {
     API.get('/orders/completed/check')
       .then((res) => {
@@ -424,7 +464,7 @@ export default function CustomerReview() {
                           <p className="text-sm font-bold text-slate-800 group-hover:text-green-900 transition-colors truncate">
                             @{clientName}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-semibold tracking-wide mt-0.5">
+                          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
                             {dateString}
                           </p>
                         </div>
@@ -451,6 +491,74 @@ export default function CustomerReview() {
                           className="w-32 h-32 object-cover rounded-xl border border-slate-200 hover:opacity-95 cursor-pointer transition-opacity"
                           onClick={() => window.open(reviewImageUrl, '_blank')}
                         />
+                      </div>
+                    )}
+
+                    {/* Like & Comment Actions */}
+                    <div className="flex items-center gap-4 pt-1 border-t border-slate-100">
+                      <button
+                        onClick={() => handleLike(rev.id)}
+                        className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
+                          rev.liked_by_current_user
+                            ? 'text-green-600'
+                            : 'text-slate-500 hover:text-green-600'
+                        }`}
+                      >
+                        <ThumbsUp
+                          className={`w-4 h-4 ${
+                            rev.liked_by_current_user ? 'fill-current text-green-600' : ''
+                          }`}
+                        />
+                        <span>{rev.like_count ?? 0}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const commentInput = document.getElementById(`comment-input-${rev.id}`);
+                          if (commentInput) commentInput.focus();
+                        }}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        <span>{(rev.comments || []).length}</span>
+                      </button>
+                    </div>
+
+                    {/* Comments Section */}
+                    {(rev.comments || []).length > 0 && (
+                      <div className="space-y-2 pt-1">
+                        {(rev.comments || []).map((cmt) => (
+                          <div key={cmt.id} className="bg-slate-50 p-3 rounded-xl border border-slate-100/50">
+                            <p className="text-xs text-slate-600 leading-relaxed break-words">{cmt.text}</p>
+                            <div className="flex items-center gap-1.5 mt-1.5 text-[9px] text-slate-400 font-medium">
+                              <span>— {cmt.user?.username || 'Anonymous'}</span>
+                              <span>·</span>
+                              <span>{new Date(cmt.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Comment Input */}
+                    {hasCompletedTransaction && (
+                      <div className="flex items-center gap-2 pt-1">
+                        <input
+                          id={`comment-input-${rev.id}`}
+                          type="text"
+                          placeholder="Write a comment..."
+                          value={commentInputs[rev.id] || ''}
+                          onChange={(e) =>
+                            setCommentInputs((prev) => ({ ...prev, [rev.id]: e.target.value }))
+                          }
+                          className="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600"
+                        />
+                        <button
+                          onClick={() => handleComment(rev.id)}
+                          className="p-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition disabled:opacity-50"
+                          disabled={!(commentInputs[rev.id] || '').trim()}
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     )}
                   </div>

@@ -3,12 +3,13 @@ from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func
+from sqlalchemy.orm import selectinload
 
 from app import db
-from app.models.review import Review
+from app.models.review import Review, ReviewLike, ReviewComment
 from app.models.user import User
-from app.models.order import Order # Assuming your Order model is located here
-from app.schemas.review import review_schema, reviews_schema
+from app.models.order import Order
+from app.schemas.review import review_schema, reviews_schema, review_comment_schema, review_comments_schema
 
 reviews_bp = Blueprint('reviews', __name__)
 
@@ -24,20 +25,43 @@ def get_global_reviews():
     user_id = int(get_jwt_identity())
     
     # 1. Fetch all platform reviews sorted by newest
-    all_reviews = Review.query.order_by(Review.created_at.desc()).all()
-    
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 20, type=int), 100)
+
+    pagination = Review.query.options(
+        selectinload(Review.reviewer),
+        selectinload(Review.comments).selectinload(ReviewComment.user),
+    ).order_by(Review.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
     # 2. Calculate platform-wide average score
     avg_rating = db.session.query(func.avg(Review.rating)).scalar() or 0.0
-    
-    # 3. Check if current user has completed transactions (e.g. orders with status 'delivered')
+
+    # 3. Check if current user has completed transactions
     completed_orders_count = Order.query.filter_by(buyer_id=user_id, status='delivered').count()
     can_review = completed_orders_count > 0
 
+    # 4. Determine which reviews the current user has liked
+    liked_review_ids = set(
+        db.session.query(ReviewLike.review_id)
+        .filter_by(user_id=user_id)
+        .all()
+    )
+
+    reviews_dump = reviews_schema.dump(pagination.items)
+    for rev in reviews_dump:
+        rev['liked_by_current_user'] = rev['id'] in liked_review_ids
+
     return jsonify({
         "average_rating": round(avg_rating, 1),
-        "total_reviews": len(all_reviews), 
+        "total_reviews": pagination.total,
+        "page": page,
+        "pages": pagination.pages,
+        "has_next": pagination.has_next,
+        "has_prev": pagination.has_prev,
         "can_review": can_review,
-        "reviews": reviews_schema.dump(all_reviews)
+        "reviews": reviews_dump,
     }), 200
 
 
@@ -101,3 +125,52 @@ def create_review(farmer_id=None):
     db.session.commit()
 
     return review_schema.jsonify(review), 201
+
+
+@reviews_bp.route('/<int:review_id>/like', methods=['POST'])
+@jwt_required()
+def like_review(review_id):
+    user_id = int(get_jwt_identity())
+    review = db.get_or_404(Review, review_id)
+
+    existing = ReviewLike.query.filter_by(review_id=review_id, user_id=user_id).first()
+    if existing:
+        db.session.delete(existing)
+        review.like_count = max(0, review.like_count - 1)
+    else:
+        db.session.add(ReviewLike(review_id=review_id, user_id=user_id))
+        review.like_count += 1
+
+    db.session.commit()
+    return jsonify({
+        'like_count': review.like_count,
+        'liked_by_current_user': existing is None,
+    }), 200
+
+
+@reviews_bp.route('/<int:review_id>/comments', methods=['GET'])
+@jwt_required()
+def get_comments(review_id):
+    db.get_or_404(Review, review_id)
+    comments = ReviewComment.query.options(
+        selectinload(ReviewComment.user)
+    ).filter_by(review_id=review_id).order_by(ReviewComment.created_at).all()
+    return review_comments_schema.jsonify(comments), 200
+
+
+@reviews_bp.route('/<int:review_id>/comments', methods=['POST'])
+@jwt_required()
+def add_comment(review_id):
+    user_id = int(get_jwt_identity())
+    db.get_or_404(Review, review_id)
+    data = request.get_json(silent=True) or {}
+    text = (data.get('text') or '').strip()
+
+    if not text:
+        return jsonify({'message': 'Comment text is required'}), 400
+
+    comment = ReviewComment(review_id=review_id, user_id=user_id, text=text)
+    db.session.add(comment)
+    db.session.commit()
+
+    return review_comment_schema.jsonify(comment), 201

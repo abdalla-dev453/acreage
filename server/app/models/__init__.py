@@ -5,7 +5,7 @@ from .product import Product
 from .order import Order, OrderItem
 from .farm_log import FarmLog
 from .chat import ChatMessage
-from .review import Review
+from .review import Review, ReviewLike, ReviewComment
 from .payout import Payout
 
 __all__ = [
@@ -16,5 +16,7 @@ __all__ = [
     "FarmLog",
     "ChatMessage",
     "Review",
+    "ReviewLike",
+    "ReviewComment",
     "Payout",
 ]

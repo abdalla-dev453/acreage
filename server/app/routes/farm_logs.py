@@ -12,9 +12,22 @@ farm_logs_bp = Blueprint('farm_logs', __name__)
 @jwt_required()
 def get_logs():
     user_id = int(get_jwt_identity())
-    # Order by target log_date descending so the latest/scheduled activities appear first
-    logs = FarmLog.query.filter_by(farmer_id=user_id).order_by(FarmLog.log_date.desc(), FarmLog.logged_at.desc()).all()
-    return farm_logs_schema.jsonify(logs), 200
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 20, type=int), 100)
+
+    query = FarmLog.query.filter_by(farmer_id=user_id).order_by(
+        FarmLog.log_date.desc(), FarmLog.logged_at.desc()
+    )
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify({
+        'items': farm_logs_schema.dump(pagination.items),
+        'total': pagination.total,
+        'page': page,
+        'pages': pagination.pages,
+        'has_next': pagination.has_next,
+        'has_prev': pagination.has_prev,
+    }), 200
 
 
 @farm_logs_bp.route('/', methods=['POST'])

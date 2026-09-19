@@ -91,7 +91,10 @@ export default function FarmingLog() {
   // Fetch Farm Logs
   useEffect(() => {
     API.get('/farm_logs/')
-      .then((res) => setLogs(res.data))
+      .then((res) => {
+        const data = res.data;
+        setLogs(Array.isArray(data) ? data : data.items || []);
+      })
       .catch(() => {
         const today = new Date().toISOString().split('T')[0];
         setLogs([

@@ -1,9 +1,11 @@
 import { useState, useContext } from 'react';
-import { Smartphone, Loader2 } from 'lucide-react';
+import { Smartphone, Loader2, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import API from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
 
 export default function OrderTable({ orders = [], onRefresh, userRole }) {
+  const navigate = useNavigate();
   const resolvedRole = userRole || user?.role || localStorage.getItem('role') || 'buyer';
 
   const [updatingId, setUpdatingId] = useState(null);
@@ -152,53 +154,74 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                       </div>
                     </td>
 
-                    {/* Action column — role-aware */}
-                    <td className="px-4 md:px-6 py-4">
-                      {resolvedRole === 'buyer' ? (
-                        <div className="space-y-1.5 min-w-[140px]">
-                          {!isPaid && !isCancelled ? (
-                            <button
-                              disabled={payingId === order?.id}
-                              onClick={() => handlePayViaMpesa(order)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-sm shadow-green-600/10 w-full justify-center"
-                            >
-                              {payingId === order?.id ? (
-                                <><Loader2 className="w-3 h-3 animate-spin" /><span>Sending...</span></>
-                              ) : (
-                                <><Smartphone className="w-3 h-3" /><span>Pay via M-Pesa</span></>
-                              )}
-                            </button>
-                          ) : isPaid ? (
-                            <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
-                              ✓ Payment Complete
-                            </span>
-                          ) : (
-                            <span className="text-xs text-slate-400 italic">Order Cancelled</span>
-                          )}
-                          {msg && (
-                            <p className={`text-[10px] font-medium leading-tight ${msg.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
-                              {msg.text}
-                            </p>
-                          )}
-                        </div>
-                      ) : resolvedRole === 'farmer' ? (
-                        isLocked ? (
-                          <span className="text-xs text-slate-400 italic">Completed</span>
-                        ) : (
-                          <select
-                            disabled={updatingId === order?.id}
-                            value={order?.status || 'pending'}
-                            onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                            className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer disabled:opacity-50"
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="on delivery">On Delivery</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancel Order</option>
-                          </select>
-                        )
-                      ) : null}
-                    </td>
+                     {/* Action column — role-aware */}
+                     <td className="px-4 md:px-6 py-4">
+                       <div className="flex items-center gap-2 min-w-[140px]">
+                         {resolvedRole === 'buyer' ? (
+                           <>
+                           {!isPaid && !isCancelled ? (
+                             <button
+                               disabled={payingId === order?.id}
+                               onClick={() => handlePayViaMpesa(order)}
+                               className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-sm shadow-green-600/10"
+                             >
+                               {payingId === order?.id ? (
+                                 <><Loader2 className="w-3 h-3 animate-spin" /><span>Sending...</span></>
+                               ) : (
+                                 <><Smartphone className="w-3 h-3" /><span>Pay</span></>
+                               )}
+                             </button>
+                           ) : isPaid ? (
+                             <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
+                               ✓ Paid
+                             </span>
+                           ) : (
+                             <span className="text-xs text-slate-400 italic">Cancelled</span>
+                           )}
+                           <button
+                             onClick={() => navigate(`/orders/${order.id}`)}
+                             className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition group"
+                             title="Track Order"
+                           >
+                             <Eye className="w-4 h-4" />
+                           </button>
+                           </>
+                         ) : isLocked ? (
+                           <>
+                           <span className="text-xs text-slate-400 italic">Completed</span>
+                           <button
+                             onClick={() => navigate(`/orders/${order.id}`)}
+                             className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                             title="View Details"
+                           >
+                             <Eye className="w-4 h-4" />
+                           </button>
+                           </>
+                         ) : (
+                           <>
+                           <select
+                             disabled={updatingId === order?.id}
+                             value={order?.status || 'pending'}
+                             onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                             className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer disabled:opacity-50"
+                           >
+                             <option value="pending">Pending</option>
+                             <option value="on delivery">On Delivery</option>
+                             <option value="delivered">Delivered</option>
+                             <option value="cancelled">Cancel Order</option>
+                           </select>
+                           <button
+                             onClick={() => navigate(`/orders/${order.id}`)}
+                             className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                             title="View Details"
+                           >
+                             <Eye className="w-4 h-4" />
+                           </button>
+                           </>
+                         )
+                       }
+                       </div>
+                     </td>
                   </tr>
                 );
               })

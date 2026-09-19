@@ -40,9 +40,10 @@ export default function Wallet() {
       setGrossRevenue(revenue);
       setOrdersSummary({ total_revenue: revenue, total_orders: totalOrders });
 
-      // Payout history
+      // Payout history (now paginated)
       const historyRes = await API.get('/payouts/history');
-      const payoutsList = Array.isArray(historyRes.data) ? historyRes.data : [];
+      const payoutsData = historyRes.data;
+      const payoutsList = Array.isArray(payoutsData) ? payoutsData : payoutsData.items || [];
       setPayouts(payoutsList);
 
       // Calculate net balance

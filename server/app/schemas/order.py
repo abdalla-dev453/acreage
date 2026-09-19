@@ -19,11 +19,16 @@ class OrderSchema(ma.SQLAlchemyAutoSchema):
     buyer = ma.Nested(UserSchema, only=("id", "username", "email"))
     farmer = ma.Nested(UserSchema, only=("id", "username", "location"))
 
-
     class Meta:
         model = Order
         load_instance = True
         include_fk = True
+        fields = (
+            "id", "order_code", "buyer_id", "farmer_id", "total_amount",
+            "status", "payment_status", "delivery_address", "contact_phone",
+            "delivery_lat", "delivery_lng", "created_at",
+            "items", "buyer", "farmer",
+        )
 
 
 order_schema = OrderSchema()

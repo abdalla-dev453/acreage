@@ -3,8 +3,10 @@ from app import db
 from app.models.order import Order, OrderItem
 from app.models.product import Product
 from app.models.user import User
+from app.utils.time import utcnow
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func
+from datetime import timedelta
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -77,18 +79,32 @@ def get_dashboard_analytics():
     total_customers = db.session.query(func.count(func.distinct(Order.buyer_id))).filter(Order.farmer_id == user_id).scalar() if user.role == "farmer" else 1
     total_products = Product.query.filter_by(farmer_id=user_id).count() if user.role == "farmer" else Product.query.filter_by(is_available=True).count()
 
-    # Map category distribution array or inject fallback metrics to keep UI vibrant if zero records exist
+    # Compute month-over-month growth in delivered order count
+    thirty_days_ago = utcnow() - timedelta(days=30)
+    sixty_days_ago = utcnow() - timedelta(days=60)
+    current_period_delivered = orders_query.filter(
+        Order.status == 'delivered', Order.created_at >= thirty_days_ago
+    ).count()
+    previous_period_delivered = orders_query.filter(
+        Order.status == 'delivered',
+        Order.created_at >= sixty_days_ago,
+        Order.created_at < thirty_days_ago
+    ).count()
+    if previous_period_delivered > 0:
+        growth_pct = round(
+            ((current_period_delivered - previous_period_delivered) / previous_period_delivered) * 100, 1
+        )
+    else:
+        growth_pct = 100.0 if current_period_delivered > 0 else 0.0
+
+    # Map category distribution array from actual data; return empty if zero records
     category_breakdown = [{
         "category": item.category if item.category else "Other Produce",
         "value": round(float(item.revenue), 2)
     } for item in category_data]
 
-    if not category_breakdown:
-        category_breakdown = [
-            {"category": "Cereals", "value": 45000},
-            {"category": "Vegetables", "value": 28000},
-            {"category": "Fruits", "value": 15000}
-        ]
+    total_revenue_val = float(total_revenue)
+    top_category_revenue = float(category_data[0].revenue) if category_data else 0.0
 
     return jsonify({
         "metrics": {
@@ -98,7 +114,7 @@ def get_dashboard_analytics():
             "total_menu": total_products or 0,
             "gross_revenue": total_revenue,
             "average_order_value": round((total_revenue / total_orders), 2) if total_orders else 0.0,
-            "conversion_rate": "3.4%",
+            "conversion_rate": f"{round((delivered_count / total_orders * 100), 1)}%" if total_orders else "0%",
             "sales_volume": total_orders
         },
         "order_summary": {
@@ -110,9 +126,9 @@ def get_dashboard_analytics():
             "title": item.title,
             "quantity": item.total_qty
         } for item in top_items],
-        "category_breakdown": category_breakdown, #FIXED: Injected the missing array expected by frontend charts
+        "category_breakdown": category_breakdown,
         "overview": {
-            "top_ordered_pct": 58,
-            "growth_rate": "+14%"
+            "top_ordered_pct": round((top_category_revenue / total_revenue_val * 100), 1) if total_revenue_val > 0 else 0,
+            "growth_rate": f"+{growth_pct}%" if growth_pct >= 0 else f"{growth_pct}%"
         }
     }), 200

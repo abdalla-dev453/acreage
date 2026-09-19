@@ -67,6 +67,16 @@ def create_app(config_class=None):
             "remote_addr": request.remote_addr,
         })
         return response
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        if app.config.get("IS_PROD"):
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        return response
     
     # Security Warning
     if app.config.get("USING_DEFAULT_SECRETS") and not app.debug:

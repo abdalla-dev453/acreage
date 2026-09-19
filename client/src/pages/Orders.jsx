@@ -6,6 +6,8 @@ import {
   ShoppingBag,
   Truck,
   XCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/common/Navbar";
@@ -15,24 +17,36 @@ import SEO from "../components/common/SEO";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1, has_next: false, has_prev: false });
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
   const userRole = localStorage.getItem("role") || "buyer";
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (page = 1) => {
     setIsLoading(true);
     try {
-       const res = await API.get(`/orders/?role=${userRole}`);
-      const data = Array.isArray(res.data) ? res.data : res.data.orders || [];
-      setOrders(data);
+       const res = await API.get(`/orders/?role=${userRole}&page=${page}&per_page=20`);
+       const responseData = res.data;
+       const data = Array.isArray(responseData) 
+         ? responseData 
+         : responseData.items || [];
+       setOrders(data);
+       setPagination({
+         total: responseData.total || data.length,
+         page: responseData.page || page,
+         pages: responseData.pages || 1,
+         has_next: responseData.has_next || false,
+         has_prev: responseData.has_prev || false,
+       });
     } catch (err) {
       console.error(
         "Failed to fetch live orders:",
         err.response?.data || err.message,
       );
       setOrders([]);
+      setPagination({ total: 0, page: 1, pages: 1, has_next: false, has_prev: false });
     } finally {
       setIsLoading(false);
     }
@@ -209,11 +223,40 @@ export default function Orders() {
           </p>
         </div>
       ) : (
-      <OrderTable
-          orders={filteredOrders}
-          onRefresh={fetchOrders}
-          userRole={userRole}
-        />
+        <>
+          <OrderTable
+              orders={filteredOrders}
+              onRefresh={() => fetchOrders(pagination.page)}
+              userRole={userRole}
+          />
+
+          {pagination.pages > 1 && (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center justify-between">
+              <p className="text-xs text-slate-500">
+                Showing {Math.min((pagination.page - 1) * 20 + 1, pagination.total)}–{Math.min(pagination.page * 20, pagination.total)} of {pagination.total} orders
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fetchOrders(pagination.page - 1)}
+                  disabled={!pagination.has_prev}
+                  className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-bold text-slate-700 px-2">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                <button
+                  onClick={() => fetchOrders(pagination.page + 1)}
+                  disabled={!pagination.has_next}
+                  className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

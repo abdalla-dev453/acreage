@@ -241,12 +241,25 @@ def update_profile():
 def list_users():
     """Return all registered users except the caller — used by the chat contacts list."""
     current_user_id = int(get_jwt_identity())
-    users = User.query.filter(User.id != current_user_id).order_by(User.username.asc()).all()
-    return jsonify([{
-        'id': u.id,
-        'username': u.username,
-        'email': u.email,
-        'role': u.role,
-        'location': u.location or '',
-        'phone_number': u.phone_number or ''
-    } for u in users]), 200
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 20, type=int), 100)
+
+    pagination = User.query.filter(User.id != current_user_id).order_by(
+        User.username.asc()
+    ).paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify({
+        'items': [{
+            'id': u.id,
+            'username': u.username,
+            'email': u.email,
+            'role': u.role,
+            'location': u.location or '',
+            'phone_number': u.phone_number or ''
+        } for u in pagination.items],
+        'total': pagination.total,
+        'page': page,
+        'pages': pagination.pages,
+        'has_next': pagination.has_next,
+        'has_prev': pagination.has_prev,
+    }), 200

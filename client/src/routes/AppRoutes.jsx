@@ -12,6 +12,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Marketplace from "../pages/Marketplace";
 import Orders from "../pages/Orders";
+import OrderDetail from "../pages/OrderDetail";
 import Profile from "../pages/Profile";
 import Register from "../pages/Register";
 import Wallet from "../pages/Wallet";
@@ -49,6 +50,7 @@ export default function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="orders" element={<Orders />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
           <Route path="chats" element={<Chats />} />
           <Route path="wallet" element={<Wallet />} />
           <Route path="reviews" element={<CustomerReview />} />

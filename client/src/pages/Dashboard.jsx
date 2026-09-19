@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ShoppingBag, Users, DollarSign, Package, UserCheck, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Users, DollarSign, Package, TrendingUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
@@ -17,25 +17,17 @@ export default function Dashboard() {
     setIsLoading(true);
     API.get('/analytics/dashboard')
       .then((res) => setData(res.data))
-      .catch(() => {
-        setData({
-          metrics: {
-            total_orders: 450,
-            total_customers: 955,
-            total_revenue: 153000,
-            total_menu: 250,
-            total_workers: 30,
-            growth_rate: '+14%'
-          },
-          order_summary: { on_delivery_pct: 25, delivered_pct: 68, cancelled_pct: 7 },
-          top_selling_items: [
-            { title: 'Organic Tomatoes', quantity: 180, category: 'Vegetables', unit: 'kg' },
-            { title: 'Fresh Maize Crate', quantity: 150, category: 'Grains', unit: 'crate' },
-            { title: 'Avocado Box', quantity: 80, category: 'Fruits', unit: 'box' }
-          ],
-          top_ordered_pct: 52
-        });
-      })
+       .catch(() => {
+         setData({
+           metrics: {
+             total_orders: 0,
+             total_customers: 0,
+             total_revenue: 0,
+             total_menu: 0,
+           },
+           overview: { top_ordered_pct: 0, growth_rate: '+0%' }
+         });
+       })
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -65,7 +57,7 @@ export default function Dashboard() {
         <StatCard label="Total Customers" value={data.metrics.total_customers} icon={Users} delay={0.04} />
         <StatCard label="Total Revenue" value={formatCompactRevenue(data.metrics.total_revenue)} icon={DollarSign} delay={0.06} />
         <StatCard label="Total Products" value={data.metrics.total_menu} icon={Package} delay={0.08} />
-        <StatCard label="Active Farmers" value={data.metrics.total_workers} icon={UserCheck} delay={0.1} />
+        <StatCard label="Growth Rate" value={data.overview?.growth_rate || '+0%'} icon={TrendingUp} delay={0.1} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
@@ -75,8 +67,8 @@ export default function Dashboard() {
         <div className="h-full">
           <AnalyticsChart
             overview={{
-              top_ordered_pct: data.top_ordered_pct,
-              growth_rate: data.metrics.growth_rate || '+12%'
+              top_ordered_pct: data.overview?.top_ordered_pct ?? 0,
+              growth_rate: data.overview?.growth_rate || '+0%'
             }}
           />
         </div>

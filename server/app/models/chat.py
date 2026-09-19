@@ -10,3 +10,6 @@ class ChatMessage(db.Model):
     message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=utcnow)
+
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages', lazy='joined')
+    receiver = db.relationship('User', foreign_keys=[receiver_id], backref='received_messages', lazy='joined')
