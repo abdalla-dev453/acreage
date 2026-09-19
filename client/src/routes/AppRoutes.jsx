@@ -19,7 +19,7 @@ import Wallet from "../pages/Wallet";
 import NotFound from "../pages/NotFound";
 import ThankYou from "../pages/ThankYou";
 import Privacy from "../pages/Privacy";
-import Terms from "../pages/Terms";
+import Settings from "../pages/Settings";
 
 function AppLayout() {
   return (
@@ -53,7 +53,8 @@ export default function AppRoutes() {
           <Route path="orders/:id" element={<OrderDetail />} />
           <Route path="chats" element={<Chats />} />
           <Route path="wallet" element={<Wallet />} />
-          <Route path="reviews" element={<CustomerReview />} />
+           <Route path="reviews" element={<CustomerReview />} />
+          <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
           <Route path="customers" element={<Customers />} />
           <Route path="analytics" element={<Analytics />} />

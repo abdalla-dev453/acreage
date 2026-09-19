@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models.chat import ChatMessage
+from app.models.user import User
 from app.schemas.chat import chat_messages_schema, chat_message_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import or_, and_, func, desc
 from sqlalchemy.orm import selectinload
 from app.utils.http import json_object
+from datetime import datetime, timedelta
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -170,6 +172,27 @@ def get_unread_count():
         ChatMessage.is_read == False,
     ).scalar()
     return jsonify({'unread_count': count or 0}), 200
+
+
+@chat_bp.route('/online', methods=['GET'])
+@jwt_required()
+def get_online_users():
+    current_user_id = int(get_jwt_identity())
+    since = datetime.utcnow() - timedelta(minutes=10)
+
+    active_user_ids = db.session.query(
+        ChatMessage.sender_id
+    ).filter(
+        ChatMessage.created_at >= since
+    ).union(
+        db.session.query(ChatMessage.receiver_id).filter(
+            ChatMessage.created_at >= since
+        )
+    ).distinct().all()
+
+    online_ids = {row[0] for row in active_user_ids if row[0] != current_user_id}
+
+    return jsonify({'online_user_ids': list(online_ids)}), 200
 
 
 @chat_bp.route('/<int:other_user_id>/mark-read', methods=['POST'])

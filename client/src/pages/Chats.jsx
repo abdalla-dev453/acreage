@@ -167,8 +167,10 @@ function MessageMenu({ onReply, onDelete, onClose }) {
 export default function Chats() {
   const {
     messages, activeRecipient, setActiveRecipient,
-    conversations, fetchConversations, unreadCount, fetchUnreadCount,
+    conversations, allUsers, onlineUserIds, fetchConversations,
+    fetchAllUsers, fetchOnlineUsers, unreadCount, fetchUnreadCount,
     fetchThread, markThreadRead, sendMessage, typingContacts, setTyping,
+    activeChatTab, setActiveChatTab,
   } = useContext(ChatContext);
   const { user: currentUser } = useContext(AuthContext);
 
@@ -198,8 +200,10 @@ export default function Chats() {
     if (currentUser) {
       fetchConversations();
       fetchUnreadCount();
+      fetchAllUsers();
+      fetchOnlineUsers();
     }
-  }, [currentUser, fetchConversations, fetchUnreadCount]);
+  }, [currentUser, fetchConversations, fetchUnreadCount, fetchAllUsers, fetchOnlineUsers]);
 
   useEffect(() => {
     if (!activeRecipient) return;
@@ -306,108 +310,200 @@ export default function Chats() {
             </div>
           </div>
 
-          {/* Search */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all placeholder-slate-400"
-            />
-          </div>
-        </div>
+        {/* Search */}
+         <div className="relative">
+           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+           <input
+             type="text"
+             placeholder="Search conversations..."
+             value={searchTerm}
+             onChange={(e) => setSearchTerm(e.target.value)}
+             className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all placeholder-slate-400"
+           />
+         </div>
+
+         {/* Tab Switcher */}
+         <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
+           <button
+             onClick={() => setActiveChatTab('conversations')}
+             className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+               activeChatTab === 'conversations'
+                 ? 'bg-white text-green-700 shadow-xs'
+                 : 'text-slate-500 hover:text-slate-800'
+             }`}
+           >
+             Conversations
+           </button>
+           <button
+             onClick={() => setActiveChatTab('users')}
+             className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+               activeChatTab === 'users'
+                 ? 'bg-white text-green-700 shadow-xs'
+                 : 'text-slate-500 hover:text-slate-800'
+             }`}
+           >
+             All Users
+           </button>
+         </div>
+       </div>
 
         {/* Conversation list */}
         <div className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
-          {filteredConversations.length > 0 ? (
-            filteredConversations.map((contact) => {
-              const isActive = String(activeRecipient?.id) === String(contact.id);
-              const unread = contact.unread_count || 0;
-              const isTyping = typingContacts.includes(contact.id);
+          {activeChatTab === 'conversations' ? (
+            conversations.length > 0 ? (
+              filteredConversations.map((contact) => {
+                const isActive = String(activeRecipient?.id) === String(contact.id);
+                const unread = contact.unread_count || 0;
+                const isTyping = typingContacts.includes(contact.id);
 
-              return (
-                <motion.div
-                  key={contact.id}
-                  whileHover={{ backgroundColor: '#f8fafc' }}
-                  onClick={() => selectContact(contact)}
-                  className={`relative p-3 rounded-xl cursor-pointer transition-all border ${
-                    isActive
-                      ? 'bg-green-50 border-green-100'
-                      : 'border-transparent hover:border-slate-100'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <Avatar name={contact.username} size="md" role={contact.role} />
+                return (
+                  <motion.div
+                    key={contact.id}
+                    whileHover={{ backgroundColor: '#f8fafc' }}
+                    onClick={() => selectContact(contact)}
+                    className={`relative p-3 rounded-xl cursor-pointer transition-all border ${
+                      isActive
+                        ? 'bg-green-50 border-green-100'
+                        : 'border-transparent hover:border-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Avatar name={contact.username} size="md" role={contact.role} online={contact.is_incoming} />
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <p className={`text-xs font-black truncate ${isActive ? 'text-green-700' : 'text-slate-800'}`}>
-                            @{contact.username}
-                          </p>
-                          {contact.role && (
-                            <span className={`text-[8px] font-black uppercase px-1 py-0.25 rounded ${
-                              contact.role === 'farmer'
-                                ? 'bg-emerald-50 text-emerald-700'
-                                : 'bg-blue-50 text-blue-700'
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <p className={`text-xs font-black truncate ${isActive ? 'text-green-700' : 'text-slate-800'}`}>
+                              @{contact.username}
+                            </p>
+                            {contact.role && (
+                              <span className={`text-[8px] font-black uppercase px-1 py-0.25 rounded ${
+                                contact.role === 'farmer'
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : 'bg-blue-50 text-blue-700'
+                              }`}>
+                                {contact.role.slice(0, 4)}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[9px] text-slate-400 font-mono shrink-0">
+                            {contact.last_message_at
+                              ? new Date(contact.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                              : ''}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-0.5 gap-1">
+                          {isTyping ? (
+                            <div className="flex items-end gap-0.5">
+                              {[0, 1, 2].map((i) => (
+                                <motion.span
+                                  key={i}
+                                  className="w-1 h-1 bg-green-600 rounded-full block"
+                                  animate={{ opacity: [0.3, 1, 0.3] }}
+                                  transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity, repeatType: 'loop' }}
+                                />
+                              ))}
+                              <span className="text-[10px] text-green-600 font-bold">typing</span>
+                            </div>
+                          ) : (
+                            <p className={`text-[10px] font-medium truncate ${
+                              unread > 0 && !isActive ? 'text-slate-900 font-black' : 'text-slate-500'
                             }`}>
-                              {contact.role.slice(0, 4)}
-                            </span>
+                              {contact.last_message || 'No messages yet'}
+                            </p>
+                          )}
+
+                          {unread > 0 && !isActive && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="min-w-[18px] h-4 px-1 bg-green-600 text-white font-black text-[9px] rounded-full flex items-center justify-center shrink-0"
+                            >
+                              {unread > 99 ? '99+' : unread}
+                            </motion.span>
                           )}
                         </div>
-                        <span className="text-[9px] text-slate-400 font-mono shrink-0">
-                          {contact.last_message_at
-                            ? new Date(contact.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                            : ''}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-0.5 gap-1">
-                        {isTyping ? (
-                          <div className="flex items-end gap-0.5">
-                            {[0, 1, 2].map((i) => (
-                              <motion.span
-                                key={i}
-                                className="w-1 h-1 bg-green-600 rounded-full block"
-                                animate={{ opacity: [0.3, 1, 0.3] }}
-                                transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity, repeatType: 'loop' }}
-                              />
-                            ))}
-                            <span className="text-[10px] text-green-600 font-bold">typing</span>
-                          </div>
-                        ) : (
-                          <p className={`text-[10px] font-medium truncate ${
-                            unread > 0 && !isActive ? 'text-slate-900 font-black' : 'text-slate-500'
-                          }`}>
-                            {contact.last_message || 'No messages yet'}
-                          </p>
-                        )}
-
-                        {unread > 0 && !isActive && (
-                          <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="min-w-[18px] h-4 px-1 bg-green-600 text-white font-black text-[9px] rounded-full flex items-center justify-center shrink-0"
-                          >
-                            {unread > 99 ? '99+' : unread}
-                          </motion.span>
-                        )}
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })
+                  </motion.div>
+                );
+              })
+            ) : (
+              <div className="py-16 flex flex-col items-center justify-center text-center text-slate-400">
+                <MessageSquare className="w-8 h-8 text-slate-200 stroke-[1.5] mb-2" />
+                <p className="text-[10px] font-black uppercase tracking-wider">
+                  {searchTerm ? 'No matching conversations' : 'No conversations yet'}
+                </p>
+                <p className="text-[10px] mt-1">Switch to the All Users tab to start chatting</p>
+              </div>
+            )
           ) : (
-            <div className="py-16 flex flex-col items-center justify-center text-center text-slate-400">
-              <MessageSquare className="w-8 h-8 text-slate-200 stroke-[1.5] mb-2" />
-              <p className="text-[10px] font-black uppercase tracking-wider">
-                {searchTerm ? 'No matching conversations' : 'No conversations yet'}
-              </p>
-              <p className="text-[10px] mt-1">Start a conversation from the All Users tab</p>
-            </div>
+            allUsers.length > 0 ? (
+              <div className="space-y-0.5">
+                {[...allUsers]
+                  .sort((a, b) => {
+                    const aOnline = onlineUserIds.includes(a.id);
+                    const bOnline = onlineUserIds.includes(b.id);
+                    if (aOnline && !bOnline) return -1;
+                    if (!aOnline && bOnline) return 1;
+                    return 0;
+                  })
+                  .filter((u) =>
+                    (u.username || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (u.location || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (u.role || '').toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+                  .map((user) => {
+                    const isActive = String(activeRecipient?.id) === String(user.id);
+                    const isOnline = onlineUserIds.includes(user.id);
+
+                    return (
+                      <motion.div
+                        key={user.id}
+                        whileHover={{ backgroundColor: '#f8fafc' }}
+                        onClick={() => selectContact(user)}
+                        className={`relative p-3 rounded-xl cursor-pointer transition-all border ${
+                          isActive
+                            ? 'bg-green-50 border-green-100'
+                            : 'border-transparent hover:border-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar name={user.username} size="md" role={user.role} online={isOnline} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className={`text-xs font-black truncate ${isActive ? 'text-green-700' : 'text-slate-800'}`}>
+                                @{user.username}
+                              </p>
+                              {user.role && (
+                                <span className={`text-[8px] font-black uppercase px-1 py-0.25 rounded ${
+                                  user.role === 'farmer'
+                                    ? 'bg-emerald-50 text-emerald-700'
+                                    : 'bg-blue-50 text-blue-700'
+                                }`}>
+                                  {user.role.slice(0, 4)}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-0.5 truncate">
+                              {user.location || 'No location set'}
+                            </p>
+                          </div>
+                          {isOnline && (
+                            <span className="w-2 h-2 bg-green-500 rounded-full shrink-0 animate-pulse" />
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div className="py-16 flex flex-col items-center justify-center text-center text-slate-400">
+                <Users className="w-8 h-8 text-slate-200 stroke-[1.5] mb-2" />
+                <p className="text-[10px] font-black uppercase tracking-wider">No users available</p>
+              </div>
+            )
           )}
         </div>
       </div>
@@ -423,8 +519,9 @@ export default function Chats() {
               Acreage Messenger
             </h4>
             <p className="text-xs text-slate-400 max-w-xs mt-2 font-medium leading-relaxed">
-              Select a conversation from the left panel to start messaging.
-              All communications are secured within the Acreage escrow platform.
+              {activeRecipient
+                ? `Messaging @${activeRecipient.username}`
+                : 'Select a conversation or browse all users to start messaging. All communications are secured within the Acreage escrow platform.'}
             </p>
             <button
               onClick={() => setPanelOpen(true)}
@@ -444,7 +541,7 @@ export default function Chats() {
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <Avatar name={activeRecipient.username} size="md" role={activeRecipient.role} online />
+                <Avatar name={activeRecipient.username} size="md" role={activeRecipient.role} online={onlineUserIds.includes(activeRecipient.id)} />
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <h3 className="font-black text-slate-800 text-sm truncate">

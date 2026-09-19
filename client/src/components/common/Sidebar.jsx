@@ -1,22 +1,23 @@
 import { useState, useContext, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  LayoutDashboard,
-  BarChart2,
-  ShoppingBag,
-  Users,
-  Star,
-  MessageSquare,
-  Wallet,
-  LogOut,
-  Sprout,
-  User,
-  ClipboardList,
-  Menu,
-  X,
-  Home
-} from 'lucide-react';
+  import {
+    LayoutDashboard,
+    BarChart2,
+    ShoppingBag,
+    Users,
+    Star,
+    MessageSquare,
+    Wallet,
+    LogOut,
+    Sprout,
+    User,
+    ClipboardList,
+    Menu,
+    X,
+    Home,
+    Settings
+  } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 
 export default function Sidebar() {
@@ -58,6 +59,7 @@ export default function Sidebar() {
     { name: 'Chats', path: '/chats', icon: MessageSquare, roles: ['farmer', 'buyer'] },
     { name: 'Wallet', path: '/wallet', icon: Wallet, roles: ['farmer', 'buyer'] },
     { name: 'Profile', path: '/profile', icon: User, roles: ['farmer', 'buyer'] },
+    { name: 'Settings', path: '/settings', icon: Settings, roles: ['farmer', 'buyer'] },
     { name: 'Home', path: '/', icon: Home, roles: ['farmer', 'buyer'] }
   ];
   const luxurySpring = { type: "spring", stiffness: 220, damping: 28, mass: 0.8 };

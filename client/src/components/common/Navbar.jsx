@@ -1,10 +1,18 @@
-import { useContext } from 'react';
-import { Search, Bell, Settings } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useContext, useState, useRef, useEffect } from 'react';
+import { Search, Bell, Settings, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { SettingsContext } from '../../context/SettingsContext';
 
 export default function Navbar({ title = 'Dashboard' }) {
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { settings, updateSetting } = useContext(SettingsContext);
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const searchRef = useRef(null);
 
   const getInitials = (name = '') => {
     const cleanName = name.trim();
@@ -19,6 +27,16 @@ export default function Navbar({ title = 'Dashboard' }) {
     }
     return cleanName.slice(0, 2).toUpperCase();
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <motion.div
@@ -49,29 +67,110 @@ export default function Navbar({ title = 'Dashboard' }) {
 
       <div className="flex items-center space-x-2.5">
         <div className="flex items-center space-x-2">
-          {[
-            { icon: Search, label: 'Search Content' },
-            { icon: Bell, label: 'Alert Notifications', badge: true },
-            { icon: Settings, label: 'System Configuration' }
-          ].map((btn, idx) => (
+          {/* Search */}
+          <div className="relative" ref={searchRef}>
+            <AnimatePresence mode="wait">
+              {isSearchOpen ? (
+                <motion.div
+                  key="search-input"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 180, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="inline-flex items-center"
+                >
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-36 px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.target.value.trim()) {
+                        navigate(`/search?q=${encodeURIComponent(e.target.value.trim())}`);
+                        setIsSearchOpen(false);
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => setIsSearchOpen(false)}
+                    className="ml-1 p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="search-btn"
+                  whileHover={{ y: -1.5, backgroundColor: '#ffffff' }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  aria-label="Search"
+                  onClick={() => setIsSearchOpen(true)}
+                  className="p-2.5 bg-white/80 border border-slate-200/60 shadow-sm rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
+                >
+                  <Search className="w-4 h-4 stroke-[2.2] group-hover:scale-105 transition-transform duration-200" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Notifications */}
+          <div className="relative">
             <motion.button
-              key={idx}
               whileHover={{ y: -1.5, backgroundColor: '#ffffff' }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              aria-label={btn.label}
+              aria-label="Notifications"
+              onClick={() => setIsNotificationsOpen((v) => !v)}
               className="p-2.5 bg-white/80 border border-slate-200/60 shadow-sm rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
             >
-              <btn.icon className="w-4 h-4 stroke-[2.2] group-hover:scale-105 transition-transform duration-200" />
-
-              {btn.badge && (
+              <Bell className={`w-4 h-4 stroke-[2.2] group-hover:scale-105 transition-transform duration-200 ${settings?.notifications ? '' : 'opacity-40'}`} />
+              {settings?.notifications && (
                 <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600" />
                 </span>
               )}
             </motion.button>
-          ))}
+
+            <AnimatePresence>
+              {isNotificationsOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-30"
+                >
+                  <div className="px-3 py-2 border-b border-slate-100">
+                    <p className="text-[10px] font-black uppercase text-slate-400">Notifications</p>
+                  </div>
+                  <div className="py-1">
+                    <button
+                      onClick={() => {
+                        updateSetting('notifications', !settings?.notifications);
+                        setIsNotificationsOpen(false);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      <span>{settings?.notifications ? 'Turn off notifications' : 'Turn on notifications'}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Settings */}
+          <motion.button
+            whileHover={{ y: -1.5, backgroundColor: '#ffffff' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            aria-label="Settings"
+            onClick={() => navigate('/settings')}
+            className="p-2.5 bg-white/80 border border-slate-200/60 shadow-sm rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
+          >
+            <Settings className="w-4 h-4 stroke-[2.2] group-hover:scale-105 transition-transform duration-200" />
+          </motion.button>
         </div>
 
         <div className="h-5 w-px bg-slate-200/80 mx-1 hidden sm:block" />
@@ -88,7 +187,7 @@ export default function Navbar({ title = 'Dashboard' }) {
             <span className="text-xs font-bold text-slate-900 truncate leading-tight group-hover:text-green-700 transition-colors duration-200">
               {user?.username || 'Guest Profile'}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold truncate leading-none mt-1 tracking-wide">
+            <span className="text-[10px] text-slate-400 font-semibold truncate leading-none mt-1">
               {user?.email || 'offline'}
             </span>
           </div>

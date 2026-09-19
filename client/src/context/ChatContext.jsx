@@ -1,5 +1,6 @@
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useContext } from 'react';
 import API from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 
 export const ChatContext = createContext();
 
@@ -7,8 +8,12 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [activeRecipient, setActiveRecipient] = useState(null);
   const [conversations, setConversations] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [onlineUserIds, setOnlineUserIds] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [typingContacts, setTypingContacts] = useState([]);
+  const [activeChatTab, setActiveChatTab] = useState('conversations');
+  const { user: currentUser } = useContext(AuthContext);
 
   const fetchConversations = useCallback(async () => {
     try {
@@ -19,6 +24,31 @@ export const ChatProvider = ({ children }) => {
       return convList;
     } catch (err) {
       console.error('Failed to load conversations', err);
+      return [];
+    }
+  }, []);
+
+  const fetchAllUsers = useCallback(async () => {
+    try {
+      const res = await API.get('/auth/users');
+      const data = res.data;
+      const users = Array.isArray(data) ? data : data.items || [];
+      setAllUsers(users);
+      return users;
+    } catch (err) {
+      console.error('Failed to load users', err);
+      return [];
+    }
+  }, []);
+
+  const fetchOnlineUsers = useCallback(async () => {
+    try {
+      const res = await API.get('/chat/online');
+      const ids = res.data.online_user_ids || [];
+      setOnlineUserIds(ids);
+      return ids;
+    } catch (err) {
+      console.error('Failed to load online users', err);
       return [];
     }
   }, []);
@@ -79,6 +109,14 @@ export const ChatProvider = ({ children }) => {
     });
   }, []);
 
+  const sortedUsers = [...allUsers].sort((a, b) => {
+    const aOnline = onlineUserIds.includes(a.id);
+    const bOnline = onlineUserIds.includes(b.id);
+    if (aOnline && !bOnline) return -1;
+    if (!aOnline && bOnline) return 1;
+    return 0;
+  });
+
   return (
     <ChatContext.Provider
       value={{
@@ -86,7 +124,11 @@ export const ChatProvider = ({ children }) => {
         activeRecipient,
         setActiveRecipient,
         conversations,
+        allUsers: sortedUsers,
+        onlineUserIds,
         fetchConversations,
+        fetchAllUsers,
+        fetchOnlineUsers,
         unreadCount,
         fetchUnreadCount,
         fetchThread,
@@ -94,6 +136,8 @@ export const ChatProvider = ({ children }) => {
         sendMessage,
         typingContacts,
         setTyping,
+        activeChatTab,
+        setActiveChatTab,
       }}
     >
       {children}

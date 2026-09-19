@@ -6,7 +6,7 @@ import SEO from '../components/common/SEO';
 
 export default function CustomerReview() {
   const [reviews, setReviews] = useState([]);
-  const [stats, setStats] = useState({ average_rating: 4.8, total_reviews: 24 });
+  const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [commentInputs, setCommentInputs] = useState({});
 
@@ -61,31 +61,8 @@ export default function CustomerReview() {
         }
       })
       .catch(() => {
-        setReviews([
-          { 
-            id: 1, 
-            reviewer: { username: 'bob_eats' }, 
-            rating: 5, 
-            comment: 'Amazing avocados! Super creamy and fresh.', 
-            created_at: '2026-08-06T08:22:00Z',
-            image_url: null,
-            like_count: 3,
-            liked_by_current_user: false,
-            comments: [],
-          },
-          { 
-            id: 2, 
-            reviewer: { username: 'alice_grocer' }, 
-            rating: 4, 
-            comment: 'Good quality tomatoes, though packaging could be slightly improved.', 
-            created_at: '2026-08-04T11:45:00Z',
-            image_url: null,
-            like_count: 1,
-            liked_by_current_user: false,
-            comments: [],
-          },
-        ]);
-        setStats({ average_rating: 4.5, total_reviews: 2 });
+        setReviews([]);
+        setStats(null);
       })
       .finally(() => setIsLoading(false));
   };
@@ -189,10 +166,15 @@ export default function CustomerReview() {
       };
 
       setReviews((prev) => [newReview, ...prev]);
-      setStats((prev) => ({
-        total_reviews: prev.total_reviews + 1,
-        average_rating: parseFloat(((prev.average_rating * prev.total_reviews + rating) / (prev.total_reviews + 1)).toFixed(1)),
-      }));
+      setStats((prev) => {
+        if (!prev) {
+          return { average_rating: parseFloat(rating.toFixed(1)), total_reviews: 1 };
+        }
+        return {
+          total_reviews: prev.total_reviews + 1,
+          average_rating: parseFloat(((prev.average_rating * prev.total_reviews + rating) / (prev.total_reviews + 1)).toFixed(1)),
+        };
+      });
 
       // Reset Form State
       setComment('');
@@ -224,20 +206,20 @@ export default function CustomerReview() {
         <div className="md:col-span-1 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between text-center md:text-left h-full">
           <div>
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">Reputation Summary</h3>
-            <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 mt-4">
-              <h2 className="text-5xl font-extrabold text-slate-900 tracking-tighter">
-                {stats.average_rating}
-              </h2>
-              <div className="space-y-1">
-                <div className="flex items-center space-x-1 text-amber-400 justify-center sm:justify-start">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 ${i < Math.round(stats.average_rating) ? 'fill-current' : 'text-slate-200'}`} />
-                  ))}
-                </div>
-                <p className="text-xs font-semibold text-slate-400">
-                  Based on {stats.total_reviews} client evaluations
-                </p>
-              </div>
+        <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 mt-4">
+               <h2 className="text-5xl font-extrabold text-slate-900 tracking-tighter">
+                 {stats ? stats.average_rating : '—'}
+               </h2>
+               <div className="space-y-1">
+                 <div className="flex items-center space-x-1 text-amber-400 justify-center sm:justify-start">
+                   {[...Array(5)].map((_, i) => (
+                     <Star key={i} className={`w-4 h-4 ${i < Math.round(stats?.average_rating || 0) ? 'fill-current' : 'text-slate-200'}`} />
+                   ))}
+                 </div>
+                 <p className="text-xs font-semibold text-slate-400">
+                   Based on {stats?.total_reviews || 0} client evaluations
+                 </p>
+               </div>
             </div>
           </div>
 
