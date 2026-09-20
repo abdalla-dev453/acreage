@@ -100,6 +100,15 @@ export const ChatProvider = ({ children }) => {
     }
   }, []);
 
+  const markMessageRead = useCallback(async (msgId, read = true) => {
+    try {
+      await API.patch(`/chat/${msgId}/read`, { is_read: read });
+      setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, is_read: read } : m)));
+    } catch (err) {
+      console.error('Failed to mark message', err);
+    }
+  }, []);
+
   const setTyping = useCallback((userId, isTyping) => {
     setTypingContacts((prev) => {
       if (isTyping) {
@@ -133,6 +142,7 @@ export const ChatProvider = ({ children }) => {
         fetchUnreadCount,
         fetchThread,
         markThreadRead,
+        markMessageRead,
         sendMessage,
         typingContacts,
         setTyping,

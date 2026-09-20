@@ -6,7 +6,8 @@ import {
   Search, Send, Phone, MessageSquare, Users, ChevronLeft,
   Check, CheckCheck, ShieldCheck, AlertTriangle, Smile,
   Loader2, Wifi, WifiOff, User, Paperclip, Image, X,
-  Clock, MoreVertical, Reply, Trash2, FileText, QrCode
+  Clock, MoreVertical, Reply, Trash2, FileText, QrCode,
+  Eye, EyeClosed
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/common/SEO';
@@ -140,7 +141,7 @@ function ReplyPreview({ replyTo, onCancel }) {
   );
 }
 
-function MessageMenu({ onReply, onDelete, onClose }) {
+function MessageMenu({ onReply, onDelete, onMarkRead, isRead, onClose }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -153,6 +154,13 @@ function MessageMenu({ onReply, onDelete, onClose }) {
         className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition"
       >
         <Reply className="w-3 h-3" /> Reply
+      </button>
+      <button
+        onClick={() => { onMarkRead(!isRead); onClose(); }}
+        className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition"
+      >
+        {isRead ? <Eye className="w-3 h-3" /> : <EyeClosed className="w-3 h-3" />}
+        {isRead ? 'Mark unread' : 'Mark read'}
       </button>
       <button
         onClick={() => { onDelete(); onClose(); }}
@@ -169,7 +177,7 @@ export default function Chats() {
     messages, activeRecipient, setActiveRecipient,
     conversations, allUsers, onlineUserIds, fetchConversations,
     fetchAllUsers, fetchOnlineUsers, unreadCount, fetchUnreadCount,
-    fetchThread, markThreadRead, sendMessage, typingContacts, setTyping,
+    fetchThread, markThreadRead, markMessageRead, sendMessage, typingContacts, setTyping,
     activeChatTab, setActiveChatTab,
   } = useContext(ChatContext);
   const { user: currentUser } = useContext(AuthContext);
@@ -256,6 +264,11 @@ export default function Chats() {
       API.delete(`/chat/${msg.id}`).catch(() => {});
       setSelectedMsgId(null);
     }
+  };
+
+  const handleMarkRead = (msg, read) => {
+    markMessageRead(msg.id, read);
+    setSelectedMsgId(null);
   };
 
   const handleAttachment = (e) => {
@@ -708,6 +721,8 @@ export default function Chats() {
                         <MessageMenu
                           onReply={() => handleReply(msg)}
                           onDelete={() => handleDelete(msg)}
+                          onMarkRead={(read) => handleMarkRead(msg, read)}
+                          isRead={msg.is_read}
                           onClose={() => setSelectedMsgId(null)}
                         />
                       )}
