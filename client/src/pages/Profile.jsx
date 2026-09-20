@@ -1,15 +1,20 @@
-import { useState, useContext } from 'react';
-import { User, Building2, CreditCard, Lock, Save, Loader2, Phone, Mail, MapPin, Landmark } from 'lucide-react';
+import { useState, useContext, useRef } from 'react';
+import { User, Building2, CreditCard, Lock, Save, Loader2, Phone, Mail, MapPin, Landmark, Camera, X, ShieldCheck } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
 import API from '../services/api';
 import SEO from '../components/common/SEO';
+import VerificationPanel from '../components/premium/VerificationPanel';
+import VerifiedBadge from '../components/premium/VerifiedBadge';
 
 export default function Profile() {
   const { user, setUser } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('farm');
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatar_url || null);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Determine if profile belongs to a farmer or a buyer to adapt wording dynamically
   const isFarmer = user?.role === 'farmer';
@@ -18,12 +23,12 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     username: user?.username || '',
     email: user?.email || '',
-    phone: user?.phone || '+254 712 345 678',
-    farm_name: user?.farm_name || (isFarmer ? 'Green Valley Acres' : 'Central Grocers Ltd'),
-    location: user?.location || 'Rift Valley, Nakuru',
-    mpesa_number: user?.mpesa_number || '+254 712 345 678',
-    bank_name: user?.bank_name || 'Equity Bank',
-    account_number: user?.account_number || '•••• •••• 4021',
+    phone: user?.phone_number || '',
+    farm_name: user?.farm_name || '',
+    location: user?.location || '',
+    mpesa_number: user?.mpesa_number || '',
+    bank_name: user?.bank_name || '',
+    account_number: user?.account_number || '',
     current_password: '',
     new_password: '',
     confirm_password: ''
@@ -31,6 +36,22 @@ export default function Profile() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onload = () => setAvatarPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSave = async (e) => {
@@ -53,15 +74,29 @@ export default function Profile() {
     }
 
     try {
-      const res = await API.put('/auth/profile', formData);
-      if (setUser) setUser(res.data.user);
+      if (avatarFile) {
+        const formDataObj = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          if (key !== 'current_password' || formData.current_password) {
+            formDataObj.append(key, value);
+          }
+        });
+        formDataObj.append('avatar', avatarFile);
+        const res = await API.put('/auth/profile', formDataObj, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        if (setUser) setUser(res.data.user);
+        setAvatarFile(null);
+      } else {
+        const res = await API.put('/auth/profile', formData);
+        if (setUser) setUser(res.data.user);
+      }
       setStatusMessage({ type: 'success', text: 'Profile updated successfully!' });
       
       // Clear password boxes on success
       setFormData(prev => ({ ...prev, current_password: '', new_password: '', confirm_password: '' }));
     } catch (err) {
-      // High-UX fallback injection for mock environment testing
-      setStatusMessage({ type: 'success', text: 'Settings updated successfully (Local Environment).' });
+      setStatusMessage({ type: 'error', text: err.response?.data?.message || 'Unable to update profile.' });
     } finally {
       setIsSaving(false);
     }
@@ -74,8 +109,43 @@ export default function Profile() {
 
       {/* Profile Overview Banner Card */}
       <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 group transition-all hover:shadow-md">
-        <div className="w-20 h-20 rounded-xl bg-green-600 text-white font-extrabold text-2xl flex items-center justify-center shadow-sm select-none uppercase transform transition-transform group-hover:scale-105 shrink-0">
-          {formData.username ? formData.username.charAt(0) : 'U'}
+        <div className="relative shrink-0">
+          {avatarPreview ? (
+            <img
+              src={avatarPreview}
+              alt="Profile"
+              className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-md"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-2xl bg-green-600 text-white font-extrabold text-2xl flex items-center justify-center shadow-sm select-none uppercase transform transition-transform group-hover:scale-105">
+              {formData.username ? formData.username.charAt(0) : 'U'}
+            </div>
+          )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/png,image/jpeg,image/webp"
+            onChange={handleAvatarChange}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute -bottom-1 -right-1 w-7 h-7 bg-white border border-slate-200 rounded-lg shadow-md flex items-center justify-center text-slate-500 hover:text-green-600 hover:bg-green-50 transition cursor-pointer"
+            aria-label="Upload avatar"
+          >
+            <Camera className="w-3.5 h-3.5" />
+          </button>
+          {avatarPreview && (
+            <button
+              type="button"
+              onClick={handleRemoveAvatar}
+              className="absolute -top-1 -right-1 w-6 h-6 bg-white border border-slate-200 rounded-lg shadow-md flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+              aria-label="Remove avatar"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
         </div>
         <div className="text-center sm:text-left space-y-1 min-w-0">
           <h2 className="text-xl font-bold text-slate-800 truncate">
@@ -84,8 +154,9 @@ export default function Profile() {
           <p className="text-xs text-slate-400 font-medium truncate">
             {formData.email} • <span className="font-semibold text-slate-500">{formData.location}</span>
           </p>
+          <VerifiedBadge user={user} />
           <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-2.5 py-0.5 rounded-md border border-green-100">
-            {user?.role || 'Verified User'}
+            {user?.role || 'Account'}
           </span>
         </div>
       </div>
@@ -94,7 +165,8 @@ export default function Profile() {
         {[
           { id: 'farm', label: isFarmer ? 'Farm Details' : 'Business Profile', icon: Building2 },
           { id: 'payment', label: 'Payment Channels', icon: CreditCard },
-          { id: 'security', label: 'Security Credentials', icon: Lock }
+          { id: 'security', label: 'Security Credentials', icon: Lock },
+          { id: 'verification', label: 'Trust & Verification', icon: ShieldCheck }
         ].map((tab) => {
           const Icon = tab.icon;
           const isCurrent = activeTab === tab.id;
@@ -348,6 +420,8 @@ export default function Profile() {
           </button>
         </div>
       </form>
+
+      {activeTab === 'verification' && <VerificationPanel user={user} compact />}
     </div>
   );
 }
