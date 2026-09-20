@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Smartphone, Loader2, Eye } from 'lucide-react';
+import { Smartphone, Loader2, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
@@ -197,28 +197,60 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                              <Eye className="w-4 h-4" />
                            </button>
                            </>
-                         ) : (
-                           <>
-                           <select
-                             disabled={updatingId === order?.id}
-                             value={order?.status || 'pending'}
-                             onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                             className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer disabled:opacity-50"
-                           >
-                             <option value="pending">Pending</option>
-                             <option value="on delivery">On Delivery</option>
-                             <option value="delivered">Delivered</option>
-                             <option value="cancelled">Cancel Order</option>
-                           </select>
-                           <button
-                             onClick={() => navigate(`/orders/${order.id}`)}
-                             className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
-                             title="View Details"
-                           >
-                             <Eye className="w-4 h-4" />
-                           </button>
-                           </>
-                         )
+                          ) : (
+                            <>
+                            {order?.status === 'pending' ? (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  disabled={updatingId === order?.id}
+                                  onClick={() => handleStatusChange(order.id, 'on delivery')}
+                                  className="flex items-center justify-center px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
+                                  title="Approve Order"
+                                >
+                                  {updatingId === order?.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <CheckCircle className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                                <button
+                                  disabled={updatingId === order?.id}
+                                  onClick={() => {
+                                    if (window.confirm('Decline this order? Stock will be returned to inventory.')) {
+                                      handleStatusChange(order.id, 'cancelled');
+                                    }
+                                  }}
+                                  className="flex items-center justify-center px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
+                                  title="Decline Order"
+                                >
+                                  {updatingId === order?.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <XCircle className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </div>
+                            ) : (
+                              <select
+                                disabled={updatingId === order?.id}
+                                value={order?.status || 'pending'}
+                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer disabled:opacity-50"
+                              >
+                                <option value="on delivery">On Delivery</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancel Order</option>
+                              </select>
+                            )}
+                            <button
+                              onClick={() => navigate(`/orders/${order.id}`)}
+                              className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                              title="View Details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            </>
+                          )
                        }
                        </div>
                      </td>
