@@ -2,13 +2,16 @@ import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   MapPin, Package, Truck, CheckCircle2, Clock, XCircle,
-  Phone, Calendar, DollarSign, User, Weight, Copy, Share2,
+  Phone, Calendar, DollarSign, User, Copy, Share2,
   QrCode,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { AuthContext } from "../context/AuthContext";
 import API from "../services/api";
 import Navbar from "../components/common/Navbar";
 import SEO from "../components/common/SEO";
+import EscrowPanel from "../components/premium/EscrowPanel";
+import TransportQuoteForm from "../components/premium/TransportQuoteForm";
 
 const STATUS_STEPS = [
   { key: "pending", label: "Pending", icon: Clock, color: "bg-slate-400" },
@@ -17,16 +20,17 @@ const STATUS_STEPS = [
   { key: "cancelled", label: "Cancelled", icon: XCircle, color: "bg-rose-500" },
 ];
 
-const DEFAULT_LAT = -1.2921;
-const DEFAULT_LNG = 36.8219;
 
 export default function OrderDetail() {
   const { id } = useParams();
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [actionError, setActionError] = useState('');
+  const [actionLoading, setActionLoading] = useState('');
 
   const fetchOrder = async () => {
     setLoading(true);
@@ -71,10 +75,8 @@ export default function OrderDetail() {
   const currentStatusIndex = STATUS_STEPS.findIndex((s) => s.key === (order.status || "").trim());
   const statusStep = currentStatusIndex >= 0 ? STATUS_STEPS[currentStatusIndex] : STATUS_STEPS[0];
 
-  const lat = order.delivery_lat || DEFAULT_LAT;
-  const lng = order.delivery_lng || DEFAULT_LNG;
-
-  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=14&size=600x300&markers=color:red%7C${lat},${lng}&key=${encodeURIComponent(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || "")}`;
+  const lat = order.delivery_lat;
+  const lng = order.delivery_lng;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(order.order_code);
@@ -127,58 +129,51 @@ export default function OrderDetail() {
           <h3 className="font-black text-slate-800 text-sm uppercase tracking-wide">Delivery Location</h3>
         </div>
 
-        <div className="relative w-full h-56 bg-slate-100">
-          <svg
-            className="w-full h-full"
-            viewBox="0 0 600 300"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <linearGradient id="landGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#e2e8f0" />
-                <stop offset="100%" stopColor="#cbd5e1" />
-              </linearGradient>
-            </defs>
-            <rect width="600" height="300" fill="url(#landGradient)" rx="8" />
-            <path
-              d="M300 40 Q 380 100 360 160 T 300 200 T 240 220 T 180 200 Q 220 140 300 40 Z"
-              fill="#dcfce7"
-              stroke="#166534"
-              strokeWidth="2"
-              opacity="0.4"
-            />
-            <circle cx="300" cy="150" r="8" fill="#ef4444" stroke="#fff" strokeWidth="2" />
-            <circle cx="300" cy="150" r="18" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.5" />
-            <circle cx="300" cy="150" r="32" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.3" />
-          </svg>
-
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 border border-slate-200 shadow-sm">
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">DELIVERY PIN</p>
-            <p className="text-lg font-black text-slate-900 font-mono">{order.order_code}</p>
+          <div className="relative w-full h-56 bg-slate-100">
+            {lat !== null && lng !== null ? (
+              <>
+                <svg
+                  className="w-full h-full"
+                  viewBox="0 0 600 300"
+                  preserveAspectRatio="none"
+                >
+                  <defs>
+                    <linearGradient id="landGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#e2e8f0" />
+                      <stop offset="100%" stopColor="#cbd5e1" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="600" height="300" fill="url(#landGradient)" rx="8" />
+                  <path d="M300 40 Q 380 100 360 160 T 300 200 T 240 220 T 180 200 Q 220 140 300 40 Z" fill="#dcfce7" stroke="#166534" strokeWidth="2" opacity="0.4" />
+                  <circle cx="300" cy="150" r="8" fill="#ef4444" stroke="#fff" strokeWidth="2" />
+                  <circle cx="300" cy="150" r="18" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.5" />
+                  <circle cx="300" cy="150" r="32" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.3" />
+                </svg>
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 border border-slate-200 shadow-sm">
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">DELIVERY PIN</p>
+                  <p className="text-lg font-black text-slate-900 font-mono">{order.order_code}</p>
+                </div>
+                <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 border border-slate-200 shadow-sm">
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">STATUS</p>
+                  <p className="text-xs font-black text-slate-900 flex items-center gap-1">
+                    <span className={`w-2 h-2 rounded-full ${statusStep.color.replace("bg-", "bg-")} inline-block`} />
+                    {statusStep.label}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+                <MapPin className="h-7 w-7 text-slate-300" aria-hidden="true" />
+                <p className="text-xs font-black text-slate-500">Delivery coordinates are not available for this order.</p>
+              </div>
+            )}
           </div>
 
-          <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 border border-slate-200 shadow-sm">
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">STATUS</p>
-            <p className="text-xs font-black text-slate-900 flex items-center gap-1">
-              <span className={`w-2 h-2 rounded-full ${statusStep.color.replace("bg-", "bg-")} inline-block`} />
-              {statusStep.label}
-            </p>
+          <div className="p-4 border-t border-slate-100 bg-slate-50/30">
+            <p className="text-xs text-slate-500"><strong>Address:</strong> {order.delivery_address}</p>
+            {order.contact_phone && <p className="text-xs text-slate-500 mt-0.5"><strong>Contact:</strong> {order.contact_phone}</p>}
+            {lat !== null && lng !== null && <p className="text-[10px] text-slate-400 mt-1 font-mono">GPS: {Number(lat).toFixed(6)}, {Number(lng).toFixed(6)}</p>}
           </div>
-        </div>
-
-        <div className="p-4 border-t border-slate-100 bg-slate-50/30">
-          <p className="text-xs text-slate-500">
-            <strong>Address:</strong> {order.delivery_address}
-          </p>
-          {order.contact_phone && (
-            <p className="text-xs text-slate-500 mt-0.5">
-              <strong>Contact:</strong> {order.contact_phone}
-            </p>
-          )}
-          <p className="text-[10px] text-slate-400 mt-1 font-mono">
-            GPS: {lat.toFixed(6)}, {lng.toFixed(6)}
-          </p>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -238,13 +233,26 @@ export default function OrderDetail() {
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-3">
             <h3 className="font-black text-slate-800 text-xs uppercase tracking-wide mb-3">Actions</h3>
 
+            {actionError && <div className="rounded-xl bg-rose-50 p-3 text-[11px] font-bold text-rose-700" role="alert">{actionError}</div>}
             {order.payment_status !== "paid" && (
               <button
-                onClick={() => API.post(`/orders/${order.id}/pay`).then(() => fetchOrder())}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-green-600/20"
+                onClick={async () => {
+                  setActionLoading('pay');
+                  setActionError('');
+                  try {
+                    await API.post(`/orders/${order.id}/pay`);
+                    await fetchOrder();
+                  } catch (err) {
+                    setActionError(err.response?.data?.message || 'Unable to start payment.');
+                  } finally {
+                    setActionLoading('');
+                  }
+                }}
+                disabled={actionLoading === 'pay'}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-green-600/20 disabled:opacity-50"
               >
                 <DollarSign className="w-4 h-4" />
-                Pay via M-Pesa
+                {actionLoading === 'pay' ? 'Starting payment...' : 'Pay via M-Pesa'}
               </button>
             )}
 
@@ -311,6 +319,26 @@ export default function OrderDetail() {
               </div>
             </div>
           </div>
+
+          <EscrowPanel order={order} userRole={user?.role} onRefresh={fetchOrder} />
+
+          {!['delivered', 'cancelled'].includes(order.status) && (
+            <TransportQuoteForm
+              orderId={order.id}
+              onQuote={(quote) => {
+                setOrder((current) => ({ ...current, transport_quote: quote, transport_cost: quote.cost }));
+              }}
+              onAccept={async (quote) => {
+                try {
+                  await API.post(`/transport/quotes/${quote.id}/accept`);
+                  await fetchOrder();
+                } catch (err) {
+                  setActionError(err.response?.data?.message || 'Unable to accept transport quote.');
+                }
+              }}
+              onError={(err) => setActionError(err.response?.data?.message || 'Unable to request transport quote.')}
+            />
+          )}
 
           {/* Customer Info */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">

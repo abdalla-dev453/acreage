@@ -22,6 +22,7 @@ import API from '../services/api';
 import Navbar from '../components/common/Navbar';
 import Modal from '../components/common/Modal';
 import SEO from '../components/common/SEO';
+import HarvestPlanner from './HarvestPlanner';
 
 // WMO Weather Code Mapper to Icons and Descriptions
 const getWeatherDetails = (code) => {
@@ -75,6 +76,8 @@ export default function FarmingLog() {
   const [weatherMap, setWeatherMap] = useState({});
   const [locationName, setLocationName] = useState('Local Farm');
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
+  const [weatherError, setWeatherError] = useState('');
+  const [logError, setLogError] = useState('');
 
   // Expanded Diary Form State
   const [formData, setFormData] = useState({
@@ -96,39 +99,8 @@ export default function FarmingLog() {
         setLogs(Array.isArray(data) ? data : data.items || []);
       })
       .catch(() => {
-        const today = new Date().toISOString().split('T')[0];
-        setLogs([
-          { 
-            id: 1, 
-            field_name: 'Block A - Greenhouse', 
-            activity_type: 'Weeding & Pruning', 
-            description: 'Removed lateral shoots from tomato vines to encourage fruiting.', 
-            logged_at: `${today}T08:30:00Z`, 
-            log_date: today,
-            status: 'Completed',
-            inputs_used: 'Pruning shears, Organic spray' 
-          },
-          { 
-            id: 2, 
-            field_name: 'Hillside Section', 
-            activity_type: 'Fertilizer Application', 
-            description: 'Apply organic NPK compost around young avocado drip lines.', 
-            logged_at: `${today}T14:00:00Z`, 
-            log_date: today,
-            status: 'Scheduled',
-            inputs_used: 'Organic NPK 50kg' 
-          },
-          { 
-            id: 3, 
-            field_name: 'Main Field B', 
-            activity_type: 'Irrigation & Watering', 
-            description: 'Deep drip cycle for maize seedlings.', 
-            logged_at: '2026-08-15T06:00:00Z', 
-            log_date: '2026-08-15',
-            status: 'Scheduled',
-            estimated_harvest_date: '2026-11-20'
-          }
-        ]);
+        setLogs([]);
+        setWeatherError('Unable to load farm activity logs.');
       });
   }, []);
 
@@ -155,7 +127,7 @@ export default function FarmingLog() {
           setWeatherMap(map);
         }
       } catch (err) {
-        console.error('Failed to load weather forecast:', err);
+        setWeatherError('Weather forecast is unavailable.');
       } finally {
         setIsLoadingWeather(false);
       }
@@ -169,13 +141,11 @@ export default function FarmingLog() {
           fetchForecast(latitude, longitude);
         },
         () => {
-          // Default fallback coordinates (e.g., Nairobi / Regional default)
-          fetchForecast(-1.286389, 36.817223);
-          setLocationName('Default Coordinates');
+          setWeatherError('Location permission was not granted.');
         }
       );
     } else {
-      fetchForecast(-1.286389, 36.817223);
+      setWeatherError('Location services are not available in this browser.');
     }
   }, []);
 
@@ -236,13 +206,8 @@ export default function FarmingLog() {
       setLogs((prev) => [res.data, ...prev]);
       setIsModalOpen(false);
     } catch (err) {
-      const localMock = { 
-        ...formData, 
-        id: Date.now(), 
-        logged_at: `${formData.log_date}T${formData.log_time}:00Z` 
-      };
-      setLogs((prev) => [localMock, ...prev]);
-      setIsModalOpen(false);
+      setLogError(err.response?.data?.message || 'Unable to save diary entry.');
+      return;
     } finally {
       setIsSubmitting(false);
     }
@@ -294,15 +259,15 @@ export default function FarmingLog() {
               Calendar
             </button>
             <button
-              onClick={() => setActiveTab('ledger')}
+              onClick={() => setActiveTab('harvest')}
               className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-                activeTab === 'ledger'
+                activeTab === 'harvest'
                   ? 'bg-white text-slate-900 shadow-xs font-bold'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <List className="w-3.5 h-3.5 text-emerald-600" />
-              Timeline
+              <Sprout className="w-3.5 h-3.5 text-emerald-600" />
+              Harvest
             </button>
           </div>
 
