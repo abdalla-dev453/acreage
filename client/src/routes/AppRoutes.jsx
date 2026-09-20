@@ -21,6 +21,12 @@ import ThankYou from "../pages/ThankYou";
 import Privacy from "../pages/Privacy";
 import Settings from "../pages/Settings";
 import Search from "../pages/Search";
+import Terms from "../pages/Terms";
+import TrustCenter from "../pages/TrustCenter";
+import MarketPrices from "../pages/MarketPrices";
+import GroupCommerce from "../pages/GroupCommerce";
+import SmsHub from "../pages/SmsHub";
+import HarvestPlanner from "../pages/HarvestPlanner";
 
 function AppLayout() {
   return (
@@ -61,6 +67,11 @@ export default function AppRoutes() {
           <Route path="analytics" element={<Analytics />} />
            <Route path="marketplace" element={<Marketplace />} />
            <Route path="search" element={<Search />} />
+          <Route path="trust" element={<TrustCenter />} />
+          <Route path="market-prices" element={<MarketPrices />} />
+          <Route path="groups" element={<GroupCommerce />} />
+          <Route path="sms" element={<SmsHub />} />
+          <Route path="harvest" element={<HarvestPlanner />} />
         </Route>
       </Route>
 

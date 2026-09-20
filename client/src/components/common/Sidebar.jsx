@@ -16,7 +16,12 @@ import { motion, AnimatePresence } from 'framer-motion';
     Menu,
     X,
     Home,
-    Settings
+    Settings,
+    ShieldCheck,
+    TrendingUp,
+    UsersRound,
+    MessageSquareText,
+    CalendarDays
   } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -60,6 +65,11 @@ export default function Sidebar() {
     { name: 'Wallet', path: '/wallet', icon: Wallet, roles: ['farmer', 'buyer'] },
     { name: 'Profile', path: '/profile', icon: User, roles: ['farmer', 'buyer'] },
     { name: 'Settings', path: '/settings', icon: Settings, roles: ['farmer', 'buyer'] },
+    { name: 'Trust Center', path: '/trust', icon: ShieldCheck, roles: ['farmer', 'buyer', 'admin'] },
+    { name: 'Market Prices', path: '/market-prices', icon: TrendingUp, roles: ['farmer', 'buyer', 'admin'] },
+    { name: 'Group Orders', path: '/groups', icon: UsersRound, roles: ['farmer', 'buyer', 'admin'] },
+    { name: 'SMS Hub', path: '/sms', icon: MessageSquareText, roles: ['farmer', 'buyer', 'admin'] },
+    { name: 'Harvest', path: '/harvest', icon: CalendarDays, roles: ['farmer', 'buyer', 'admin'] },
     { name: 'Home', path: '/', icon: Home, roles: ['farmer', 'buyer'] }
   ];
   const luxurySpring = { type: "spring", stiffness: 220, damping: 28, mass: 0.8 };
