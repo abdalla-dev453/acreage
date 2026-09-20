@@ -20,6 +20,7 @@ import NotFound from "../pages/NotFound";
 import ThankYou from "../pages/ThankYou";
 import Privacy from "../pages/Privacy";
 import Settings from "../pages/Settings";
+import Search from "../pages/Search";
 
 function AppLayout() {
   return (
@@ -58,7 +59,8 @@ export default function AppRoutes() {
           <Route path="profile" element={<Profile />} />
           <Route path="customers" element={<Customers />} />
           <Route path="analytics" element={<Analytics />} />
-          <Route path="marketplace" element={<Marketplace />} />
+           <Route path="marketplace" element={<Marketplace />} />
+           <Route path="search" element={<Search />} />
         </Route>
       </Route>
 

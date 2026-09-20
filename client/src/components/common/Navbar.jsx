@@ -13,6 +13,7 @@ export default function Navbar({ title = 'Dashboard' }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const searchRef = useRef(null);
+  const notificationsRef = useRef(null);
 
   const getInitials = (name = '') => {
     const cleanName = name.trim();
@@ -32,6 +33,9 @@ export default function Navbar({ title = 'Dashboard' }) {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setIsSearchOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
+        setIsNotificationsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -114,7 +118,7 @@ export default function Navbar({ title = 'Dashboard' }) {
           </div>
 
           {/* Notifications */}
-          <div className="relative">
+          <div className="relative" ref={notificationsRef}>
             <motion.button
               whileHover={{ y: -1.5, backgroundColor: '#ffffff' }}
               whileTap={{ scale: 0.97 }}
@@ -153,6 +157,15 @@ export default function Navbar({ title = 'Dashboard' }) {
                       className="w-full flex items-center justify-between px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition"
                     >
                       <span>{settings?.notifications ? 'Turn off notifications' : 'Turn on notifications'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        updateSetting('sound', !settings?.sound);
+                        setIsNotificationsOpen(false);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      <span>{settings?.sound ? 'Mute notification sounds' : 'Enable notification sounds'}</span>
                     </button>
                   </div>
                 </motion.div>
