@@ -16,6 +16,7 @@ class ReviewCommentSchema(ma.SQLAlchemyAutoSchema):
 class ReviewSchema(ma.SQLAlchemyAutoSchema):
     reviewer = ma.Nested('app.schemas.user.UserSchema', only=('id', 'username', 'avatar_url'), dump_only=True)
     comments = ma.Nested(ReviewCommentSchema, many=True, dump_only=True)
+    evidence = ma.Nested('app.schemas.trust.ReviewEvidenceSchema', many=True, dump_only=True)
 
     class Meta:
         model = Review
@@ -25,15 +26,24 @@ class ReviewSchema(ma.SQLAlchemyAutoSchema):
             'id',
             'reviewer_id',
             'farmer_id',
+            'order_id',
             'rating',
+            'quality_freshness',
+            'quality_accuracy',
+            'quality_packaging',
+            'quality_delivery',
+            'quality_communication',
+            'quality_score',
+            'verified_purchase',
             'comment',
             'image_url',
             'like_count',
             'created_at',
             'reviewer',
             'comments',
+            'evidence',
         )
-        dump_only = ('id', 'created_at', 'like_count', 'reviewer', 'comments')
+        dump_only = ('id', 'created_at', 'like_count', 'reviewer', 'comments', 'evidence')
 
 
 review_schema = ReviewSchema()

@@ -12,6 +12,7 @@ import datetime
 import base64
 import requests
 import logging
+from app.services.escrow import fund_escrow, get_or_create_escrow
 from app.utils.mpesa import get_mpesa_access_token
 from app.utils.http import json_object
 
@@ -171,7 +172,7 @@ def place_order():
         farmer_id=farmer_id,
         total_amount=total_amount,
         status="pending",
-        payment_status=data.get('payment_status', 'unpaid'),
+        payment_status="unpaid",
         delivery_address=data.get('delivery_address', 'Fulfillment Warehouse, Nairobi'),
         contact_phone=cleaned_phone,
         items=compiled_items,
@@ -181,6 +182,7 @@ def place_order():
         db.session.add(new_order)
         # Generate the identifier before handing the payment request to M-Pesa.
         db.session.flush()
+        escrow = get_or_create_escrow(new_order)
 
         token = get_mpesa_access_token()
         if token:
@@ -258,6 +260,9 @@ def update_order_status(order_id):
     if order.status == 'delivered' or order.status == 'cancelled':
         return jsonify({'message': 'Delivered or cancelled orders cannot be changed'}), 409
     if new_status == 'cancelled':
+        escrow = getattr(order, 'escrow_transaction', None)
+        if escrow and escrow.status in {'funded', 'disputed'}:
+            return jsonify({'message': 'Funded escrow must be resolved before cancellation'}), 409
         for item in order.items:
             item.product.stock_quantity += item.quantity
         logger.info('Order cancelled and stock restored', extra={'order_id': order.id})
@@ -420,6 +425,16 @@ def mpesa_callback():
         return jsonify({"ResultCode": 1, "ResultDesc": "Order identifier missing alignment"}), 400
 
     # 2. EVALUATE TRANSACTION LIFECYCLE RESULTS
+    if order.payment_status == 'paid':
+        logger.info(
+            "Duplicate M-Pesa callback ignored for Order #%s. Receipt: %s",
+            order.order_code, mpesa_receipt_number,
+        )
+        return (
+            jsonify({"ResultCode": 0, "ResultDesc": "Callback already processed."}),
+            200,
+        )
+
     if result_code == 0:
         logger.info(
             "STK Push Payment Cleared for Order #%s. Receipt: %s",
@@ -427,8 +442,13 @@ def mpesa_callback():
             extra={'order_id': order.id, 'checkout_id': checkout_request_id},
         )
         order.payment_status = 'paid'
-        # Optional: You can attach the receipt number onto your order tracking text string notes if needed
-        order.delivery_address += f" [M-Pesa Ref: {mpesa_receipt_number}]"
+        escrow = get_or_create_escrow(order)
+        fund_escrow(
+            escrow,
+            order.buyer,
+            provider_transaction_id=checkout_request_id,
+            mpesa_receipt_number=mpesa_receipt_number,
+        )
 
     else:
         logger.warning("STK Push Payment Rejected for Order #%s. Reason: %s", order.order_code, result_desc)
@@ -436,10 +456,11 @@ def mpesa_callback():
         order.status = 'cancelled'
 
         # RESTORE PRODUCT STOCK: Since payment failed, release crop items back to the marketplace immediately
-        for item in order.items:
-            product = db.session.get(Product, item.product_id)
-            if product:
-                product.stock_quantity += item.quantity
+        if order.items:
+            for item in order.items:
+                product = db.session.get(Product, item.product_id)
+                if product:
+                    product.stock_quantity += item.quantity
 
     db.session.commit()
 

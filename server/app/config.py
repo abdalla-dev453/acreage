@@ -75,3 +75,14 @@ class Config:
         "MPESA_CALLBACK_URL",
         "http://localhost:5000/api/orders/mpesa-callback"
     )
+
+    # Premium commerce adapters and immutable receipt values.
+    TRANSPORT_PROVIDER = os.getenv("TRANSPORT_PROVIDER", "unconfigured")
+    TRANSPORT_LOCAL_ENABLED = os.getenv("TRANSPORT_LOCAL_ENABLED", "false").lower() in {"1", "true", "yes"}
+    MARKET_PRICE_PROVIDER = os.getenv("MARKET_PRICE_PROVIDER", "unconfigured")
+    MARKET_PRICE_LOCAL_ENABLED = os.getenv("MARKET_PRICE_LOCAL_ENABLED", "false").lower() in {"1", "true", "yes"}
+    SMS_PROVIDER = os.getenv("SMS_PROVIDER", "unconfigured")
+    SMS_LOCAL_ENABLED = os.getenv("SMS_LOCAL_ENABLED", "false").lower() in {"1", "true", "yes"}
+    SMS_WEBHOOK_TOKEN = os.getenv("SMS_WEBHOOK_TOKEN", "")
+    RECEIPT_PROCESSING_FEE = float(os.getenv("RECEIPT_PROCESSING_FEE", "0"))
+    RECEIPT_DISCOUNT = float(os.getenv("RECEIPT_DISCOUNT", "0"))

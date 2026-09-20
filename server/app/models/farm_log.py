@@ -19,6 +19,8 @@ class FarmLog(db.Model):
     log_date = db.Column(db.Date, nullable=False)  # Target date for the activity
     log_time = db.Column(db.String(10), nullable=True, default="08:00")  # e.g., '08:00'
     estimated_harvest_date = db.Column(db.Date, nullable=True)
+    harvest_plan_id = db.Column(db.Integer, db.ForeignKey('harvest_plans.id'), nullable=True)
+    harvest_plan = db.relationship('HarvestPlan', backref='farm_logs')
     
     # Metadata
     logged_at = db.Column(db.DateTime, default=utcnow)
@@ -36,5 +38,6 @@ class FarmLog(db.Model):
             "log_date": self.log_date.isoformat() if self.log_date else None,
             "log_time": self.log_time,
             "estimated_harvest_date": self.estimated_harvest_date.isoformat() if self.estimated_harvest_date else None,
+            "harvest_plan_id": self.harvest_plan_id,
             "logged_at": self.logged_at.isoformat() if self.logged_at else None,
         }

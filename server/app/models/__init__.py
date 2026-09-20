@@ -7,6 +7,19 @@ from .farm_log import FarmLog
 from .chat import ChatMessage
 from .review import Review, ReviewLike, ReviewComment
 from .payout import Payout
+from .commerce import (
+    EscrowTransaction,
+    EscrowEvent,
+    TransportQuote,
+    SmsCommand,
+    MarketPriceObservation,
+    GroupOrder,
+    GroupOrderCommitment,
+    HarvestPlan,
+    HarvestPreorder,
+    Receipt,
+)
+from .trust import MediaAsset, VerificationRequest, ReviewEvidence
 
 __all__ = [
     "User",
@@ -19,4 +32,17 @@ __all__ = [
     "ReviewLike",
     "ReviewComment",
     "Payout",
+    "EscrowTransaction",
+    "EscrowEvent",
+    "TransportQuote",
+    "SmsCommand",
+    "MarketPriceObservation",
+    "GroupOrder",
+    "GroupOrderCommitment",
+    "HarvestPlan",
+    "HarvestPreorder",
+    "Receipt",
+    "MediaAsset",
+    "VerificationRequest",
+    "ReviewEvidence",
 ]

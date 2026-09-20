@@ -58,8 +58,10 @@ def create_product():
     try:
         price = float(data.get('price_per_unit', 0.0))
         stock = float(data.get('stock_quantity', 0.0))
+        unit_weight_kg = float(data['unit_weight_kg']) if data.get('unit_weight_kg') is not None else None
+        video_duration_seconds = int(data['video_duration_seconds']) if data.get('video_duration_seconds') is not None else None
     except (ValueError, TypeError):
-        return jsonify({'message': 'Invalid data format for price or stock metrics.'}), 400
+        return jsonify({'message': 'Invalid data format for price, stock, unit weight, or video duration.'}), 400
     title = data.get('title', '').strip() if isinstance(data.get('title'), str) else ''
     category = data.get('category', '').strip() if isinstance(data.get('category'), str) else ''
     if not title or not category or price < 0 or stock < 0:
@@ -72,9 +74,14 @@ def create_product():
         description=data.get('description'),
         price_per_unit=price,
         unit=data.get('unit', 'kg'),
+        unit_weight_kg=unit_weight_kg,
         stock_quantity=stock,
         image_url=data.get('image_url'),
-        is_available=True
+        video_url=data.get('video_url'),
+        video_duration_seconds=video_duration_seconds,
+        is_available=True,
+        is_premium=bool(data.get('is_premium', False)),
+        allows_group_buying=bool(data.get('allows_group_buying', False)),
     )
 
     db.session.add(product)
@@ -101,7 +108,20 @@ def update_product(product_id):
     product.category = data.get('category', product.category)
     product.description = data.get('description', product.description)
     product.unit = data.get('unit', product.unit)
+    product.video_url = data.get('video_url', product.video_url)
+    if 'unit_weight_kg' in data:
+        try:
+            product.unit_weight_kg = float(data['unit_weight_kg']) if data['unit_weight_kg'] is not None else None
+        except (ValueError, TypeError):
+            return jsonify({'message': 'Invalid unit weight format'}), 400
+    if 'video_duration_seconds' in data:
+        try:
+            product.video_duration_seconds = int(data['video_duration_seconds']) if data['video_duration_seconds'] is not None else None
+        except (ValueError, TypeError):
+            return jsonify({'message': 'Invalid video duration format'}), 400
     product.is_available = data.get('is_available', product.is_available)
+    product.is_premium = data.get('is_premium', product.is_premium)
+    product.allows_group_buying = data.get('allows_group_buying', product.allows_group_buying)
 
     # Cast optional numerical mutations smoothly
     if 'price_per_unit' in data:

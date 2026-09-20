@@ -91,6 +91,9 @@ def create_app(config_class=None):
     from .routes.orders import orders_bp
     from .routes.payouts import payouts_bp
     from .routes.farm_logs import farm_logs_bp
+    from .routes.trust import trust_bp
+    from .routes.commerce import commerce_bp
+    from .routes.settings import settings_bp
 
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     app.register_blueprint(products_bp, url_prefix="/api/products")
@@ -100,6 +103,9 @@ def create_app(config_class=None):
     app.register_blueprint(payouts_bp, url_prefix="/api/payouts")
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(farm_logs_bp, url_prefix="/api/farm_logs")
+    app.register_blueprint(trust_bp, url_prefix="/api/trust")
+    app.register_blueprint(commerce_bp, url_prefix="/api")
+    app.register_blueprint(settings_bp, url_prefix="/api/settings")
 
     # Global Health Check Endpoint
     @app.route("/health")

@@ -220,3 +220,19 @@ def delete_message(msg_id):
     db.session.delete(msg)
     db.session.commit()
     return jsonify({'message': 'Message deleted'}), 200
+
+
+@chat_bp.route('/<int:msg_id>/read', methods=['PATCH'])
+@jwt_required()
+def mark_message_read(msg_id):
+    current_user_id = int(get_jwt_identity())
+    msg = db.session.get(ChatMessage, msg_id)
+    if not msg:
+        return jsonify({'message': 'Message not found'}), 404
+    if msg.receiver_id != current_user_id:
+        return jsonify({'message': 'Unauthorized'}), 403
+    data = request.get_json(silent=True) or {}
+    is_read = data.get('is_read', True)
+    msg.is_read = bool(is_read)
+    db.session.commit()
+    return jsonify({'is_read': msg.is_read}), 200

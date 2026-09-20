@@ -1,6 +1,8 @@
 import hashlib
 import logging
+import os
 from flask import Blueprint, request, jsonify, current_app
+from werkzeug.utils import secure_filename
 from app import db
 from app.models.user import User
 from app.schemas.user import user_schema
@@ -211,6 +213,18 @@ def update_profile():
 
     if location is not None:
         user.location = location
+
+    # Handle avatar upload (multipart/form-data)
+    if 'avatar' in request.files:
+        file = request.files['avatar']
+        if file and file.filename != '':
+            allowed_ext = {'png', 'jpg', 'jpeg', 'webp'}
+            if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_ext:
+                filename = secure_filename(f"avatar_{user_id}_{file.filename}")
+                upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'avatars')
+                os.makedirs(upload_folder, exist_ok=True)
+                file.save(os.path.join(upload_folder, filename))
+                user.avatar_url = f"/static/uploads/avatars/{filename}"
 
     # Handle password change if new_password is provided
     if new_password:
