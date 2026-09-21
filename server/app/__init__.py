@@ -37,11 +37,19 @@ def create_app(config_class=None):
     migrate.init_app(app, db)
     
     # 1. Parse CORS origins cleanly (ensures list format)
-    raw_origins = app.config.get("CORS_ORIGINS", ["http://localhost:3000", "http://127.0.0.1:3000"])
+    raw_origins = app.config.get("CORS_ORIGINS") or [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
     if isinstance(raw_origins, str):
         origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
     else:
         origins = raw_origins
+    # Never leave a placeholder origin in the list — it would silently
+    # refuse every real browser origin in development.
+    origins = [origin for origin in origins if origin and origin != "<local>"]
 
     # 2. Configure CORS with authorization credentials support
     CORS(app, resources={r"/api/*": {"origins": origins}}, supports_credentials=True)

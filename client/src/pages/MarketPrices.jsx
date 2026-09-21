@@ -21,7 +21,7 @@ export default function MarketPrices() {
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
-  const [manual, setManual] = useState({ commodity: '', price_per_kg: '', source: '', notes: '' });
+  const [manual, setManual] = useState({ commodity: '', price_per_kg: '', source: '', market: '', notes: '' });
   const [notice, setNotice] = useState('');
 
   const load = async () => {
@@ -71,12 +71,13 @@ export default function MarketPrices() {
         category: manual.commodity,
         price_per_unit: Number(manual.price_per_kg),
         unit: 'kg',
-        market: manual.market,
+        // The API rejects an empty market, so fall back to the default one.
+        market: manual.market.trim() || 'Nairobi',
         source: manual.source,
         provider: 'manual',
         metadata: { notes: manual.notes },
       });
-      setManual({ commodity: '', price_per_kg: '', source: '', notes: '' });
+      setManual({ commodity: '', price_per_kg: '', source: '', market: '', notes: '' });
       setManualOpen(false);
       setNotice('Manual observation recorded.');
       await load();

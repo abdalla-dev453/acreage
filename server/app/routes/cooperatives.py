@@ -11,13 +11,14 @@ cooperatives_bp = Blueprint('cooperatives', __name__)
 logger = logging.getLogger(__name__)
 
 
+@cooperatives_bp.route('', methods=['GET'])
 @cooperatives_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_cooperatives():
     """Get all cooperatives"""
     try:
         cooperatives = Cooperative.query.filter_by(is_active=True).all()
-        
+
         # Enrich with member counts
         enriched_coops = []
         for coop in cooperatives:
@@ -26,7 +27,7 @@ def get_cooperatives():
             member_count = User.query.filter_by(cooperative_id=coop.id, role='farmer').count()
             coop_dict['member_count'] = member_count
             enriched_coops.append(coop_dict)
-        
+
         return jsonify({
             'items': enriched_coops
         }), 200
@@ -35,6 +36,7 @@ def get_cooperatives():
         return jsonify({'message': 'Failed to retrieve cooperatives'}), 500
 
 
+@cooperatives_bp.route('', methods=['POST'])
 @cooperatives_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_cooperative():

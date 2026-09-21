@@ -12,16 +12,17 @@ price_alerts_bp = Blueprint('price_alerts', __name__)
 logger = logging.getLogger(__name__)
 
 
+@price_alerts_bp.route('', methods=['GET'])
 @price_alerts_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_user_alerts():
     """Get all price alerts for the current user"""
     user_id = int(get_jwt_identity())
     active_only = request.args.get('active', 'true').lower() == 'true'
-    
+
     try:
         alerts = alert_manager.get_user_alerts(user_id, active_only)
-        
+
         # Enrich alerts with product details
         enriched_alerts = []
         for alert in alerts:
@@ -35,14 +36,15 @@ def get_user_alerts():
                     'is_available': alert.product.is_available
                 }
             enriched_alerts.append(alert_dict)
-        
+
         return jsonify({'items': enriched_alerts}), 200
-        
+
     except Exception as e:
         logger.exception(f"Error getting alerts for user {user_id}")
         return jsonify({'message': 'Failed to retrieve alerts'}), 500
 
 
+@price_alerts_bp.route('', methods=['POST'])
 @price_alerts_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_alert():

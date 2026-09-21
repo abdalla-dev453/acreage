@@ -171,7 +171,8 @@ def confirm_password_reset():
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_profile():
-    current_user_id = get_jwt_identity()
+    # JWT identities are stored as strings; the primary key is an integer.
+    current_user_id = int(get_jwt_identity())
     user = db.get_or_404(User, current_user_id)
     return user_schema.jsonify(user), 200
 
@@ -180,7 +181,8 @@ def get_profile():
 @jwt_required()
 def update_profile():
     """Update the authenticated user's profile (partial updates supported)."""
-    current_user_id = get_jwt_identity()
+    # JWT identities are stored as strings; the primary key is an integer.
+    current_user_id = int(get_jwt_identity())
     user = db.get_or_404(User, current_user_id)
 
     data, error = json_object()
@@ -220,7 +222,7 @@ def update_profile():
         if file and file.filename != '':
             allowed_ext = {'png', 'jpg', 'jpeg', 'webp'}
             if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_ext:
-                filename = secure_filename(f"avatar_{user_id}_{file.filename}")
+                filename = secure_filename(f"avatar_{user.id}_{file.filename}")
                 upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'avatars')
                 os.makedirs(upload_folder, exist_ok=True)
                 file.save(os.path.join(upload_folder, filename))

@@ -21,7 +21,16 @@ class Config:
     )
 
     # Database Configuration (Ensures standard postgresql:// URI format)
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///../instance/acreage.db")
+    # Default to an absolute SQLite path. A relative `sqlite:///...` URI is
+    # resolved against the process working directory, so running the server from
+    # the repo root instead of `server/` silently creates a second, empty
+    # database with no tables. Anchoring it to the `server/` directory keeps
+    # `python app.py`, `flask db upgrade`, and gunicorn on one database.
+    _SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _DEFAULT_SQLITE_PATH = os.path.join(_SERVER_DIR, "instance", "acreage.db")
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL", f"sqlite:///{_DEFAULT_SQLITE_PATH}"
+    )
     if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
     
@@ -60,8 +69,17 @@ class Config:
     raw_cors = os.getenv("CORS_ORIGINS", "")
     if raw_cors:
         CORS_ORIGINS = [origin.strip() for origin in raw_cors.split(",") if origin.strip()]
+    elif IS_PROD:
+        # Production must declare its origins explicitly; never widen by default.
+        CORS_ORIGINS = []
     else:
-        CORS_ORIGINS = ["<local>"]  # auto-detect in dev; set CORS_ORIGINS in production
+        # Local development: the Vite dev server and the common fallbacks.
+        CORS_ORIGINS = [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
 
     #Safaricom M-Pesa Settings
     MPESA_ENV = os.getenv("MPESA_ENV", "sandbox")
