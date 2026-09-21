@@ -5,41 +5,309 @@ html, body, #root {
 }
 
 :root {
-    --acreage-forest: #166534;
-    --acreage-forest-dark: #052e16;
-    --acreage-leaf: #15803d;
-    
-    /* Elegant canvas tone that melts perfectly into your dark glass sidebar */
-    --acreage-mist: #f0f7eb; 
-    --acreage-ink: #0f172a;
+  --acreage-forest: #166534;
+  --acreage-forest-dark: #052e16;
+  --acreage-leaf: #15803d;
+  --acreage-gold: #f9b31f;
+  --acreage-mist: #f0f7eb;
+  --acreage-ink: #0f172a;
+  --glass-white: rgba(255, 255, 255, 0.7);
+  --glass-dark: rgba(15, 23, 42, 0.8);
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--acreage-mist);
-    /* Creates a beautiful luxury vignette effect behind your white page panels */
-    background-image: radial-gradient(at 0% 0%, rgba(15, 23, 42, 0.05) 0px, transparent 50%);
-    color: var(--acreage-ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: var(--acreage-mist);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(22, 101, 52, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(249, 179, 31, 0.05) 0px, transparent 50%);
+  color: var(--acreage-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ========================================================
-   LANDING & UTILITY PALETTE ALIGNMENTS (KEEPING WHITE CARDS INTACT)
-   ======================================================== */
+/* Premium Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
-/* Restores primary green highlights and badges */
-.bg-green-600 { background-color: var(--acreage-forest) !important; }
-.bg-green-50 { background-color: #edf4ef !important; }
-.text-green-600, .text-green-700 { color: var(--acreage-leaf) !important; }
-.border-green-100, .border-green-200 { border-color: #dbe6df !important; }
-.hover\:bg-green-700:hover { background-color: var(--acreage-forest-dark) !important; }
-.hover\:text-green-900:hover { color: var(--acreage-forest-dark) !important; }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--acreage-forest) 0%, var(--acreage-leaf) 100%);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--acreage-forest-dark) 0%, var(--acreage-forest) 100%);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Premium Glassmorphism Effects */
+.glass-card {
+  background: var(--glass-white);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.glass-card-dark {
+  background: var(--glass-dark);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Premium Button Styling */
+.btn-premium {
+  background: linear-gradient(135deg, var(--acreage-forest) 0%, var(--acreage-leaf) 100%);
+  box-shadow: 
+    0 4px 15px rgba(22, 101, 52, 0.3),
+    0 2px 6px rgba(22, 101, 52, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-premium:hover::before {
+  left: 100%;
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(22, 101, 52, 0.4),
+    0 4px 10px rgba(22, 101, 52, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--acreage-gold) 0%, #fac93e 50%, #f07528 100%);
+  box-shadow: 
+    0 4px 15px rgba(249, 179, 31, 0.3),
+    0 2px 6px rgba(249, 179, 31, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(249, 179, 31, 0.4),
+    0 4px 10px rgba(249, 179, 31, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Premium Input Styling */
+.input-premium {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(22, 101, 52, 0.2);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.input-premium:focus {
+  border-color: var(--acreage-forest);
+  box-shadow: 
+    0 0 0 3px rgba(22, 101, 52, 0.1),
+    0 4px 12px rgba(22, 101, 52, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  outline: none;
+}
+
+/* Premium Card Hover Effects */
+.card-premium {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 12px 28px rgba(0, 0, 0, 0.1),
+    0 6px 14px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(22, 101, 52, 0.3);
+}
+
+/* Premium Badge Styling */
+.badge-premium {
+  background: linear-gradient(135deg, var(--acreage-forest) 0%, var(--acreage-leaf) 100%);
+  box-shadow: 
+    0 2px 8px rgba(22, 101, 52, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.badge-gold {
+  background: linear-gradient(135deg, var(--acreage-gold) 0%, #fac93e 100%);
+  box-shadow: 
+    0 2px 8px rgba(249, 179, 31, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Premium Gradient Text */
+.text-gradient-premium {
+  background: linear-gradient(135deg, var(--acreage-forest) 0%, var(--acreage-leaf) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--acreage-gold) 0%, #fac93e 50%, #f07528 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Premium Loading Animation */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Premium Pulse Animation */
+.pulse-premium {
+  animation: pulse-premium 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-premium {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Premium Gradient Background */
+.bg-premium-gradient {
+  background: linear-gradient(135deg, var(--acreage-forest) 0%, var(--acreage-leaf) 50%, var(--acreage-gold) 100%);
+  background-size: 200% 200%;
+  animation: gradient 15s ease infinite;
+}
+
+/* Custom Utility Classes */
+.text-premium-dark {
+  color: var(--acreage-ink);
+}
+
+.bg-premium-mist {
+  background-color: var(--acreage-mist);
+}
+
+.border-premium-forest {
+  border-color: var(--acreage-forest);
+}
+
+/* Override existing Tailwind classes with premium versions */
+.bg-green-600 { 
+  background: linear-gradient(135deg, var(--acreage-forest) 0%, var(--acreage-leaf) 100%) !important;
+  box-shadow: 0 2px 8px rgba(22, 101, 52, 0.3);
+}
+
+.bg-green-50 { 
+  background-color: #edf4ef !important;
+  border: 1px solid rgba(22, 101, 52, 0.1);
+}
+
+.text-green-600, .text-green-700 { 
+  color: var(--acreage-leaf) !important;
+}
+
+.border-green-100, .border-green-200 { 
+  border-color: #dbe6df !important;
+}
+
+.hover\:bg-green-700:hover { 
+  background: linear-gradient(135deg, var(--acreage-forest-dark) 0%, var(--acreage-forest) 100%) !important;
+}
+
+.hover\:text-green-900:hover { 
+  color: var(--acreage-forest-dark) !important;
+}
 
 input, textarea, select, .bg-white {
-    background-color: #f8f9f8 !important;
-    color: var(--acreage-ink) !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: var(--acreage-ink) !important;
+  border: 1px solid rgba(22, 101, 52, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-/* Clear Custom Scrollbar Layers for the sidebar container link list */
+/* Premium Sidebar Enhancement */
+.sidebar-premium {
+  background: linear-gradient(180deg, var(--acreage-forest-dark) 0%, var(--acreage-forest) 100%);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Premium Stats Card Enhancement */
+.stats-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stats-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.12),
+    0 8px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* Premium Navigation Enhancement */
+.nav-premium {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Scrollbar hiding for specific containers */
 @layer utilities {
   .scrollbar-none::-webkit-scrollbar {
     display: none;
@@ -48,4 +316,104 @@ input, textarea, select, .bg-white {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(22, 101, 52, 0.3);
+    border-radius: 2px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(22, 101, 52, 0.5);
+  }
+}
+
+/* Premium Form Elements */
+.form-group-premium label {
+  font-weight: 600;
+  color: var(--acreage-ink);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-group-premium input,
+.form-group-premium select,
+.form-group-premium textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(22, 101, 52, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.form-group-premium input:focus,
+.form-group-premium select:focus,
+.form-group-premium textarea:focus {
+  outline: none;
+  border-color: var(--acreage-forest);
+  box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+}
+
+/* Premium Table Styling */
+.table-premium {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.table-premium thead {
+  background: linear-gradient(135deg, var(--acreage-forest) 0%, var(--acreage-leaf) 100%);
+  color: white;
+}
+
+.table-premium tbody tr {
+  border-bottom: 1px solid rgba(22, 101, 52, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.table-premium tbody tr:hover {
+  background-color: rgba(22, 101, 52, 0.05);
+}
+
+/* Premium Badge Variants */
+.badge-success {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.badge-error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }

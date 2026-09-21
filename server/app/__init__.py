@@ -94,6 +94,10 @@ def create_app(config_class=None):
     from .routes.trust import trust_bp
     from .routes.commerce import commerce_bp
     from .routes.settings import settings_bp
+    from .routes.sms import sms_bp
+    from .routes.whatsapp import whatsapp_bp
+    from .routes.price_alerts import price_alerts_bp
+    from .routes.cooperatives import cooperatives_bp
 
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     app.register_blueprint(products_bp, url_prefix="/api/products")
@@ -106,6 +110,10 @@ def create_app(config_class=None):
     app.register_blueprint(trust_bp, url_prefix="/api/trust")
     app.register_blueprint(commerce_bp, url_prefix="/api")
     app.register_blueprint(settings_bp, url_prefix="/api/settings")
+    app.register_blueprint(sms_bp, url_prefix="/api/sms")
+    app.register_blueprint(whatsapp_bp, url_prefix="/api/whatsapp")
+    app.register_blueprint(price_alerts_bp, url_prefix="/api/price-alerts")
+    app.register_blueprint(cooperatives_bp, url_prefix="/api/cooperatives")
 
     # Global Health Check Endpoint
     @app.route("/health")

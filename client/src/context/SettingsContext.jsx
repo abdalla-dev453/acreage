@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
+import API from '../services/api';
 
 export const SettingsContext = createContext();
 
@@ -20,11 +21,34 @@ export const SettingsProvider = ({ children }) => {
       return DEFAULT_SETTINGS;
     }
   });
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     applyTheme(settings.theme);
     localStorage.setItem('app_settings', JSON.stringify(settings));
   }, [settings]);
+
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setLoaded(true);
+          return;
+        }
+        const response = await API.get('/settings/preferences');
+        const serverPrefs = response.data?.preferences || {};
+        setSettings((prev) => {
+          const merged = { ...prev, ...serverPrefs };
+          return merged;
+        });
+      } catch {
+      } finally {
+        setLoaded(true);
+      }
+    };
+    if (!loaded) loadPreferences();
+  }, []);
 
   function applyTheme(theme) {
     const root = document.documentElement;
@@ -38,16 +62,29 @@ export const SettingsProvider = ({ children }) => {
     }
   }
 
-  const updateSetting = useCallback((key, value) => {
+  const updateSetting = useCallback(async (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+    try {
+      await API.put('/settings/preferences', { [key]: value });
+    } catch {
+    }
+  }, []);
+
+  const saveAll = useCallback(async (newSettings) => {
+    setSettings(newSettings);
+    try {
+      await API.put('/settings/preferences', newSettings);
+    } catch {
+    }
   }, []);
 
   const resetSettings = useCallback(() => {
     setSettings(DEFAULT_SETTINGS);
+    API.put('/settings/preferences', DEFAULT_SETTINGS).catch(() => {});
   }, []);
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSetting, resetSettings }}>
+    <SettingsContext.Provider value={{ settings, updateSetting, resetSettings, saveAll, loaded }}>
       {children}
     </SettingsContext.Provider>
   );

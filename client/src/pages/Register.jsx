@@ -17,7 +17,7 @@ export default function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const navigate = useNavigate();1
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,7 +59,7 @@ export default function Register() {
       <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
         <h2 className="text-xl font-bold text-slate-800 text-center mb-1">Create Account</h2>
         <p className="text-xs text-slate-400 text-center mb-6">Join the digital marketplace connecting farmers and buyers</p>
-        
+
       {error && (
           <div className="mb-4 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 p-3 rounded-xl text-center">
             {error}
@@ -69,62 +69,62 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Username</label>
-            <input 
-              type="text" 
-              required 
+            <input
+              type="text"
+              required
               disabled={isSubmitting}
-              value={formData.username} 
+              value={formData.username}
               placeholder="e.g. john_doe"
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })} 
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all disabled:opacity-60" 
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all disabled:opacity-60"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email Address</label>
-            <input 
-              type="email" 
-              required 
+            <input
+              type="email"
+              required
               disabled={isSubmitting}
-              value={formData.email} 
+              value={formData.email}
               placeholder="e.g. john@farm.com"
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all disabled:opacity-60" 
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all disabled:opacity-60"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Password</label>
-            <input 
-              type="password" 
-              required 
+            <input
+              type="password"
+              required
               disabled={isSubmitting}
-              value={formData.password} 
+              value={formData.password}
               placeholder="••••••••"
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all disabled:opacity-60" 
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all disabled:opacity-60"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Location (Town/City)</label>
-            <input 
-              type="text" 
-              required 
+            <input
+              type="text"
+              required
               disabled={isSubmitting}
-              value={formData.location} 
+              value={formData.location}
               placeholder="e.g. Nakuru, Nairobi"
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })} 
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all disabled:opacity-60" 
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all disabled:opacity-60"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Account Role</label>
-            <select 
-              value={formData.role} 
+            <select
+              value={formData.role}
               disabled={isSubmitting}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })} 
+              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all cursor-pointer"
             >
               <option value="farmer">Farmer (Sell Products & Track Logs)</option>

@@ -11,21 +11,21 @@ export default function StatCard({ label, value, icon: Icon, delay = 0, isCurren
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35, ease: 'easeOut' }}
-      whileHover={{ y: -2 }}
-      className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between transition-shadow hover:shadow-md/50 cursor-pointer group"
+      transition={{ delay, duration: 0.4, ease: 'easeOut' }}
+      whileHover={{ y: -4, scale: 1.02 }}
+      className="stats-card p-6 rounded-2xl flex items-center justify-between cursor-pointer group"
     >
-      <div className="min-w-0 flex-1 pr-3">
-        <p className="text-2xl font-extrabold text-slate-900 tracking-tight truncate">
+      <div className="min-w-0 flex-1 pr-4">
+        <p className="text-3xl font-bold text-gradient-premium tracking-tight truncate">
           {formattedValue ?? '0'}
         </p>
-        <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1 truncate">
+        <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-2 truncate">
           {label}
         </p>
       </div>
 
-      <div className="p-3.5 rounded-xl bg-green-50 text-green-600 transition-all duration-300 group-hover:bg-green-600 group-hover:text-white shrink-0 shadow-sm">
-        <Icon className="w-5 h-5 stroke-[2.2]" />
+      <div className="p-4 rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 text-primary-600 transition-all duration-300 group-hover:from-primary-600 group-hover:to-primary-700 group-hover:text-white group-hover:shadow-lg shrink-0">
+        <Icon className="w-6 h-6 stroke-[2.2]" />
       </div>
     </motion.div>
   );

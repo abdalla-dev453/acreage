@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ShoppingBag, Users, DollarSign, Package, TrendingUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
 import StatCard from '../components/common/StatCard';
@@ -10,6 +11,7 @@ import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import SEO from '../components/common/SEO';
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -34,8 +36,11 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center">
-        <span className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs text-slate-400 font-semibold mt-3 tracking-wide">Loading dashboard...</p>
+        <div className="relative">
+          <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-gold-500 rounded-full animate-spin opacity-50" style={{ animationDelay: '0.3s' }}></div>
+        </div>
+        <p className="text-sm text-slate-500 font-semibold mt-4 tracking-wide animate-pulse">{t('common.loading')}</p>
       </div>
     );
   }
@@ -48,23 +53,23 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-6 w-full pb-12">
+    <div className="space-y-8 w-full pb-12">
       <SEO title="Dashboard | Acreage" description="View your farm dashboard with order summaries, revenue metrics, and top-selling products." />
-      <Navbar title="Dashboard Overview" />
+      <Navbar title={t('dashboard.title')} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard label="Total Orders" value={data.metrics.total_orders} icon={ShoppingBag} delay={0.02} />
-        <StatCard label="Total Customers" value={data.metrics.total_customers} icon={Users} delay={0.04} />
-        <StatCard label="Total Revenue" value={formatCompactRevenue(data.metrics.total_revenue)} icon={DollarSign} delay={0.06} />
-        <StatCard label="Total Products" value={data.metrics.total_menu} icon={Package} delay={0.08} />
-        <StatCard label="Growth Rate" value={data.overview?.growth_rate || '+0%'} icon={TrendingUp} delay={0.1} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <StatCard label={t('dashboard.totalOrders')} value={data.metrics.total_orders} icon={ShoppingBag} delay={0.02} />
+        <StatCard label={t('dashboard.totalCustomers')} value={data.metrics.total_customers} icon={Users} delay={0.04} />
+        <StatCard label={t('dashboard.totalRevenue')} value={formatCompactRevenue(data.metrics.total_revenue)} icon={DollarSign} delay={0.06} />
+        <StatCard label={t('dashboard.totalProducts')} value={data.metrics.total_menu} icon={Package} delay={0.08} />
+        <StatCard label={t('dashboard.growthRate')} value={data.overview?.growth_rate || '+0%'} icon={TrendingUp} delay={0.1} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        <div className="h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        <div className="h-full animate-slide-up" style={{ animationDelay: '0.1s' }}>
           <OrderSummary summary={data.order_summary} />
         </div>
-        <div className="h-full">
+        <div className="h-full animate-slide-up" style={{ animationDelay: '0.2s' }}>
           <AnalyticsChart
             overview={{
               top_ordered_pct: data.overview?.top_ordered_pct ?? 0,
@@ -72,22 +77,22 @@ export default function Dashboard() {
             }}
           />
         </div>
-        <div className="h-full">
+        <div className="h-full animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <TopSelling items={data.top_selling_items} />
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-green-800 to-green-900 rounded-2xl p-6 text-white shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="text-center sm:text-left">
-          <h4 className="font-bold text-lg">Marketplace Inventory Control</h4>
-          <p className="text-xs text-green-100 mt-1">Review active produce listings, configure price thresholds, or fulfill outstanding orders.</p>
+      <div className="bg-premium-gradient rounded-3xl p-8 text-white shadow-premium-xl flex flex-col sm:flex-row items-center justify-between gap-6 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+        <div className="text-center sm:text-left space-y-2">
+          <h4 className="font-bold text-xl font-display">{t('dashboard.inventoryControl')}</h4>
+          <p className="text-sm text-white/90 leading-relaxed">{t('dashboard.inventoryDescription')}</p>
         </div>
         <Link
           to="/orders"
-          className="bg-white text-green-700 hover:bg-green-50 transition-all font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 shrink-0 shadow-sm"
+          className="bg-white text-primary-700 hover:bg-primary-50 transition-all font-bold text-sm px-6 py-3 rounded-2xl flex items-center gap-2 active:scale-95 shadow-lg hover:shadow-xl group"
         >
-          <span>Manage Orders</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <span>{t('dashboard.manageOrders')}</span>
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
     </div>

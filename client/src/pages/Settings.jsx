@@ -1,25 +1,95 @@
-import { useState, useContext } from 'react';
-import { Settings, Sun, Moon, Monitor, Globe, Bell, BellOff, Volume2, VolumeX, Type, ZoomIn, ZoomOut, RotateCw, Save, Palette, Crown, CreditCard, User as UserIcon, Shield, HelpCircle, LifeBuoy, Globe as GlobeIcon, Smartphone } from 'lucide-react';
+import { useState, useContext, useEffect } from 'react';
+import { Settings, Sun, Moon, Monitor, Globe, User as UserIcon, Shield, HelpCircle, LifeBuoy, Globe as GlobeIcon, Save, RotateCw, LogOut } from 'lucide-react';
 import { SettingsContext } from '../context/SettingsContext';
 import { AuthContext } from '../context/AuthContext';
+import API from '../services/api';
 import Navbar from '../components/common/Navbar';
 import SEO from '../components/common/SEO';
 
 export default function SettingsPage() {
   const { settings, updateSetting, resetSettings } = useContext(SettingsContext);
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
+  const [loading, setLoading] = useState({});
+  const [feedback, setFeedback] = useState('');
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackNotice, setFeedbackNotice] = useState('');
+  const [passwordForm, setPasswordForm] = useState({ current_password: '', new_password: '', confirm_password: '' });
+  const [passwordNotice, setPasswordNotice] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setPasswordForm((prev) => ({ ...prev, current_password: '' }));
+    }
+  }, [user]);
 
   const handleSave = () => {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const handleToggle = async (key) => {
+    setLoading((prev) => ({ ...prev, [key]: true }));
+    try {
+      await updateSetting(key, !settings[key]);
+    } finally {
+      setLoading((prev) => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const submitFeedback = async (event) => {
+    event.preventDefault();
+    if (!feedback.trim()) return;
+    try {
+      await API.post('/settings/feedback', { message: feedback, rating: feedbackRating });
+      setFeedbackNotice('Thank you for your feedback!');
+      setFeedback('');
+      setFeedbackRating(5);
+    } catch (err) {
+      setFeedbackNotice(err.response?.data?.message || 'Unable to submit feedback.');
+    }
+  };
+
+  const changePassword = async (event) => {
+    event.preventDefault();
+    setPasswordError('');
+    setPasswordNotice('');
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+    if (passwordForm.new_password.length < 8) {
+      setPasswordError('Password must be at least 8 characters.');
+      return;
+    }
+    try {
+      await API.put('/settings/account', {
+        current_password: passwordForm.current_password,
+        new_password: passwordForm.new_password,
+      });
+      setPasswordNotice('Password changed successfully.');
+      setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
+    } catch (err) {
+      setPasswordError(err.response?.data?.message || 'Unable to change password.');
+    }
+  };
+
+  const deactivateAccount = async () => {
+    if (!window.confirm('Are you sure you want to deactivate your account? This action cannot be undone.')) return;
+    try {
+      await API.delete('/settings/account');
+      logout();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Unable to deactivate account.');
+    }
+  };
+
   const tabs = [
     { id: 'general', label: 'General', icon: Settings },
-    { id: 'subscription', label: 'Subscription', icon: Crown },
     { id: 'account', label: 'Account', icon: UserIcon },
+    { id: 'security', label: 'Security & Privacy', icon: Shield },
     { id: 'help', label: 'Help & Feedback', icon: LifeBuoy },
   ];
 
@@ -34,12 +104,6 @@ export default function SettingsPage() {
     { value: 'sw', label: 'Kiswahili' },
   ];
 
-  const fontSizeOptions = [
-    { value: 'small', label: 'Small' },
-    { value: 'normal', label: 'Normal' },
-    { value: 'large', label: 'Large' },
-  ];
-
   const SettingCard = ({ title, description, children }) => (
     <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
       <h3 className="font-bold text-slate-900 text-sm mb-1">{title}</h3>
@@ -48,24 +112,31 @@ export default function SettingsPage() {
     </div>
   );
 
-  const ToggleSwitch = ({ checked, onChange, label, desc }) => (
+  const ToggleSwitch = ({ settingKey, label, desc }) => (
     <div className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
       <div className="flex-1 min-w-0">
         <label className="text-xs font-bold text-slate-700">{label}</label>
         <p className="text-[10px] text-slate-400 mt-0.5">{desc}</p>
       </div>
       <button
-        onClick={() => onChange(!checked)}
+        onClick={() => handleToggle(settingKey)}
+        disabled={loading[settingKey]}
         className={`relative w-10 h-5 rounded-full transition-colors ${
-          checked ? 'bg-green-500' : 'bg-slate-300'
-        }`}
+          settings[settingKey] ? 'bg-green-500' : 'bg-slate-300'
+        } disabled:opacity-50`}
       >
         <span className={`absolute top-0.5 h-4 w-4 rounded-full transition-transform ${
-          checked ? 'translate-x-5 bg-white' : 'translate-x-0.5 bg-white'
+          settings[settingKey] ? 'translate-x-5 bg-white' : 'translate-x-0.5 bg-white'
         }`} />
       </button>
     </div>
   );
+
+  const fontSizeOptions = [
+    { value: 'small', label: 'Small' },
+    { value: 'normal', label: 'Normal' },
+    { value: 'large', label: 'Large' },
+  ];
 
   return (
     <div className="space-y-6 w-full pb-12">
@@ -77,15 +148,22 @@ export default function SettingsPage() {
           <Settings className="w-5 h-5 text-green-600" />
           System Configuration
         </h1>
-        {saved && (
-          <span className="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-lg">
-            Saved
-          </span>
-        )}
+        <div className="flex items-center gap-4">
+          {saved && (
+            <span className="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-lg">
+              Saved
+            </span>
+          )}
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition"
+          >
+            <Save className="w-3.5 h-3.5" /> Save Settings
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4">
-        {/* Tab Navigation */}
         <div className="flex gap-2 p-1.5 bg-slate-100 rounded-xl overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -107,10 +185,8 @@ export default function SettingsPage() {
           })}
         </div>
 
-        {/* Tab Content: General */}
         {activeTab === 'general' && (
           <>
-            {/* Theme Settings */}
             <SettingCard
               title="Theme"
               description="Choose your preferred color scheme."
@@ -136,7 +212,6 @@ export default function SettingsPage() {
               </div>
             </SettingCard>
 
-            {/* Language Settings */}
             <SettingCard
               title="Language"
               description="Select your preferred interface language."
@@ -155,26 +230,22 @@ export default function SettingsPage() {
               </div>
             </SettingCard>
 
-            {/* Notification Settings */}
             <SettingCard
               title="Notifications"
               description="Manage how you receive alerts and notifications."
             >
               <ToggleSwitch
-                checked={settings.notifications}
-                onChange={(v) => updateSetting('notifications', v)}
+                settingKey="notifications"
                 label="Push Notifications"
                 desc={settings.notifications ? 'Receive real-time notifications' : 'Notifications are disabled'}
               />
               <ToggleSwitch
-                checked={settings.sound}
-                onChange={(v) => updateSetting('sound', v)}
+                settingKey="sound"
                 label="Notification Sound"
                 desc={settings.sound ? 'Play sound on new notifications' : 'Sounds are muted'}
               />
             </SettingCard>
 
-            {/* Display Settings */}
             <SettingCard
               title="Display"
               description="Adjust text size and interface density."
@@ -183,55 +254,38 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between py-2">
                   <label className="text-xs font-bold text-slate-700">Font Size</label>
                   <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
-                    <button
-                      onClick={() => updateSetting('fontSize', 'small')}
-                      className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        settings.fontSize === 'small' ? 'bg-white text-slate-900 shadow' : 'text-slate-400'
-                      }`}
-                    >
-                      A
-                    </button>
-                    <button
-                      onClick={() => updateSetting('fontSize', 'normal')}
-                      className={`px-2 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                        settings.fontSize === 'normal' ? 'bg-white text-slate-900 shadow' : 'text-slate-400'
-                      }`}
-                    >
-                      Aa
-                    </button>
-                    <button
-                      onClick={() => updateSetting('fontSize', 'large')}
-                      className={`px-2 py-1.5 rounded-lg text-base font-bold transition-all ${
-                        settings.fontSize === 'large' ? 'bg-white text-slate-900 shadow' : 'text-slate-400'
-                      }`}
-                    >
-                      Aa
-                    </button>
+                    {fontSizeOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => updateSetting('fontSize', opt.value)}
+                        className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          settings.fontSize === opt.value ? 'bg-white text-slate-900 shadow' : 'text-slate-400'
+                        }`}
+                      >
+                        {opt.label === 'small' ? 'A' : opt.label === 'normal' ? 'Aa' : 'AaA'}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 <ToggleSwitch
-                  checked={settings.compactMode}
-                  onChange={(v) => updateSetting('compactMode', v)}
+                  settingKey="compactMode"
                   label="Compact Mode"
                   desc="Reduce vertical spacing for more content"
                 />
               </div>
             </SettingCard>
 
-            {/* Website Updates */}
             <SettingCard
               title="Website Updates"
               description="How you receive updates about new features and improvements."
             >
               <ToggleSwitch
-                checked={true}
-                onChange={() => {}}
+                settingKey="featureAnnouncements"
                 label="Feature Announcements"
                 desc="Get notified about new features and releases"
               />
               <ToggleSwitch
-                checked={true}
-                onChange={() => {}}
+                settingKey="betaProgram"
                 label="Beta Program"
                 desc="Early access to new features and improvements"
               />
@@ -239,51 +293,6 @@ export default function SettingsPage() {
           </>
         )}
 
-        {/* Tab Content: Subscription */}
-        {activeTab === 'subscription' && (
-          <div className="space-y-4">
-            <SettingCard
-              title="Current Plan"
-              description="Your subscription status and plan details."
-            >
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-xl border border-green-100">
-                <div className="flex items-center gap-3">
-                  <Crown className="w-6 h-6 text-green-600" />
-                  <div>
-                    <span className="font-bold text-sm text-green-800">Free Plan</span>
-                    <p className="text-[10px] text-green-600">Basic marketplace features</p>
-                  </div>
-                </div>
-                <span className="text-xs font-bold text-green-700 bg-green-100 px-2.5 py-0.5 rounded-lg">
-                  Active
-                </span>
-              </div>
-              <div className="mt-4 space-y-3">
-                <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">Premium Benefits</h4>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <GlobeIcon className="w-3.5 h-3.5 text-green-600 mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-slate-500">Premium marketplace visibility</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Smartphone className="w-3.5 h-3.5 text-green-600 mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-slate-500">Priority support and early access</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Crown className="w-3.5 h-3.5 text-green-600 mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-slate-500">No listing fees on premium plans</p>
-                  </div>
-                </div>
-              </div>
-              <button className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
-                <Crown className="w-4 h-4" />
-                Upgrade to Premium
-              </button>
-            </SettingCard>
-          </div>
-        )}
-
-        {/* Tab Content: Account */}
         {activeTab === 'account' && (
           <div className="space-y-4">
             <SettingCard
@@ -300,53 +309,29 @@ export default function SettingsPage() {
                     <p className="text-[10px] text-slate-400">{user?.email}</p>
                   </div>
                 </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                  <div className="flex-1 min-w-0">
+                    <label className="text-xs font-bold text-slate-700">Phone</label>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{user?.phone_number || 'Not set'}</p>
+                  </div>
+                  <button className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition">
+                    Edit
+                  </button>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                  <div className="flex-1 min-w-0">
+                    <label className="text-xs font-bold text-slate-700">Location</label>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{user?.location || 'Not set'}</p>
+                  </div>
+                  <button className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition">
+                    Edit
+                  </button>
+                </div>
                 <ToggleSwitch
-                  checked={true}
-                  onChange={() => {}}
+                  settingKey="privateAccount"
                   label="Private Account"
                   desc="Only approved followers can message you"
                 />
-                <ToggleSwitch
-                  checked={true}
-                  onChange={() => {}}
-                  label="Two-Factor Authentication"
-                  desc="Add an extra layer of security to your account"
-                />
-              </div>
-            </SettingCard>
-
-            <SettingCard
-              title="Password & Security"
-              description="Manage your password and login credentials."
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                  <div className="flex-1 min-w-0">
-                    <label className="text-xs font-bold text-slate-700">Current Password</label>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Last changed 3 months ago</p>
-                  </div>
-                  <button className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition">
-                    Change
-                  </button>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                  <div className="flex-1 min-w-0">
-                    <label className="text-xs font-bold text-slate-700">Email Address</label>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{user?.email}</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                    Verified
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                  <div className="flex-1 min-w-0">
-                    <label className="text-xs font-bold text-slate-700">Connected Apps</label>
-                    <p className="text-[10px] text-slate-400 mt-0.5">3 integrations active</p>
-                  </div>
-                  <button className="px-3 py-1.5 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition">
-                    Manage
-                  </button>
-                </div>
               </div>
             </SettingCard>
 
@@ -360,7 +345,10 @@ export default function SettingsPage() {
                     <label className="text-xs font-bold text-rose-600">Deactivate Account</label>
                     <p className="text-[10px] text-slate-400 mt-0.5">Permanently delete your account and all data</p>
                   </div>
-                  <button className="px-3 py-1.5 text-xs font-medium text-rose-600 border border-rose-200 rounded-lg hover:bg-rose-50 transition">
+                  <button
+                    onClick={deactivateAccount}
+                    className="px-3 py-1.5 text-xs font-medium text-rose-600 border border-rose-200 rounded-lg hover:bg-rose-50 transition"
+                  >
                     Deactivate
                   </button>
                 </div>
@@ -369,7 +357,83 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Tab Content: Help */}
+        {activeTab === 'security' && (
+          <div className="space-y-4">
+            <SettingCard
+              title="Password & Security"
+              description="Manage your password and login credentials."
+            >
+              <form onSubmit={changePassword} className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Current Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.current_password}
+                    onChange={(e) => setPasswordForm((prev) => ({ ...prev, current_password: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700">New Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.new_password}
+                    onChange={(e) => setPasswordForm((prev) => ({ ...prev, new_password: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.confirm_password}
+                    onChange={(e) => setPasswordForm((prev) => ({ ...prev, confirm_password: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600"
+                    required
+                  />
+                </div>
+                {passwordError && <p className="text-[10px] font-bold text-rose-600">{passwordError}</p>}
+                {passwordNotice && <p className="text-[10px] font-bold text-green-600">{passwordNotice}</p>}
+                <button
+                  type="submit"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl text-xs font-bold transition"
+                >
+                  Change Password
+                </button>
+              </form>
+            </SettingCard>
+
+            <SettingCard
+              title="Two-Factor Authentication"
+              description="Add an extra layer of security to your account."
+            >
+              <ToggleSwitch
+                settingKey="twoFactorAuth"
+                label="Enable 2FA"
+                desc={settings.twoFactorAuth ? 'Two-factor authentication is enabled' : 'Two-factor authentication is disabled'}
+              />
+            </SettingCard>
+
+            <SettingCard
+              title="Active Sessions"
+              description="Manage your logged-in sessions."
+            >
+              <button
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  window.dispatchEvent(new Event('auth-logout'));
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold hover:bg-rose-100 transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Sign out of all devices
+              </button>
+            </SettingCard>
+          </div>
+        )}
+
         {activeTab === 'help' && (
           <div className="space-y-4">
             <SettingCard
@@ -384,7 +448,10 @@ export default function SettingsPage() {
                     <p className="text-[10px] text-slate-400">Frequently asked questions</p>
                   </div>
                 </button>
-                <button className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 rounded-xl transition">
+                <button
+                  onClick={() => window.open('https://wa.me/254700000000', '_blank')}
+                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 rounded-xl transition"
+                >
                   <LifeBuoy className="w-5 h-5 text-slate-600" />
                   <div className="text-left">
                     <p className="text-xs font-bold text-slate-800">Contact Support</p>
@@ -406,30 +473,45 @@ export default function SettingsPage() {
               description="Help us improve Acreage."
             >
               <textarea
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
                 placeholder="What would you like to tell us?"
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium resize-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600"
                 rows={3}
               />
-              <button className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl text-xs font-bold transition">
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-600">Rating:</span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFeedbackRating(star)}
+                      className={`text-${star <= feedbackRating ? 'amber' : 'slate'}-400 text-base`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {feedbackNotice && <p className={`mt-2 text-[10px] font-bold ${feedbackNotice.includes('Thank you') ? 'text-green-600' : 'text-rose-600'}`}>{feedbackNotice}</p>}
+              <button
+                onClick={submitFeedback}
+                disabled={!feedback.trim()}
+                className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl text-xs font-bold transition disabled:opacity-50"
+              >
                 Submit Feedback
               </button>
             </SettingCard>
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="flex justify-between pt-4">
           <button
             onClick={resetSettings}
             className="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2"
           >
             <RotateCw className="w-3.5 h-3.5" /> Reset to Defaults
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm"
-          >
-            <Save className="w-3.5 h-3.5" /> Save Settings
           </button>
         </div>
       </div>

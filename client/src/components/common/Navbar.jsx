@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { SettingsContext } from '../../context/SettingsContext';
+import LanguageSelector from './LanguageSelector';
 
 export default function Navbar({ title = 'Dashboard' }) {
   const navigate = useNavigate();
@@ -47,12 +48,12 @@ export default function Navbar({ title = 'Dashboard' }) {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="flex justify-between items-center mb-8 w-full bg-white/40 backdrop-blur-xl py-3.5 px-4 rounded-2xl border border-white/60 shadow-sm"
+      className="flex justify-between items-center mb-8 w-full nav-premium py-4 px-6 rounded-2xl"
     >
       <div className="flex items-center space-x-3.5">
         <div className="flex items-center space-x-1.5">
-          <span className="text-green-600 font-mono text-xl font-black select-none opacity-40">#</span>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">
+          <span className="text-primary-600 font-mono text-xl font-black select-none opacity-40">#</span>
+          <h1 className="text-xl font-black text-gradient-premium tracking-tight">
             {title}
           </h1>
         </div>
@@ -62,7 +63,7 @@ export default function Navbar({ title = 'Dashboard' }) {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.15 }}
-            className="hidden sm:inline-block text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-1 bg-slate-900/5 text-slate-600 rounded-lg border border-slate-900/[0.03]"
+            className="hidden sm:inline-block text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-1 bg-gradient-to-r from-primary-100 to-primary-50 text-primary-700 rounded-lg border border-primary-200 shadow-sm"
           >
             {user.role}
           </motion.span>
@@ -109,7 +110,7 @@ export default function Navbar({ title = 'Dashboard' }) {
                   transition={{ duration: 0.2, ease: "easeOut" }}
                   aria-label="Search"
                   onClick={() => setIsSearchOpen(true)}
-                  className="p-2.5 bg-white/80 border border-slate-200/60 shadow-sm rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
+                  className="p-2.5 bg-white/80 border border-slate-200/60 shadow-premium rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
                 >
                   <Search className="w-4 h-4 stroke-[2.2] group-hover:scale-105 transition-transform duration-200" />
                 </motion.button>
@@ -125,7 +126,7 @@ export default function Navbar({ title = 'Dashboard' }) {
               transition={{ duration: 0.2, ease: "easeOut" }}
               aria-label="Notifications"
               onClick={() => setIsNotificationsOpen((v) => !v)}
-              className="p-2.5 bg-white/80 border border-slate-200/60 shadow-sm rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
+              className="p-2.5 bg-white/80 border border-slate-200/60 shadow-premium rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
             >
               <Bell className={`w-4 h-4 stroke-[2.2] group-hover:scale-105 transition-transform duration-200 ${settings?.notifications ? '' : 'opacity-40'}`} />
               {settings?.notifications && (
@@ -180,10 +181,13 @@ export default function Navbar({ title = 'Dashboard' }) {
             transition={{ duration: 0.2, ease: "easeOut" }}
             aria-label="Settings"
             onClick={() => navigate('/settings')}
-            className="p-2.5 bg-white/80 border border-slate-200/60 shadow-sm rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
+            className="p-2.5 bg-white/80 border border-slate-200/60 shadow-premium rounded-xl text-slate-500 hover:text-slate-800 transition-colors relative cursor-pointer group"
           >
             <Settings className="w-4 h-4 stroke-[2.2] group-hover:scale-105 transition-transform duration-200" />
           </motion.button>
+
+          {/* Language Selector */}
+          <LanguageSelector />
         </div>
 
         <div className="h-5 w-px bg-slate-200/80 mx-1 hidden sm:block" />

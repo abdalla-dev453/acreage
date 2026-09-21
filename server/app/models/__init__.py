@@ -7,6 +7,10 @@ from .farm_log import FarmLog
 from .chat import ChatMessage
 from .review import Review, ReviewLike, ReviewComment
 from .payout import Payout
+from .sms_log import SMSLog
+from .whatsapp_log import WhatsAppLog
+from .price_alert import PriceAlert
+from .cooperative import Cooperative, BulkOrder, BulkOrderItem
 from .commerce import (
     EscrowTransaction,
     EscrowEvent,
@@ -32,6 +36,12 @@ __all__ = [
     "ReviewLike",
     "ReviewComment",
     "Payout",
+    "SMSLog",
+    "WhatsAppLog",
+    "PriceAlert",
+    "Cooperative",
+    "BulkOrder",
+    "BulkOrderItem",
     "EscrowTransaction",
     "EscrowEvent",
     "TransportQuote",

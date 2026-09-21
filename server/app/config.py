@@ -84,5 +84,10 @@ class Config:
     SMS_PROVIDER = os.getenv("SMS_PROVIDER", "unconfigured")
     SMS_LOCAL_ENABLED = os.getenv("SMS_LOCAL_ENABLED", "false").lower() in {"1", "true", "yes"}
     SMS_WEBHOOK_TOKEN = os.getenv("SMS_WEBHOOK_TOKEN", "")
+    WHATSAPP_PROVIDER = os.getenv("WHATSAPP_PROVIDER", "mock")
+    WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN", "")
+    WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
+    WHATSAPP_API_VERSION = os.getenv("WHATSAPP_API_VERSION", "v18.0")
+    WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv("WHATSAPP_WEBHOOK_VERIFY_TOKEN", "test_token")
     RECEIPT_PROCESSING_FEE = float(os.getenv("RECEIPT_PROCESSING_FEE", "0"))
     RECEIPT_DISCOUNT = float(os.getenv("RECEIPT_DISCOUNT", "0"))

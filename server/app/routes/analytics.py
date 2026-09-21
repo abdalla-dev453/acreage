@@ -31,7 +31,7 @@ def get_dashboard_analytics():
     if user.role == "farmer":
         total_revenue = db.session.query(func.sum(Order.total_amount))\
             .filter(Order.farmer_id == user_id, Order.status == 'delivered').scalar() or 0.0
-            
+
         top_items_query = db.session.query(
             Product.title,
             func.sum(OrderItem.quantity).label('total_qty')
@@ -42,7 +42,6 @@ def get_dashboard_analytics():
         .order_by(func.sum(OrderItem.quantity).desc())\
         .limit(5)
 
-        # 🚀 ADDED: Direct database categorical distribution calculation for your charts
         category_data = db.session.query(
             Product.category,
             func.sum(OrderItem.quantity * OrderItem.unit_price).label('revenue')
@@ -50,11 +49,11 @@ def get_dashboard_analytics():
         .join(Order, Order.id == OrderItem.order_id)\
         .filter(Order.farmer_id == user_id)\
         .group_by(Product.category).all()
-        
+
     else:
         total_revenue = db.session.query(func.sum(Order.total_amount))\
             .filter(Order.buyer_id == user_id, Order.status == 'delivered').scalar() or 0.0
-            
+
         top_items_query = db.session.query(
             Product.title,
             func.sum(OrderItem.quantity).label('total_qty')

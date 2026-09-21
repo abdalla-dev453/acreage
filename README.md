@@ -366,6 +366,51 @@ Known gaps in the current implementation — useful context before extending it:
 - **Single-farmer orders.** An order can only contain products from one farmer per checkout; multi-farmer carts aren't supported.
 - **No license file.** See [License](#license) below.
 
+## ✅ Recently Added Features
+
+### SMS Ordering Gateway
+- **SMS-based ordering system** allowing buyers to place orders via text message without internet
+- **Command interface**: ORDER, STATUS, PRODUCTS, HELP commands for SMS interaction
+- **SMS notifications**: Automatic SMS updates for order status changes and payment confirmations
+- **Audit trail**: Complete SMS logging system for compliance and debugging
+- **Multi-provider support**: Africa's Talking, Twilio, and mock provider for development
+- **Kenya-optimized**: Designed for feature phone users with M-Pesa integration
+
+### WhatsApp Business Integration
+- **WhatsApp Business API integration** for rich media ordering and customer engagement
+- **Interactive messaging**: Buttons, lists, and template messages for enhanced UX
+- **Product catalogs**: Rich product browsing via WhatsApp list messages
+- **Dual notifications**: Both SMS and WhatsApp notifications for order updates
+- **WhatsApp webhook**: Real-time message processing and command handling
+- **Audit logging**: Complete WhatsApp communication tracking
+- **Kenya-optimized**: Built for WhatsApp's high adoption in Kenya
+
+### Multi-language Support (Swahili)
+- **i18next integration**: Professional internationalization framework
+- **Swahili translations**: Complete Swahili language support for all UI elements
+- **Language detection**: Automatic language detection with manual override
+- **Language selector**: Easy language switching in navbar
+- **Persisted preferences**: Language choice saved in localStorage
+- **Extensible architecture**: Easy to add more languages (Luo, Kikuyu, etc.)
+
+### Market Price Alerts
+- **Price alert system** for farmers and buyers
+- **Multiple alert types**: Price above/below thresholds, percentage changes, high demand alerts
+- **Notification methods**: SMS, WhatsApp, or both based on user preference
+- **Alert manager**: Background service to check and trigger alerts
+- **Product-specific alerts**: Farmers can set alerts for their own products
+- **User preferences**: Configurable notification methods and thresholds
+- **Audit trail**: Complete alert history with trigger timestamps
+
+### Cooperative Ordering System
+- **Farmer cooperatives**: Group organization for farmers to sell collectively
+- **Bulk orders**: Buyers can place orders spanning multiple farmers in a cooperative
+- **Farmer confirmation**: Individual farmers confirm their portion of bulk orders
+- **Order tracking**: Per-item status tracking within bulk orders
+- **Cooperative management**: Admin can create and manage cooperatives
+- **Member management**: Farmers can join cooperatives to participate in bulk selling
+- **Volume discounts**: Framework for cooperative pricing advantages
+
 ---
 
 ## 🤝 Contributing

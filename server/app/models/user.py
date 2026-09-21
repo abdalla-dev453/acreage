@@ -26,6 +26,7 @@ class User(db.Model):
     verification_token_expires_at = db.Column(db.DateTime, nullable=True)
     reset_token_hash = db.Column(db.String(64), nullable=True)
     reset_token_expires_at = db.Column(db.DateTime, nullable=True)
+    cooperative_id = db.Column(db.Integer, db.ForeignKey('cooperatives.id'), nullable=True)
 
     # relationships
     products = db.relationship('Product', backref='farmer', lazy=True)
@@ -47,6 +48,7 @@ class User(db.Model):
     escrow_transactions_as_farmer = db.relationship(
         'EscrowTransaction', foreign_keys='EscrowTransaction.farmer_id', lazy=True
     )
+    cooperative = db.relationship('Cooperative', backref='members')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

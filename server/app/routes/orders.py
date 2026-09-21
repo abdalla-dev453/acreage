@@ -15,6 +15,8 @@ import logging
 from app.services.escrow import fund_escrow, get_or_create_escrow
 from app.utils.mpesa import get_mpesa_access_token
 from app.utils.http import json_object
+from app.utils.sms import send_order_status_sms, send_payment_confirmation_sms
+from app.utils.whatsapp import send_order_status_whatsapp, send_payment_confirmation_whatsapp
 
 
 orders_bp = Blueprint('orders', __name__)
@@ -266,8 +268,22 @@ def update_order_status(order_id):
         for item in order.items:
             item.product.stock_quantity += item.quantity
         logger.info('Order cancelled and stock restored', extra={'order_id': order.id})
+    
+    old_status = order.status
     order.status = new_status
     db.session.commit()
+    
+    # Send SMS notification for status change
+    try:
+        send_order_status_sms(order, new_status)
+    except Exception as sms_error:
+        logger.exception('Failed to send order status SMS', extra={'order_id': order.id})
+    
+    # Send WhatsApp notification for status change
+    try:
+        send_order_status_whatsapp(order, new_status)
+    except Exception as whatsapp_error:
+        logger.exception('Failed to send order status WhatsApp', extra={'order_id': order.id})
 
     return order_schema.jsonify(order), 200
 
@@ -449,6 +465,18 @@ def mpesa_callback():
             provider_transaction_id=checkout_request_id,
             mpesa_receipt_number=mpesa_receipt_number,
         )
+        
+        # Send SMS payment confirmation
+        try:
+            send_payment_confirmation_sms(order)
+        except Exception as sms_error:
+            logger.exception('Failed to send payment confirmation SMS', extra={'order_id': order.id})
+        
+        # Send WhatsApp payment confirmation
+        try:
+            send_payment_confirmation_whatsapp(order)
+        except Exception as whatsapp_error:
+            logger.exception('Failed to send payment confirmation WhatsApp', extra={'order_id': order.id})
 
     else:
         logger.warning("STK Push Payment Rejected for Order #%s. Reason: %s", order.order_code, result_desc)
