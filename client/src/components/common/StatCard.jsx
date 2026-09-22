@@ -16,7 +16,7 @@ export default function StatCard({ label, value, icon: Icon, delay = 0, isCurren
       className="stats-card p-6 rounded-2xl flex items-center justify-between cursor-pointer group"
     >
       <div className="min-w-0 flex-1 pr-4">
-        <p className="text-3xl font-bold text-gradient-premium tracking-tight truncate">
+        <p className="text-3xl font-bold text-green-700 tracking-tight truncate">
           {formattedValue ?? '0'}
         </p>
         <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-2 truncate">

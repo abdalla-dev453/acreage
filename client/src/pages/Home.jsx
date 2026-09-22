@@ -120,7 +120,7 @@ export default function Home() {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#166534] to-[#052E16] text-white flex items-center justify-center -rotate-3 shadow-md shadow-[#166534]/30">
               <Sprout className="w-5 h-5 stroke-[2.5]" />
             </div>
-            <span className="font-display font-extrabold text-2xl tracking-wide bg-gradient-to-r from-[#020617] via-[#166534] to-[#052E16] bg-clip-text text-transparent">
+            <span className="font-display font-extrabold text-2xl tracking-wide text-[#166534]">
               Acreage
               <span className='block text-green-400 text-sm mt-2'>Be Today, Be Nature!</span>
             </span>
@@ -173,7 +173,7 @@ export default function Home() {
 
             <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-[3.8rem] leading-[1.08] tracking-tight text-[#020617]">
               The ledger for your{' '}
-              <span className="relative inline-block italic font-bold bg-gradient-to-r from-[#166534] via-[#22C55E] to-[#15803D] bg-clip-text text-transparent drop-shadow-sm">
+              <span className="relative inline-block italic font-bold text-[#166534] drop-shadow-sm">
                 whole harvest.
               </span>
             </h1>

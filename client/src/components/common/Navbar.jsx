@@ -53,7 +53,7 @@ export default function Navbar({ title = 'Dashboard' }) {
       <div className="flex items-center space-x-3.5">
         <div className="flex items-center space-x-1.5">
           <span className="text-primary-600 font-mono text-xl font-black select-none opacity-40">#</span>
-          <h1 className="text-xl font-black text-gradient-premium tracking-tight">
+          <h1 className="text-xl font-black text-green-700 tracking-tight">
             {title}
           </h1>
         </div>

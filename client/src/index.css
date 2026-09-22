@@ -179,19 +179,13 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Premium Gradient Text */
+/* Premium Text Colors */
 .text-gradient-premium {
-  background: linear-gradient(135deg, var(--acreage-forest) 0%, var(--acreage-leaf) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--acreage-forest);
 }
 
 .text-gradient-gold {
-  background: linear-gradient(135deg, var(--acreage-gold) 0%, #fac93e 50%, #f07528 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--acreage-gold);
 }
 
 /* Premium Loading Animation */

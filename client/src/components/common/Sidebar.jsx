@@ -83,7 +83,7 @@ export default function Sidebar() {
           <div className="p-2 bg-gradient-to-tr from-gold-400 to-gold-600 rounded-lg text-black shadow-gold animate-pulse-slow">
             <Sprout className="w-4 h-4 stroke-[3]" />
           </div>
-          <span className="font-black text-xs tracking-[0.3em] text-gradient-gold">ACREAGE</span>
+          <span className="font-black text-xs tracking-[0.3em] text-amber-400">ACREAGE</span>
         </div>
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}
@@ -134,7 +134,7 @@ export default function Sidebar() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    className="font-black text-[15px] tracking-[0.3em] text-gradient-gold ml-4 whitespace-nowrap"
+                    className="font-black text-[15px] tracking-[0.3em] text-amber-400 ml-4 whitespace-nowrap"
                   >
                     ACREAGE
                   </motion.span>
@@ -197,7 +197,7 @@ export default function Sidebar() {
                     exit={{ opacity: 0, x: -10 }}
                     className="ml-3 overflow-hidden whitespace-nowrap"
                   >
-                    <p className="text-[10px] font-bold text-gradient-gold uppercase truncate">{user.username}</p>
+                    <p className="text-[10px] font-bold text-amber-400 uppercase truncate">{user.username}</p>
                     <p className="text-[8px] text-white/40 uppercase tracking-wider truncate">{user.role}</p>
                   </motion.div>
                 )}
