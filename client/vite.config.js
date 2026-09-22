@@ -67,11 +67,19 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['framer-motion', 'lucide-react'],
-          'api-vendor': ['axios'],
-          'i18n-vendor': ['i18next', 'react-i18next', 'i18next-browser-languagedetector']
+        manualChunks: (id) => {
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            return 'react-vendor';
+          }
+          if (id.includes('framer-motion') || id.includes('lucide-react')) {
+            return 'ui-vendor';
+          }
+          if (id.includes('axios')) {
+            return 'api-vendor';
+          }
+          if (id.includes('i18next') || id.includes('react-i18next')) {
+            return 'i18n-vendor';
+          }
         }
       }
     },
