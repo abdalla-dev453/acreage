@@ -5,6 +5,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import AppRoutes from './routes/AppRoutes';
 import CookieBanner from './components/common/CookieBanner';
 import MobileCTA from './components/common/MobileCTA';
+import OfflineBanner from './components/common/OfflineBanner';
 import './index.css';
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
       <AuthProvider>
         <ChatProvider>
           <Router>
+            <OfflineBanner />
             <AppRoutes />
             <CookieBanner />
             <MobileCTA />
