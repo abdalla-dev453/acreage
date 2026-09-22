@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings, Sun, Moon, Monitor, Globe, User as UserIcon, Shield, HelpCircle, LifeBuoy, Globe as GlobeIcon, Save, RotateCw, LogOut } from 'lucide-react';
 import { SettingsContext } from '../context/SettingsContext';
 import { AuthContext } from '../context/AuthContext';
@@ -7,6 +8,7 @@ import Navbar from '../components/common/Navbar';
 import SEO from '../components/common/SEO';
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const { settings, updateSetting, resetSettings } = useContext(SettingsContext);
   const { user, logout } = useContext(AuthContext);
   const [saved, setSaved] = useState(false);
@@ -123,14 +125,14 @@ export default function SettingsPage() {
   ];
 
   const themeOptions = [
-    { value: 'light', label: 'Light', icon: Sun, desc: 'Always use light mode' },
-    { value: 'dark', label: 'Dark', icon: Moon, desc: 'Always use dark mode' },
-    { value: 'system', label: 'System', icon: Monitor, desc: 'Follow system preference' },
+    { value: 'light', label: t('settings.themeLight'), icon: Sun, desc: 'Always use light mode' },
+    { value: 'dark', label: t('settings.themeDark'), icon: Moon, desc: 'Always use dark mode' },
+    { value: 'system', label: t('settings.themeSystem'), icon: Monitor, desc: 'Follow system preference' },
   ];
 
   const languageOptions = [
-    { value: 'en', label: 'English' },
-    { value: 'sw', label: 'Kiswahili' },
+    { value: 'en', label: t('languages.english') },
+    { value: 'sw', label: t('languages.swahili') },
   ];
 
   const SettingCard = ({ title, description, children }) => (
@@ -169,8 +171,8 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 w-full pb-12">
-      <SEO title="Settings | Acreage" description="Manage your theme, language, notification, and website preferences." />
-      <Navbar title="Settings" />
+      <SEO title={`${t('settings.title')} | Acreage`} description="Manage your theme, language, notification, and website preferences." />
+      <Navbar title={t('settings.title')} />
 
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
@@ -217,7 +219,7 @@ export default function SettingsPage() {
         {activeTab === 'general' && (
           <>
             <SettingCard
-              title="Theme"
+              title={t('settings.theme')}
               description="Choose your preferred color scheme."
             >
               <div className="grid grid-cols-3 gap-2">

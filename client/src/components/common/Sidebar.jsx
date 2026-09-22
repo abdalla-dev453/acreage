@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
   import {
     LayoutDashboard,
     BarChart2,
@@ -27,6 +28,7 @@ import { AuthContext } from '../../context/AuthContext';
 
 export default function Sidebar() {
   const { user, logout } = useContext(AuthContext);
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,23 +56,23 @@ export default function Sidebar() {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['farmer', 'buyer'] },
-    { name: 'Analytics', path: '/analytics', icon: BarChart2, roles: ['farmer'] },
-    { name: 'Farm Logs', path: '/farm-logs', icon: ClipboardList, roles: ['farmer'] },
-    { name: 'Orders', path: '/orders', icon: ShoppingBag, roles: ['farmer', 'buyer'] },
-    { name: 'Customers', path: '/customers', icon: Users, roles: ['farmer'] },
-    { name: 'Marketplace', path: '/marketplace', icon: ShoppingBag, roles: ['farmer', 'buyer'] },
-    { name: 'Reviews', path: '/reviews', icon: Star, roles: ['farmer', 'buyer'] },
-    { name: 'Chats', path: '/chats', icon: MessageSquare, roles: ['farmer', 'buyer'] },
-    { name: 'Wallet', path: '/wallet', icon: Wallet, roles: ['farmer', 'buyer'] },
-    { name: 'Profile', path: '/profile', icon: User, roles: ['farmer', 'buyer'] },
-    { name: 'Settings', path: '/settings', icon: Settings, roles: ['farmer', 'buyer'] },
-    { name: 'Trust Center', path: '/trust', icon: ShieldCheck, roles: ['farmer', 'buyer', 'admin'] },
-    { name: 'Market Prices', path: '/market-prices', icon: TrendingUp, roles: ['farmer', 'buyer', 'admin'] },
-    { name: 'Group Orders', path: '/groups', icon: UsersRound, roles: ['farmer', 'buyer', 'admin'] },
-    { name: 'SMS Hub', path: '/sms', icon: MessageSquareText, roles: ['farmer', 'buyer', 'admin'] },
-    { name: 'Harvest', path: '/harvest', icon: CalendarDays, roles: ['farmer', 'buyer', 'admin'] },
-    { name: 'Home', path: '/', icon: Home, roles: ['farmer', 'buyer'] }
+    { name: t('nav.dashboard'), path: '/dashboard', icon: LayoutDashboard, roles: ['farmer', 'buyer'] },
+    { name: t('nav.analytics'), path: '/analytics', icon: BarChart2, roles: ['farmer'] },
+    { name: t('nav.farmLogs'), path: '/farm-logs', icon: ClipboardList, roles: ['farmer'] },
+    { name: t('nav.orders'), path: '/orders', icon: ShoppingBag, roles: ['farmer', 'buyer'] },
+    { name: t('nav.customers'), path: '/customers', icon: Users, roles: ['farmer'] },
+    { name: t('nav.marketplace'), path: '/marketplace', icon: ShoppingBag, roles: ['farmer', 'buyer'] },
+    { name: t('nav.reviews'), path: '/reviews', icon: Star, roles: ['farmer', 'buyer'] },
+    { name: t('nav.chats'), path: '/chats', icon: MessageSquare, roles: ['farmer', 'buyer'] },
+    { name: t('nav.wallet'), path: '/wallet', icon: Wallet, roles: ['farmer', 'buyer'] },
+    { name: t('nav.profile'), path: '/profile', icon: User, roles: ['farmer', 'buyer'] },
+    { name: t('nav.settings'), path: '/settings', icon: Settings, roles: ['farmer', 'buyer'] },
+    { name: t('nav.trust'), path: '/trust', icon: ShieldCheck, roles: ['farmer', 'buyer', 'admin'] },
+    { name: t('nav.marketPrices'), path: '/market-prices', icon: TrendingUp, roles: ['farmer', 'buyer', 'admin'] },
+    { name: t('nav.groupOrders'), path: '/groups', icon: UsersRound, roles: ['farmer', 'buyer', 'admin'] },
+    { name: t('nav.smsHub'), path: '/sms', icon: MessageSquareText, roles: ['farmer', 'buyer', 'admin'] },
+    { name: t('nav.harvest'), path: '/harvest', icon: CalendarDays, roles: ['farmer', 'buyer', 'admin'] },
+    { name: t('nav.home'), path: '/', icon: Home, roles: ['farmer', 'buyer'] }
   ];
   const luxurySpring = { type: "spring", stiffness: 220, damping: 28, mass: 0.8 };
 
@@ -220,7 +222,7 @@ export default function Sidebar() {
                   exit={{ opacity: 0, x: -10 }}
                   className="text-[11px] font-black uppercase tracking-[0.2em] pl-2 whitespace-nowrap"
                 >
-                  Logout
+                  {t('nav.logout')}
                 </motion.span>
               )}
             </AnimatePresence>

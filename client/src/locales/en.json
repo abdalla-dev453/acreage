@@ -230,5 +230,29 @@
     "maxValue": "Must be less than or equal to {{max}}",
     "minLength": "Must be at least {{min}} characters",
     "maxLength": "Must be no more than {{max}} characters"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "general": "General",
+    "theme": "Theme",
+    "language": "Language",
+    "notifications": "Notifications",
+    "security": "Security",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "phone": "Phone Number",
+    "location": "Location",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "twoFactorAuth": "Two-Factor Authentication",
+    "betaProgram": "Beta Program",
+    "featureAnnouncements": "Feature Announcements",
+    "privateAccount": "Private Account",
+    "faq": "FAQ",
+    "documentation": "Documentation",
+    "contactSupport": "Contact Support"
   }
 }
