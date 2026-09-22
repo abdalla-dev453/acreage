@@ -12,8 +12,8 @@ import i18n from './i18n'; // Initialize i18n before any components
 
 export default function App() {
   return (
-    <I18nextProvider i18n={i18n}>
-      <SettingsProvider>
+    <SettingsProvider>
+      <I18nextProvider i18n={i18n}>
         <AuthProvider>
           <ChatProvider>
             <Router>
@@ -24,7 +24,7 @@ export default function App() {
             </Router>
           </ChatProvider>
         </AuthProvider>
-      </SettingsProvider>
-    </I18nextProvider>
+      </I18nextProvider>
+    </SettingsProvider>
   );
 }
