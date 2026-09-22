@@ -10,6 +10,10 @@ const DEFAULT_SETTINGS = {
   sound: true,
   fontSize: 'normal',
   compactMode: false,
+  featureAnnouncements: true,
+  betaProgram: false,
+  privateAccount: false,
+  twoFactorAuth: false,
 };
 
 export const SettingsProvider = ({ children }) => {

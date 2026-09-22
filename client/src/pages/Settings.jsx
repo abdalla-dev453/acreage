@@ -18,10 +18,19 @@ export default function SettingsPage() {
   const [passwordForm, setPasswordForm] = useState({ current_password: '', new_password: '', confirm_password: '' });
   const [passwordNotice, setPasswordNotice] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [editingPhone, setEditingPhone] = useState(false);
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [phoneValue, setPhoneValue] = useState(user?.phone_number || '');
+  const [locationValue, setLocationValue] = useState(user?.location || '');
+  const [showFAQ, setShowFAQ] = useState(false);
+  const [showDocs, setShowDocs] = useState(false);
+  const [twoFactorSetup, setTwoFactorSetup] = useState(false);
 
   useEffect(() => {
     if (user) {
       setPasswordForm((prev) => ({ ...prev, current_password: '' }));
+      setPhoneValue(user?.phone_number || '');
+      setLocationValue(user?.location || '');
     }
   }, [user]);
 
@@ -83,6 +92,26 @@ export default function SettingsPage() {
       logout();
     } catch (err) {
       alert(err.response?.data?.message || 'Unable to deactivate account.');
+    }
+  };
+
+  const updatePhone = async () => {
+    try {
+      await API.put('/settings/account', { phone_number: phoneValue });
+      setEditingPhone(false);
+      handleSave();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Unable to update phone number.');
+    }
+  };
+
+  const updateLocation = async () => {
+    try {
+      await API.put('/settings/account', { location: locationValue });
+      setEditingLocation(false);
+      handleSave();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Unable to update location.');
     }
   };
 
@@ -289,6 +318,13 @@ export default function SettingsPage() {
                 label="Beta Program"
                 desc="Early access to new features and improvements"
               />
+              {settings.betaProgram && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-xs text-blue-800">
+                    <strong>Beta Program Active:</strong> You'll receive early access to new features. Thank you for helping us improve!
+                  </p>
+                </div>
+              )}
             </SettingCard>
           </>
         )}
@@ -312,20 +348,86 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                   <div className="flex-1 min-w-0">
                     <label className="text-xs font-bold text-slate-700">Phone</label>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{user?.phone_number || 'Not set'}</p>
+                    {editingPhone ? (
+                      <input
+                        type="text"
+                        value={phoneValue}
+                        onChange={(e) => setPhoneValue(e.target.value)}
+                        className="w-full mt-1 px-2 py-1 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600"
+                        placeholder="Enter phone number"
+                      />
+                    ) : (
+                      <p className="text-[11px] text-slate-500 mt-0.5">{user?.phone_number || 'Not set'}</p>
+                    )}
                   </div>
-                  <button className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition">
-                    Edit
-                  </button>
+                  {editingPhone ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={updatePhone}
+                        className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingPhone(false);
+                          setPhoneValue(user?.phone_number || '');
+                        }}
+                        className="px-3 py-1.5 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setEditingPhone(true)}
+                      className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                   <div className="flex-1 min-w-0">
                     <label className="text-xs font-bold text-slate-700">Location</label>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{user?.location || 'Not set'}</p>
+                    {editingLocation ? (
+                      <input
+                        type="text"
+                        value={locationValue}
+                        onChange={(e) => setLocationValue(e.target.value)}
+                        className="w-full mt-1 px-2 py-1 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600"
+                        placeholder="Enter location"
+                      />
+                    ) : (
+                      <p className="text-[11px] text-slate-500 mt-0.5">{user?.location || 'Not set'}</p>
+                    )}
                   </div>
-                  <button className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition">
-                    Edit
-                  </button>
+                  {editingLocation ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={updateLocation}
+                        className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingLocation(false);
+                          setLocationValue(user?.location || '');
+                        }}
+                        className="px-3 py-1.5 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setEditingLocation(true)}
+                      className="px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 transition"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
                 <ToggleSwitch
                   settingKey="privateAccount"
@@ -414,6 +516,26 @@ export default function SettingsPage() {
                 label="Enable 2FA"
                 desc={settings.twoFactorAuth ? 'Two-factor authentication is enabled' : 'Two-factor authentication is disabled'}
               />
+              {settings.twoFactorAuth && !twoFactorSetup && (
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-xs text-amber-800">
+                    <strong>Setup Required:</strong> Please complete 2FA setup by scanning the QR code in your authenticator app.
+                  </p>
+                  <button
+                    onClick={() => setTwoFactorSetup(true)}
+                    className="mt-2 px-3 py-1.5 text-xs font-medium text-amber-700 border border-amber-300 rounded-lg hover:bg-amber-100 transition"
+                  >
+                    Complete Setup
+                  </button>
+                </div>
+              )}
+              {twoFactorSetup && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-xs text-green-800">
+                    <strong>2FA Active:</strong> Your account is now protected with two-factor authentication.
+                  </p>
+                </div>
+              )}
             </SettingCard>
 
             <SettingCard
@@ -441,15 +563,26 @@ export default function SettingsPage() {
               description="Get support and learn how to use Acreage."
             >
               <div className="space-y-2">
-                <button className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 rounded-xl transition">
+                <button
+                  onClick={() => setShowFAQ(!showFAQ)}
+                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 rounded-xl transition"
+                >
                   <HelpCircle className="w-5 h-5 text-slate-600" />
-                  <div className="text-left">
+                  <div className="text-left flex-1">
                     <p className="text-xs font-bold text-slate-800">FAQ</p>
                     <p className="text-[10px] text-slate-400">Frequently asked questions</p>
                   </div>
+                  <span className="text-slate-400">{showFAQ ? '−' : '+'}</span>
                 </button>
+                {showFAQ && (
+                  <div className="ml-8 p-3 bg-slate-50 rounded-lg text-xs text-slate-600 space-y-2">
+                    <p><strong>Q: How do I change my password?</strong><br/>A: Go to Security & Privacy tab and use the password change form.</p>
+                    <p><strong>Q: How do I update my profile?</strong><br/>A: Go to Account tab and edit your phone/location information.</p>
+                    <p><strong>Q: How do I enable notifications?</strong><br/>A: Go to General tab and toggle Push Notifications.</p>
+                  </div>
+                )}
                 <button
-                  onClick={() => window.open('https://wa.me/254700000000', '_blank')}
+                  onClick={() => window.open('https://wa.me/?text=Hello%20Acreage%20Support', '_blank')}
                   className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 rounded-xl transition"
                 >
                   <LifeBuoy className="w-5 h-5 text-slate-600" />
@@ -458,13 +591,24 @@ export default function SettingsPage() {
                     <p className="text-[10px] text-slate-400">Chat with our team</p>
                   </div>
                 </button>
-                <button className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 rounded-xl transition">
+                <button
+                  onClick={() => setShowDocs(!showDocs)}
+                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 rounded-xl transition"
+                >
                   <GlobeIcon className="w-5 h-5 text-slate-600" />
-                  <div className="text-left">
+                  <div className="text-left flex-1">
                     <p className="text-xs font-bold text-slate-800">Documentation</p>
                     <p className="text-[10px] text-slate-400">Developer guides and API docs</p>
                   </div>
+                  <span className="text-slate-400">{showDocs ? '−' : '+'}</span>
                 </button>
+                {showDocs && (
+                  <div className="ml-8 p-3 bg-slate-50 rounded-lg text-xs text-slate-600 space-y-2">
+                    <p><strong>Getting Started:</strong> Learn how to set up your account and start using Acreage.</p>
+                    <p><strong>API Documentation:</strong> Integrate Acreage with your applications using our REST API.</p>
+                    <p><strong>User Guides:</strong> Step-by-step tutorials for farmers and buyers.</p>
+                  </div>
+                )}
               </div>
             </SettingCard>
 
