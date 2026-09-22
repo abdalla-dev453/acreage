@@ -6,7 +6,7 @@ import SEO from '../components/common/SEO';
 export default function SmsHub() {
   const [copied, setCopied] = useState(false);
 
-  const smsNumber = '+254700000000'; // Replace with actual SMS short code
+  const smsNumber = process.env.VITE_SMS_NUMBER || '+254700000000';
   const exampleCommands = [
     {
       command: 'ORDER 123 5',
