@@ -73,7 +73,7 @@ export default function Navbar({ title = 'Dashboard' }) {
       <div className="flex items-center space-x-2.5">
         <div className="flex items-center space-x-2">
           {/* Search */}
-          <div className="relative" ref={searchRef}>
+          <div className="relative z-[100]" ref={searchRef}>
             <AnimatePresence mode="wait">
               {isSearchOpen ? (
                 <motion.div
@@ -119,7 +119,7 @@ export default function Navbar({ title = 'Dashboard' }) {
           </div>
 
           {/* Notifications */}
-          <div className="relative" ref={notificationsRef}>
+          <div className="relative z-[100]" ref={notificationsRef}>
             <motion.button
               whileHover={{ y: -1.5, backgroundColor: '#ffffff' }}
               whileTap={{ scale: 0.97 }}
@@ -144,7 +144,7 @@ export default function Navbar({ title = 'Dashboard' }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-30"
+                  className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-[100]"
                 >
                   <div className="px-3 py-2 border-b border-slate-100">
                     <p className="text-[10px] font-black uppercase text-slate-400">Notifications</p>

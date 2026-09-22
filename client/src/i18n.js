@@ -34,4 +34,10 @@ i18n
     }
   });
 
+// Export a function to manually change language
+export const changeLanguage = (lng) => {
+  i18n.changeLanguage(lng);
+  localStorage.setItem('acreage_language', lng);
+};
+
 export default i18n;

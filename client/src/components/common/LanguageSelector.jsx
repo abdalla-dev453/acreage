@@ -1,14 +1,15 @@
-import { useTranslation } from 'react-i18next';
+import { useContext } from 'react';
 import { Globe } from 'lucide-react';
+import { SettingsContext } from '../../context/SettingsContext';
 
 export default function LanguageSelector() {
-  const { i18n } = useTranslation();
+  const { settings, updateSetting } = useContext(SettingsContext);
 
   const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
+    updateSetting('language', lng);
   };
 
-  const currentLanguage = i18n.language;
+  const currentLanguage = settings?.language || 'en';
 
   return (
     <div className="flex items-center gap-2">

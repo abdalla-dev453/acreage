@@ -1,10 +1,12 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useContext } from 'react';
 import { Star, MessageSquare, ShieldCheck, ImagePlus, X, Send, Lock, CheckCircle2, AlertCircle, ThumbsUp } from 'lucide-react';
 import API from '../services/api';
 import Navbar from '../components/common/Navbar';
 import SEO from '../components/common/SEO';
+import { AuthContext } from '../context/AuthContext';
 
 export default function CustomerReview() {
+  const { user } = useContext(AuthContext);
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -522,12 +524,12 @@ export default function CustomerReview() {
                     )}
 
                     {/* Comment Input */}
-                    {hasCompletedTransaction && (
+                    {user && (hasCompletedTransaction || user?.role === 'farmer') && (
                       <div className="flex items-center gap-2 pt-1">
                         <input
                           id={`comment-input-${rev.id}`}
                           type="text"
-                          placeholder="Write a comment..."
+                          placeholder={user?.role === 'farmer' ? "Respond as farmer..." : "Write a comment..."}
                           value={commentInputs[rev.id] || ''}
                           onChange={(e) =>
                             setCommentInputs((prev) => ({ ...prev, [rev.id]: e.target.value }))

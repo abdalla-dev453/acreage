@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { ArrowDownRight, ArrowUpRight, Clock3, Plus, RefreshCw, Search, TrendingUp } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
+import kenyahMarketPricesService from '../services/kenyanMarketPrices';
 import Navbar from '../components/common/Navbar';
 import SEO from '../components/common/SEO';
 import { EmptyState, ErrorState, LoadingState } from '../components/premium/PageState';
@@ -23,24 +24,44 @@ export default function MarketPrices() {
   const [manualOpen, setManualOpen] = useState(false);
   const [manual, setManual] = useState({ commodity: '', price_per_kg: '', source: '', market: '', notes: '' });
   const [notice, setNotice] = useState('');
+  const [dataSource, setDataSource] = useState('API');
 
   const load = async () => {
     setLoading(true);
     setError('');
     try {
+      // Try backend API first
       const params = new URLSearchParams();
       if (category) params.set('category', category);
       if (market.trim()) params.set('market', market.trim());
       const response = await API.get(`/market/prices?${params.toString()}`);
       const data = response.data?.items || response.data || [];
-      setPrices((Array.isArray(data) ? data : []).map((item) => ({
-        ...item,
-        commodity: item.commodity || item.category || 'Market observation',
-        price_per_kg: item.price_per_kg ?? item.price_per_unit,
-        price_change_percent: item.price_change_percent ?? 0,
-      })));
+      
+      if (data.length > 0) {
+        setPrices((Array.isArray(data) ? data : []).map((item) => ({
+          ...item,
+          commodity: item.commodity || item.category || 'Market observation',
+          price_per_kg: item.price_per_kg ?? item.price_per_unit,
+          price_change_percent: item.price_change_percent ?? 0,
+        })));
+        setDataSource('API');
+      } else {
+        // Fallback to Kenyan market prices service
+        const fallbackData = await kenyahMarketPricesService.getMarketPrices(category, market);
+        setPrices(fallbackData);
+        setDataSource('Kenyan Market Data');
+      }
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Market price feed is unavailable.');
+      // Fallback to Kenyan market prices service on error
+      console.log('API unavailable, using Kenyan market data');
+      try {
+        const fallbackData = await kenyahMarketPricesService.getMarketPrices(category, market);
+        setPrices(fallbackData);
+        setDataSource('Kenyan Market Data');
+        setError(''); // Clear error since we have fallback data
+      } catch (fallbackError) {
+        setError('Market price feed is unavailable.');
+      }
     } finally {
       setLoading(false);
     }
@@ -52,11 +73,17 @@ export default function MarketPrices() {
     setRefreshing(true);
     setError('');
     try {
+      // Try to refresh from backend API
       await API.post('/market/prices/refresh');
-      setNotice('Provider observations refreshed.');
+      // Also refresh the Kenyan market service
+      await kenyahMarketPricesService.refreshMarketPrices();
+      setNotice('Market prices refreshed from Kenyan sources.');
       await load();
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Provider refresh is unavailable.');
+      // Still refresh from Kenyan service even if backend fails
+      await kenyahMarketPricesService.refreshMarketPrices();
+      setNotice('Market prices refreshed from Kenyan sources.');
+      await load();
     } finally {
       setRefreshing(false);
     }
@@ -101,6 +128,12 @@ export default function MarketPrices() {
         <div>
           <h1 className="text-xl font-black text-slate-900">Live market intelligence</h1>
           <p className="mt-1 text-xs font-bold text-slate-500">Source-aware observations for smarter listing and preorder decisions.</p>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-lg text-[10px] font-bold">
+              <Clock3 className="w-3 h-3" />
+              {dataSource}
+            </span>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           {user?.role === 'admin' && <button type="button" onClick={refresh} disabled={refreshing} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50 disabled:opacity-50"><RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} /> {refreshing ? 'Refreshing...' : 'Refresh provider'}</button>}

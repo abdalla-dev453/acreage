@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
 import API from '../services/api';
+import { changeLanguage } from '../i18n';
 
 export const SettingsContext = createContext();
 
@@ -29,6 +30,7 @@ export const SettingsProvider = ({ children }) => {
 
   useEffect(() => {
     applyTheme(settings.theme);
+    applyLanguage(settings.language);
     localStorage.setItem('app_settings', JSON.stringify(settings));
   }, [settings]);
 
@@ -58,32 +60,59 @@ export const SettingsProvider = ({ children }) => {
     const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
+      document.body.classList.add('dark');
     } else if (theme === 'light') {
       root.classList.remove('dark');
+      document.body.classList.remove('dark');
     } else {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       root.classList.toggle('dark', prefersDark);
+      document.body.classList.toggle('dark', prefersDark);
     }
+  }
+
+  function applyLanguage(language) {
+    changeLanguage(language);
+    document.documentElement.lang = language;
   }
 
   const updateSetting = useCallback(async (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+    
+    // Apply theme immediately for better UX
+    if (key === 'theme') {
+      applyTheme(value);
+    }
+    
+    // Apply language immediately
+    if (key === 'language') {
+      applyLanguage(value);
+    }
+    
     try {
       await API.put('/settings/preferences', { [key]: value });
-    } catch {
+    } catch (error) {
+      console.error('Failed to update setting:', error);
+      // Revert on error
+      setSettings((prev) => ({ ...prev, [key]: settings[key] }));
     }
-  }, []);
+  }, [settings]);
 
   const saveAll = useCallback(async (newSettings) => {
     setSettings(newSettings);
+    applyTheme(newSettings.theme);
+    applyLanguage(newSettings.language);
     try {
       await API.put('/settings/preferences', newSettings);
-    } catch {
+    } catch (error) {
+      console.error('Failed to save settings:', error);
     }
   }, []);
 
   const resetSettings = useCallback(() => {
     setSettings(DEFAULT_SETTINGS);
+    applyTheme(DEFAULT_SETTINGS.theme);
+    applyLanguage(DEFAULT_SETTINGS.language);
     API.put('/settings/preferences', DEFAULT_SETTINGS).catch(() => {});
   }, []);
 
