@@ -1,32 +1,47 @@
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
+import { lazy, Suspense } from "react";
 
 import Sidebar from "../components/common/Sidebar";
-import Analytics from "../pages/Analytics";
-import Chats from "../pages/Chats";
-import CustomerReview from "../pages/CustomerReview";
-import Customers from "../pages/Customers";
-import Dashboard from "../pages/Dashboard";
-import FarmingLog from "../pages/FarmingLog";
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Marketplace from "../pages/Marketplace";
-import Orders from "../pages/Orders";
-import OrderDetail from "../pages/OrderDetail";
-import Profile from "../pages/Profile";
-import Register from "../pages/Register";
-import Wallet from "../pages/Wallet";
-import NotFound from "../pages/NotFound";
-import ThankYou from "../pages/ThankYou";
-import Privacy from "../pages/Privacy";
-import Settings from "../pages/Settings";
-import Search from "../pages/Search";
-import Terms from "../pages/Terms";
-import TrustCenter from "../pages/TrustCenter";
-import MarketPrices from "../pages/MarketPrices";
-import GroupCommerce from "../pages/GroupCommerce";
-import SmsHub from "../pages/SmsHub";
-import HarvestPlanner from "../pages/HarvestPlanner";
+import Home from "../pages/Home"; // Keep Home as regular import for landing page
+
+// Lazy load components for better performance
+const Analytics = lazy(() => import("../pages/Analytics"));
+const Chats = lazy(() => import("../pages/Chats"));
+const CustomerReview = lazy(() => import("../pages/CustomerReview"));
+const Customers = lazy(() => import("../pages/Customers"));
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const FarmingLog = lazy(() => import("../pages/FarmingLog"));
+const Login = lazy(() => import("../pages/Login"));
+const Marketplace = lazy(() => import("../pages/Marketplace"));
+const Orders = lazy(() => import("../pages/Orders"));
+const OrderDetail = lazy(() => import("../pages/OrderDetail"));
+const Profile = lazy(() => import("../pages/Profile"));
+const Register = lazy(() => import("../pages/Register"));
+const Wallet = lazy(() => import("../pages/Wallet"));
+const NotFound = lazy(() => import("../pages/NotFound"));
+const ThankYou = lazy(() => import("../pages/ThankYou"));
+const Privacy = lazy(() => import("../pages/Privacy"));
+const Settings = lazy(() => import("../pages/Settings"));
+const Search = lazy(() => import("../pages/Search"));
+const Terms = lazy(() => import("../pages/Terms"));
+const TrustCenter = lazy(() => import("../pages/TrustCenter"));
+const MarketPrices = lazy(() => import("../pages/MarketPrices"));
+const GroupCommerce = lazy(() => import("../pages/GroupCommerce"));
+const SmsHub = lazy(() => import("../pages/SmsHub"));
+const HarvestPlanner = lazy(() => import("../pages/HarvestPlanner"));
+
+// Loading component for lazy loading
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-slate-600 font-medium">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function AppLayout() {
   return (
@@ -47,41 +62,137 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/thank-you" element={<ThankYou />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/terms" element={<Terms />} />
+      <Route path="/login" element={
+        <Suspense fallback={<PageLoader />}>
+          <Login />
+        </Suspense>
+      } />
+      <Route path="/register" element={
+        <Suspense fallback={<PageLoader />}>
+          <Register />
+        </Suspense>
+      } />
+      <Route path="/thank-you" element={
+        <Suspense fallback={<PageLoader />}>
+          <ThankYou />
+        </Suspense>
+      } />
+      <Route path="/privacy" element={
+        <Suspense fallback={<PageLoader />}>
+          <Privacy />
+        </Suspense>
+      } />
+      <Route path="/terms" element={
+        <Suspense fallback={<PageLoader />}>
+          <Terms />
+        </Suspense>
+      } />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="orders/:id" element={<OrderDetail />} />
-          <Route path="chats" element={<Chats />} />
-          <Route path="wallet" element={<Wallet />} />
-           <Route path="reviews" element={<CustomerReview />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="customers" element={<Customers />} />
-          <Route path="analytics" element={<Analytics />} />
-           <Route path="marketplace" element={<Marketplace />} />
-           <Route path="search" element={<Search />} />
-          <Route path="trust" element={<TrustCenter />} />
-          <Route path="market-prices" element={<MarketPrices />} />
-          <Route path="groups" element={<GroupCommerce />} />
-          <Route path="sms" element={<SmsHub />} />
-          <Route path="harvest" element={<HarvestPlanner />} />
+          <Route path="dashboard" element={
+            <Suspense fallback={<PageLoader />}>
+              <Dashboard />
+            </Suspense>
+          } />
+          <Route path="orders" element={
+            <Suspense fallback={<PageLoader />}>
+              <Orders />
+            </Suspense>
+          } />
+          <Route path="orders/:id" element={
+            <Suspense fallback={<PageLoader />}>
+              <OrderDetail />
+            </Suspense>
+          } />
+          <Route path="chats" element={
+            <Suspense fallback={<PageLoader />}>
+              <Chats />
+            </Suspense>
+          } />
+          <Route path="wallet" element={
+            <Suspense fallback={<PageLoader />}>
+              <Wallet />
+            </Suspense>
+          } />
+           <Route path="reviews" element={
+            <Suspense fallback={<PageLoader />}>
+              <CustomerReview />
+            </Suspense>
+          } />
+          <Route path="settings" element={
+            <Suspense fallback={<PageLoader />}>
+              <Settings />
+            </Suspense>
+          } />
+          <Route path="profile" element={
+            <Suspense fallback={<PageLoader />}>
+              <Profile />
+            </Suspense>
+          } />
+          <Route path="customers" element={
+            <Suspense fallback={<PageLoader />}>
+              <Customers />
+            </Suspense>
+          } />
+          <Route path="analytics" element={
+            <Suspense fallback={<PageLoader />}>
+              <Analytics />
+            </Suspense>
+          } />
+           <Route path="marketplace" element={
+            <Suspense fallback={<PageLoader />}>
+              <Marketplace />
+            </Suspense>
+          } />
+           <Route path="search" element={
+            <Suspense fallback={<PageLoader />}>
+              <Search />
+            </Suspense>
+          } />
+          <Route path="trust" element={
+            <Suspense fallback={<PageLoader />}>
+              <TrustCenter />
+            </Suspense>
+          } />
+          <Route path="market-prices" element={
+            <Suspense fallback={<PageLoader />}>
+              <MarketPrices />
+            </Suspense>
+          } />
+          <Route path="groups" element={
+            <Suspense fallback={<PageLoader />}>
+              <GroupCommerce />
+            </Suspense>
+          } />
+          <Route path="sms" element={
+            <Suspense fallback={<PageLoader />}>
+              <SmsHub />
+            </Suspense>
+          } />
+          <Route path="harvest" element={
+            <Suspense fallback={<PageLoader />}>
+              <HarvestPlanner />
+            </Suspense>
+          } />
         </Route>
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
         <Route element={<AppLayout />}>
-          <Route path="farm-logs" element={<FarmingLog />} />
+          <Route path="farm-logs" element={
+            <Suspense fallback={<PageLoader />}>
+              <FarmingLog />
+            </Suspense>
+          } />
         </Route>
       </Route>
 
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={
+        <Suspense fallback={<PageLoader />}>
+          <NotFound />
+        </Suspense>
+      } />
     </Routes>
   );
 }
