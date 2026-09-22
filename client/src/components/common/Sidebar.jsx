@@ -116,7 +116,7 @@ export default function Sidebar() {
           x: isMobile ? (isMobileOpen ? 0 : -256) : 0
         }}
         transition={luxurySpring}
-        className="sidebar-premium fixed top-0 bottom-0 left-0 h-screen flex flex-col justify-between p-4 z-50 overflow-x-hidden border-r border-white/10"
+        className="sidebar-premium fixed top-0 bottom-0 left-0 h-screen flex flex-col justify-between p-4 z-50 overflow-x-hidden border-r border-white/10 dark:border-slate-700"
       >
         <div
           className="absolute inset-0 -z-20 bg-cover bg-center opacity-30"
@@ -125,7 +125,7 @@ export default function Sidebar() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary-900/95 to-primary-950/95 backdrop-blur-[2px]" />
 
         <div className={`relative w-full flex-1 flex flex-col min-h-0 ${isMobile ? 'pt-16' : ''}`}>
-          <div className="flex items-center h-14 px-2 mb-6 border-b border-white/10 shrink-0">
+          <div className="flex items-center h-14 px-2 mb-6 border-b border-white/10 dark:border-slate-700 shrink-0">
             <div className="flex items-center min-w-[200px]">
               <div className="p-2.5 bg-gradient-to-tr from-gold-400 to-gold-600 rounded-lg text-black shadow-gold shrink-0 animate-pulse-slow">
                 <Sprout className="w-4 h-4 stroke-[3]" />
