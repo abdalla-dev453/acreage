@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acreage - Offline Mode</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f0f7eb 0%, #dcfce7 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .icon-container {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 40px rgba(22, 101, 52, 0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .icon-container svg {
+      width: 60px;
+      height: 60px;
+      color: white;
+    }
+    
+    h1 {
+      color: #166534;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+    
+    p {
+      color: #475569;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 20px 0;
+    }
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: #f59e0b;
+      border-radius: 50%;
+      animation: blink 1s ease-in-out infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .tips {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+      text-align: left;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tips h3 {
+      color: #166534;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    
+    .tips ul {
+      list-style: none;
+    }
+    
+    .tips li {
+      color: #475569;
+      font-size: 14px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .tips li:last-child {
+      border-bottom: none;
+    }
+    
+    .tips li::before {
+      content: "🌱";
+      font-size: 16px;
+    }
+    
+    .retry-button {
+      background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 25px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 15px rgba(22, 101, 52, 0.3);
+    }
+    
+    .retry-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4);
+    }
+    
+    .retry-button:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon-container">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+      </svg>
+    </div>
+    
+    <h1>You're Offline</h1>
+    <p>No internet connection detected. Don't worry - Acreage works offline too!</p>
+    
+    <div class="status">
+      <span class="status-dot"></span>
+      <span>Working Offline</span>
+    </div>
+    
+    <p>Your cached data is still available. You can browse previously loaded content and prepare orders.</p>
+    
+    <div class="tips">
+      <h3>What you can do offline:</h3>
+      <ul>
+        <li>Browse cached marketplace listings</li>
+        <li>View your orders and farming logs</li>
+        <li>Check cached market prices</li>
+        <li>Prepare orders (will sync when online)</li>
+        <li>Read documentation and FAQs</li>
+      </ul>
+    </div>
+    
+    <button class="retry-button" onclick="window.location.reload()">
+      Try Reconnecting
+    </button>
+  </div>
+
+  <script>
+    // Auto-retry when connection is restored
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+    
+    // Show connection status
+    function updateOnlineStatus() {
+      const statusDot = document.querySelector('.status-dot');
+      const statusText = document.querySelector('.status span:last-child');
+      
+      if (navigator.onLine) {
+        statusDot.style.background = '#22c55e';
+        statusDot.style.animation = 'none';
+        statusText.textContent = 'Connection Restored';
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        statusDot.style.background = '#f59e0b';
+        statusDot.style.animation = 'blink 1s ease-in-out infinite';
+        statusText.textContent = 'Working Offline';
+      }
+    }
+    
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+  </script>
+</body>
+</html>
