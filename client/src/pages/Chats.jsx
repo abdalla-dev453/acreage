@@ -415,7 +415,7 @@ export default function Chats() {
                             <motion.span
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="min-w-[18px] h-4 px-1 bg-green-600 dark:bg-emerald-500 text-white font-black text-[9px] rounded-full flex items-center justify-center shrink-0"
+                              className="min-w-[18px] h-4 px-1 bg-green-600 dark:bg-emerald-500 text-white dark:text-emerald-950 font-black text-[9px] rounded-full flex items-center justify-center shrink-0"
                             >
                               {unread > 99 ? '99+' : unread}
                             </motion.span>

@@ -84,7 +84,14 @@ export const SettingsProvider = ({ children }) => {
         }
         const response = await API.get('/settings/preferences');
         const serverPrefs = response.data?.preferences || {};
-        setSettings((prev) => ({ ...prev, ...serverPrefs }));
+        // First visit on this device: adopt the synced preferences wholesale.
+        // Returning visit: the local copy wins. Letting the server copy
+        // overwrite local settings snapped the theme back to a stale value on
+        // every page load, visibly flipping the UI between light and dark.
+        const returningVisitor = (() => {
+          try { return !!localStorage.getItem('app_settings'); } catch { return false; }
+        })();
+        setSettings((prev) => (returningVisitor ? { ...serverPrefs, ...prev } : { ...prev, ...serverPrefs }));
       } catch {
         // Offline / unauthorized — keep local preferences.
       } finally {

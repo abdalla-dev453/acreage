@@ -383,9 +383,9 @@ export default function SmsHub() {
         </div>
 
         {/* Important Notes */}
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
-          <h3 className="text-lg font-bold text-amber-800 mb-3">Important Notes</h3>
-          <ul className="space-y-2 text-sm text-amber-700">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-6">
+          <h3 className="text-lg font-bold text-amber-800 dark:text-amber-300 mb-3">Important Notes</h3>
+          <ul className="space-y-2 text-sm text-amber-700 dark:text-amber-200/90">
             <li className="flex items-start gap-2">
               <span className="font-bold">•</span>
               <span>Standard SMS rates apply. Check with your mobile provider for costs.</span>

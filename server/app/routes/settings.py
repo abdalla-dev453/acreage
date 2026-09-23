@@ -48,10 +48,11 @@ def update_preferences():
     for key, value in data.items():
         if key in allowed_keys:
             valid_updates[key] = value
-
-    current = user.preferences_json or {}
-    current.update(valid_updates)
-    user.preferences_json = current
+    # Build a NEW dict instead of mutating the existing one in place.
+    # Reassigning the same mutated object is a no-op for SQLAlchemy's change
+    # detection (old and new compare identical), so the commit silently
+    # persisted nothing and clients kept receiving the stale preferences.
+    user.preferences_json = {**(user.preferences_json or {}), **valid_updates}
     db.session.commit()
     return jsonify({'preferences': current, 'message': 'Preferences saved'}), 200
 
