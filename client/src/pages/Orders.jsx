@@ -107,7 +107,7 @@ export default function Orders() {
   }, [orders, activeTab, searchQuery]);
 
   return (
-    <div className="space-y-6 w-full pb-12">
+    <div className="space-y-6 w-full pb-16">
       <SEO title="Orders | Acreage" description="View, manage, and track all your crop orders on the Acreage marketplace." />
 
       <Navbar
@@ -118,7 +118,7 @@ export default function Orders() {
         }
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
         {[
           {
             key: "all",
@@ -157,24 +157,24 @@ export default function Orders() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all duration-300 transform cursor-pointer active:scale-95 shadow-sm min-h-[96px] ${
+              className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all duration-300 transform cursor-pointer active:scale-95 shadow-sm min-h-[90px] sm:min-h-[96px] ${
                 isSelected
-                  ? "bg-emerald-600 text-white border-emerald-600 shadow-md ring-4 ring-emerald-500/10"
-                  : "bg-white hover:bg-slate-50 border-slate-200"
+                  ? "bg-emerald-600 dark:bg-emerald-600 text-white border-emerald-600 dark:border-emerald-500 shadow-md ring-4 ring-emerald-500/15"
+                  : "bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 border-slate-200/80 dark:border-slate-700"
               }`}
             >
               <div className="flex justify-between items-center w-full">
                 <span
-                  className={`text-xs font-bold uppercase tracking-wider ${isSelected ? "text-emerald-100" : "text-slate-400"}`}
+                  className={`text-xs font-bold uppercase tracking-wider truncate ${isSelected ? "text-emerald-100" : "text-slate-400 dark:text-slate-400"}`}
                 >
                   {tab.label}
                 </span>
                 <Icon
-                  className={`w-4 h-4 ${isSelected ? "text-white" : tab.key === "all" ? "text-emerald-500" : "text-slate-400"}`}
+                  className={`w-4 h-4 shrink-0 ${isSelected ? "text-white" : tab.key === "all" ? "text-emerald-500" : "text-slate-400"}`}
                 />
               </div>
               <p
-                className={`text-2xl font-extrabold tracking-tight mt-2 ${isSelected ? "text-white" : "text-slate-900"}`}
+                className={`text-2xl font-black tracking-tight mt-2 ${isSelected ? "text-white" : "text-slate-900 dark:text-white"}`}
               >
                 {tab.count}
               </p>
@@ -183,31 +183,31 @@ export default function Orders() {
         })}
       </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div>
-            <h2 className="text-base font-bold text-slate-800">
-              Distribution Roster
-            </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+      <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div>
+          <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">
+            Distribution Roster
+          </h2>
+          <p className="text-xs text-slate-400 dark:text-slate-400 mt-0.5">
             Showing {filteredOrders.length} of {orders.length} orders
           </p>
         </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-initial">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search code, user or contact..."
+              placeholder="Search code, user..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-64 pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+              className="w-full sm:w-64 pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
             />
           </div>
 
           <button
-            onClick={fetchOrders}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 transition select-none"
+            onClick={() => fetchOrders(pagination.page)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200 rounded-xl text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer select-none shrink-0"
           >
             <Filter className="w-3.5 h-3.5 text-slate-400" />
             <span>Refresh</span>
@@ -216,7 +216,7 @@ export default function Orders() {
       </div>
 
       {isLoading ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 flex flex-col items-center justify-center">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 p-12 flex flex-col items-center justify-center shadow-sm">
           <span className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
           <p className="text-xs text-slate-400 font-medium mt-2">
             Loading live transactions...
@@ -225,31 +225,31 @@ export default function Orders() {
       ) : (
         <>
           <OrderTable
-              orders={filteredOrders}
-              onRefresh={() => fetchOrders(pagination.page)}
-              userRole={userRole}
+            orders={filteredOrders}
+            onRefresh={() => fetchOrders(pagination.page)}
+            userRole={userRole}
           />
 
           {pagination.pages > 1 && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex items-center justify-between">
-              <p className="text-xs text-slate-500">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400 text-center sm:text-left">
                 Showing {Math.min((pagination.page - 1) * 20 + 1, pagination.total)}–{Math.min(pagination.page * 20, pagination.total)} of {pagination.total} orders
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => fetchOrders(pagination.page - 1)}
                   disabled={!pagination.has_prev}
-                  className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="text-xs font-bold text-slate-700 px-2">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 px-2">
                   Page {pagination.page} of {pagination.pages}
                 </span>
                 <button
                   onClick={() => fetchOrders(pagination.page + 1)}
                   disabled={!pagination.has_next}
-                  className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

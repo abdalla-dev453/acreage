@@ -1,4 +1,5 @@
-import { useState, useContext, useRef } from 'react';
+import { useState, useContext, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { User, Building2, CreditCard, Lock, Save, Loader2, Phone, Mail, MapPin, Landmark, Camera, X, ShieldCheck } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
@@ -9,7 +10,9 @@ import VerifiedBadge from '../components/premium/VerifiedBadge';
 
 export default function Profile() {
   const { user, setUser } = useContext(AuthContext);
-  const [activeTab, setActiveTab] = useState('farm');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'farm';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar_url || null);
@@ -18,6 +21,28 @@ export default function Profile() {
 
   // Determine if profile belongs to a farmer or a buyer to adapt wording dynamically
   const isFarmer = user?.role === 'farmer';
+
+  // Sync active tab when URL query param changes (e.g., from sidebar nav)
+  useEffect(() => {
+    const tab = searchParams.get('tab') || 'farm';
+    setActiveTab(tab);
+  }, [searchParams]);
+
+  // Reload profile data from server on mount to ensure persisted data is fresh
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const res = await API.get('/auth/me');
+          if (setUser) setUser(res.data.user);
+        }
+      } catch {
+        // Keep existing user data if server is unreachable
+      }
+    };
+    loadProfile();
+  }, [setUser]);
 
   // Form State
   const [formData, setFormData] = useState({

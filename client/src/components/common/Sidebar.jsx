@@ -67,7 +67,7 @@ export default function Sidebar() {
     { name: t('nav.wallet'), path: '/wallet', icon: Wallet, roles: ['farmer', 'buyer'] },
     { name: t('nav.profile'), path: '/profile', icon: User, roles: ['farmer', 'buyer'] },
     { name: t('nav.settings'), path: '/settings', icon: Settings, roles: ['farmer', 'buyer'] },
-    { name: t('nav.trust'), path: '/trust', icon: ShieldCheck, roles: ['farmer', 'buyer', 'admin'] },
+    { name: t('nav.trust'), path: '/profile?tab=verification', icon: ShieldCheck, roles: ['farmer', 'buyer', 'admin'] },
     { name: t('nav.marketPrices'), path: '/market-prices', icon: TrendingUp, roles: ['farmer', 'buyer', 'admin'] },
     { name: t('nav.groupOrders'), path: '/groups', icon: UsersRound, roles: ['farmer', 'buyer', 'admin'] },
     { name: t('nav.smsHub'), path: '/sms', icon: MessageSquareText, roles: ['farmer', 'buyer', 'admin'] },
@@ -80,16 +80,16 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="lg:hidden fixed top-0 inset-x-0 h-16 bg-gradient-to-r from-primary-900 to-primary-950 backdrop-blur-md border-b border-white/10 px-6 flex items-center justify-between z-40 shadow-lg">
+      <div className="lg:hidden fixed top-0 inset-x-0 h-16 bg-white/90 dark:bg-gradient-to-r dark:from-primary-900 dark:to-primary-950 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 flex items-center justify-between z-40 shadow-sm dark:shadow-lg">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-gradient-to-tr from-gold-400 to-gold-600 rounded-lg text-black shadow-gold animate-pulse-slow">
             <Sprout className="w-4 h-4 stroke-[3]" />
           </div>
-          <span className="font-black text-lg tracking-[0.3em] text-amber-400">ACREAGE</span>
+          <span className="font-black text-lg tracking-[0.3em] text-primary-800 dark:text-amber-400">ACREAGE</span>
         </div>
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="p-2 text-white/70 hover:text-white transition-colors"
+          className="p-2 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors"
           aria-label="Toggle Navigation"
         >
           {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -116,16 +116,16 @@ export default function Sidebar() {
           x: isMobile ? (isMobileOpen ? 0 : -256) : 0
         }}
         transition={luxurySpring}
-        className="sidebar-premium fixed top-0 bottom-0 left-0 h-screen flex flex-col justify-between p-4 z-50 overflow-x-hidden border-r border-white/10 dark:border-slate-700"
+        className="sidebar-premium fixed top-0 bottom-0 left-0 h-screen flex flex-col justify-between p-4 z-50 overflow-x-hidden border-r border-slate-200 dark:border-slate-700"
       >
         <div
-          className="absolute inset-0 -z-20 bg-cover bg-center opacity-30"
+          className="absolute inset-0 -z-20 bg-cover bg-center opacity-15 dark:opacity-30"
           style={{ backgroundImage: `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdiWIug24cirN-tE2IcGYzyY2PUYjqFUSf2K1MzdvhsA&s=10')` }}
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary-900/95 to-primary-950/95 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 -z-10 sidebar-surface backdrop-blur-[2px]" />
 
         <div className={`relative w-full flex-1 flex flex-col min-h-0 ${isMobile ? 'pt-16' : ''}`}>
-          <div className="flex items-center h-14 px-2 mb-6 border-b border-white/10 dark:border-slate-700 shrink-0">
+          <div className="flex items-center h-14 px-2 mb-6 border-b border-slate-200 dark:border-white/10 shrink-0">
             <div className="flex items-center min-w-[200px]">
               <div className="p-2.5 bg-gradient-to-tr from-gold-400 to-gold-600 rounded-lg text-black shadow-gold shrink-0 animate-pulse-slow">
                 <Sprout className="w-4 h-4 stroke-[3]" />
@@ -136,7 +136,7 @@ export default function Sidebar() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    className="font-black text-lg tracking-[0.3em] text-amber-400 ml-4 whitespace-nowrap"
+                    className="font-black text-lg tracking-[0.3em] text-primary-800 dark:text-amber-400 ml-4 whitespace-nowrap"
                   >
                     ACREAGE
                   </motion.span>
@@ -164,7 +164,7 @@ export default function Sidebar() {
                   )}
                   <div className="w-12 h-12 flex items-center justify-center shrink-0">
                     <item.icon className={`w-4 h-4 transition-all duration-300 ${
-                      isActive ? 'text-gold-400 drop-shadow-[0_0_8px_rgba(249,179,31,0.5)]' : 'text-white/40 group-hover:text-white'
+                      isActive ? 'text-gold-600 dark:text-gold-400 drop-shadow-[0_0_8px_rgba(249,179,31,0.5)]' : 'text-slate-500 dark:text-white/40 group-hover:text-slate-900 dark:group-hover:text-white'
                     }`} />
                   </div>
                   <AnimatePresence>
@@ -173,7 +173,7 @@ export default function Sidebar() {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -10 }}
-                        className={`pl-2 whitespace-nowrap transition-colors duration-300 ${isActive ? 'text-white font-black' : 'text-white/70 group-hover:text-white'}`}
+                        className={`pl-2 whitespace-nowrap transition-colors duration-300 ${isActive ? 'text-slate-900 dark:text-white font-black' : 'text-slate-600 dark:text-white/70 group-hover:text-slate-900 dark:group-hover:text-white'}`}
                       >
                         {item.name}
                       </motion.span>
@@ -185,7 +185,7 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        <div className="relative pt-4 border-t border-white/10 space-y-2 shrink-0">
+        <div className="relative pt-4 border-t border-slate-200 dark:border-white/10 space-y-2 shrink-0">
           {user && (
             <div className="h-12 flex items-center overflow-hidden w-full px-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gold-400 to-gold-600 flex items-center justify-center text-[10px] font-bold text-black uppercase shrink-0 shadow-gold">
@@ -199,8 +199,8 @@ export default function Sidebar() {
                     exit={{ opacity: 0, x: -10 }}
                     className="ml-3 overflow-hidden whitespace-nowrap"
                   >
-                    <p className="text-[11px] font-black text-amber-400 uppercase truncate">{user.username}</p>
-                    <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider truncate">{user.role}</p>
+                    <p className="text-[11px] font-black text-amber-600 dark:text-amber-400 uppercase truncate">{user.username}</p>
+                    <p className="text-[9px] font-bold text-slate-500 dark:text-white/60 uppercase tracking-wider truncate">{user.role}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -209,7 +209,7 @@ export default function Sidebar() {
 
           <button
             onClick={handleLogout}
-            className="w-full h-12 flex items-center text-white/40 hover:text-red-400 transition-colors group rounded-lg"
+            className="w-full h-12 flex items-center text-slate-400 dark:text-white/40 hover:text-red-500 dark:hover:text-red-400 transition-colors group rounded-lg"
           >
             <div className="w-12 h-12 flex items-center justify-center shrink-0">
               <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />

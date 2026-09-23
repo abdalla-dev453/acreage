@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 
 import Sidebar from "../components/common/Sidebar";
 import Home from "../pages/Home"; // Keep Home as regular import for landing page
+import ErrorBoundary from "../components/common/ErrorBoundary";
 
 // Lazy load components for better performance
 const Analytics = lazy(() => import("../pages/Analytics"));
@@ -25,10 +26,9 @@ const Privacy = lazy(() => import("../pages/Privacy"));
 const Settings = lazy(() => import("../pages/Settings"));
 const Search = lazy(() => import("../pages/Search"));
 const Terms = lazy(() => import("../pages/Terms"));
-const TrustCenter = lazy(() => import("../pages/TrustCenter"));
 const MarketPrices = lazy(() => import("../pages/MarketPrices"));
 const GroupCommerce = lazy(() => import("../pages/GroupCommerce"));
-const SmsHub = lazy(() => import("../pages/SmsHub"));
+import SmsHub from "../pages/SmsHub";
 const HarvestPlanner = lazy(() => import("../pages/HarvestPlanner"));
 
 // Loading component for lazy loading
@@ -45,12 +45,14 @@ function PageLoader() {
 
 function AppLayout() {
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] text-[#0F172A] antialiased font-sans">
+    <div className="flex min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-[#0F172A] dark:text-slate-100 antialiased font-sans">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden max-h-screen ml-0 lg:ml-20">
         <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-20 lg:pt-6">
           <div className="w-full max-w-7xl mx-auto">
-            <Outlet />
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>
@@ -148,11 +150,6 @@ export default function AppRoutes() {
            <Route path="search" element={
             <Suspense fallback={<PageLoader />}>
               <Search />
-            </Suspense>
-          } />
-          <Route path="trust" element={
-            <Suspense fallback={<PageLoader />}>
-              <TrustCenter />
             </Suspense>
           } />
           <Route path="market-prices" element={

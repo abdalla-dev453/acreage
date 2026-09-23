@@ -82,17 +82,17 @@ export default function MediaUploader({
   const accept = isVideo ? 'video/mp4,video/quicktime,video/webm' : 'image/png,image/jpeg,image/webp';
 
   return (
-    <div className={compact ? 'space-y-2' : 'rounded-xl border border-slate-200 bg-slate-50 p-3'}>
+    <div className={compact ? 'space-y-2' : 'rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-3'}>
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-bold text-slate-700">{label || (isVideo ? 'Upload video' : 'Upload photo')}</p>
-          <p className="mt-0.5 text-[11px] font-bold text-slate-400">{isVideo ? 'MP4, MOV, WebM' : 'PNG, JPG, WebP'} · max 25 MB</p>
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{label || (isVideo ? 'Upload video' : 'Upload photo')}</p>
+          <p className="mt-0.5 text-[11px] font-bold text-slate-400 dark:text-slate-500">{isVideo ? 'MP4, MOV, WebM' : 'PNG, JPG, WebP'} · max 25 MB</p>
         </div>
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-slate-800 px-3 py-2 text-[11px] font-extrabold text-slate-700 dark:text-slate-200 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 transition hover:bg-slate-50 dark:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           aria-label={label || (isVideo ? 'Choose video file' : 'Choose photo file')}
         >
           <FileUp className="h-3.5 w-3.5" aria-hidden="true" />
@@ -117,17 +117,17 @@ export default function MediaUploader({
         </div>
       )}
       {!preview && (
-        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400">
+        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400 dark:text-slate-500">
           {isVideo ? <Video className="h-4 w-4" aria-hidden="true" /> : <ImageIcon className="h-4 w-4" aria-hidden="true" />}
           <span>No file selected</span>
         </div>
       )}
-      {error && <p className="text-[11px] font-bold text-rose-600" role="alert">{error}</p>}
+      {error && <p className="text-[11px] font-bold text-rose-600 dark:text-rose-400" role="alert">{error}</p>}
       <button
         type="button"
         onClick={upload}
         disabled={!file || uploading}
-        className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-[11px] font-extrabold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-3 py-2 text-[11px] font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
       >
         {uploading ? 'Uploading...' : 'Upload evidence'}
       </button>

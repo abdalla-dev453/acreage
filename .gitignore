@@ -17,3 +17,4 @@ client/.env.local
 .DS_Store
 .vscode/
 .idea/
+client/dev-dist/

@@ -36,6 +36,32 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Apply the saved theme before React mounts to avoid a flash of the
+      // wrong color scheme (FOUC). Mirrors SettingsContext > applyTheme().
+      (function () {
+        try {
+          var stored = localStorage.getItem('app_settings');
+          var theme = 'system';
+          if (stored) {
+            var parsed = JSON.parse(stored);
+            if (parsed && parsed.theme) theme = parsed.theme;
+          }
+          var effective = theme;
+          if (theme === 'system') {
+            effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          var root = document.documentElement;
+          if (effective === 'dark') root.classList.add('dark');
+          root.style.colorScheme = effective;
+          if (stored) {
+            var s = JSON.parse(stored);
+            if (s && s.fontSize) root.setAttribute('data-font-size', s.fontSize);
+            if (s && typeof s.compactMode === 'boolean') root.setAttribute('data-compact', s.compactMode ? 'true' : 'false');
+          }
+        } catch (e) { /* ignore */ }
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

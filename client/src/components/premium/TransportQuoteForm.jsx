@@ -53,33 +53,33 @@ export default function TransportQuoteForm({ orderId, onQuote, onAccept, onError
   };
 
   return (
-    <form onSubmit={requestQuote} className={compact ? 'space-y-3' : 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm'} aria-label="Transport quote request">
+    <form onSubmit={requestQuote} className={compact ? 'space-y-3' : 'rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm'} aria-label="Transport quote request">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-sm font-black text-slate-800">
-            <Truck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+          <div className="flex items-center gap-2 text-sm font-black text-slate-800 dark:text-white">
+            <Truck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
             Transport quote
           </div>
-          <p className="mt-1 text-[11px] font-bold text-slate-400">Get a live carrier estimate before checkout.</p>
+          <p className="mt-1 text-[11px] font-bold text-slate-400 dark:text-slate-500">Get a live carrier estimate before checkout.</p>
         </div>
-        {quote && <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Quoted</span>}
+        {quote && <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Quoted</span>}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-[11px] font-extrabold text-slate-500" htmlFor={`origin-${orderId || 'quote'}`}>Pickup location</label>
-          <input id={`origin-${orderId || 'quote'}`} value={form.origin} onChange={(event) => update('origin', event.target.value)} required placeholder="e.g. Nakuru" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50" />
+          <label className="mb-1 block text-[11px] font-extrabold text-slate-500 dark:text-slate-400" htmlFor={`origin-${orderId || 'quote'}`}>Pickup location</label>
+          <input id={`origin-${orderId || 'quote'}`} value={form.origin} onChange={(event) => update('origin', event.target.value)} required placeholder="e.g. Nakuru" className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 text-sm font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 dark:focus:ring-emerald-950/30" />
         </div>
         <div>
-          <label className="mb-1 block text-[11px] font-extrabold text-slate-500" htmlFor={`destination-${orderId || 'quote'}`}>Delivery location</label>
-          <input id={`destination-${orderId || 'quote'}`} value={form.destination} onChange={(event) => update('destination', event.target.value)} required placeholder="e.g. Nairobi" className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50" />
+          <label className="mb-1 block text-[11px] font-extrabold text-slate-500 dark:text-slate-400" htmlFor={`destination-${orderId || 'quote'}`}>Delivery location</label>
+          <input id={`destination-${orderId || 'quote'}`} value={form.destination} onChange={(event) => update('destination', event.target.value)} required placeholder="e.g. Nairobi" className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 text-sm font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 dark:focus:ring-emerald-950/30" />
         </div>
         <div>
-          <label className="mb-1 block text-[11px] font-extrabold text-slate-500" htmlFor={`weight-${orderId || 'quote'}`}>Weight (kg)</label>
-          <input id={`weight-${orderId || 'quote'}`} type="number" min="0.1" step="0.1" value={form.weight_kg} onChange={(event) => update('weight_kg', event.target.value)} required className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50" />
+          <label className="mb-1 block text-[11px] font-extrabold text-slate-500 dark:text-slate-400" htmlFor={`weight-${orderId || 'quote'}`}>Weight (kg)</label>
+          <input id={`weight-${orderId || 'quote'}`} type="number" min="0.1" step="0.1" value={form.weight_kg} onChange={(event) => update('weight_kg', event.target.value)} required className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 text-sm font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 dark:focus:ring-emerald-950/30" />
         </div>
         <div>
-          <label className="mb-1 block text-[11px] font-extrabold text-slate-500" htmlFor={`packages-${orderId || 'quote'}`}>Packages</label>
-          <input id={`packages-${orderId || 'quote'}`} type="number" min="1" step="1" value={form.package_count} onChange={(event) => update('package_count', event.target.value)} required className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50" />
+          <label className="mb-1 block text-[11px] font-extrabold text-slate-500 dark:text-slate-400" htmlFor={`packages-${orderId || 'quote'}`}>Packages</label>
+          <input id={`packages-${orderId || 'quote'}`} type="number" min="1" step="1" value={form.package_count} onChange={(event) => update('package_count', event.target.value)} required className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3 py-2 text-sm font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 dark:focus:ring-emerald-950/30" />
         </div>
       </div>
       <fieldset className="grid grid-cols-3 gap-2">
@@ -88,11 +88,11 @@ export default function TransportQuoteForm({ orderId, onQuote, onAccept, onError
           const ModeIcon = mode.labelIcon || PackageCheck;
           const selected = form.mode === mode.value;
           return (
-            <label key={mode.value} className={`cursor-pointer rounded-xl border px-2 py-2 text-center transition ${selected ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+            <label key={mode.value} className={`cursor-pointer rounded-xl border px-2 py-2 text-center transition ${selected ? 'border-emerald-400 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-600'}`}>
               <input type="radio" name={`mode-${orderId || 'quote'}`} value={mode.value} checked={selected} onChange={() => update('mode', mode.value)} className="sr-only" />
-              <ModeIcon className={`mx-auto h-4 w-4 ${selected ? 'text-emerald-600' : 'text-slate-400'}`} aria-hidden="true" />
-              <span className="mt-1 block text-[11px] font-extrabold text-slate-700">{mode.label}</span>
-              <span className="block text-[9px] font-bold text-slate-400">{mode.description}</span>
+              <ModeIcon className={`mx-auto h-4 w-4 ${selected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`} aria-hidden="true" />
+              <span className="mt-1 block text-[11px] font-extrabold text-slate-700 dark:text-slate-200">{mode.label}</span>
+              <span className="block text-[9px] font-bold text-slate-400 dark:text-slate-500">{mode.description}</span>
             </label>
           );
         })}
@@ -109,9 +109,9 @@ export default function TransportQuoteForm({ orderId, onQuote, onAccept, onError
           </div>
         </div>
       )}
-      {unavailable && <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] font-bold text-amber-800" role="alert">{error}</div>}
-      {error && !unavailable && <p className="text-[11px] font-bold text-rose-600" role="alert">{error}</p>}
-      <button type="submit" disabled={loading} className="w-full rounded-xl bg-slate-900 px-3 py-2.5 text-xs font-extrabold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
+      {unavailable && <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-3 text-[11px] font-bold text-amber-800 dark:text-amber-300" role="alert">{error}</div>}
+      {error && !unavailable && <p className="text-[11px] font-bold text-rose-600 dark:text-rose-400" role="alert">{error}</p>}
+      <button type="submit" disabled={loading} className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-3 py-2.5 text-xs font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer">
         {loading ? 'Requesting quote...' : 'Request live quote'}
       </button>
     </form>

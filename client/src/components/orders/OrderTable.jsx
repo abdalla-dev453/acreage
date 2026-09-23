@@ -6,6 +6,7 @@ import { AuthContext } from '../../context/AuthContext';
 
 export default function OrderTable({ orders = [], onRefresh, userRole }) {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const resolvedRole = userRole || user?.role || localStorage.getItem('role') || 'buyer';
 
   const [updatingId, setUpdatingId] = useState(null);
@@ -16,16 +17,16 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
     const cleanStatus = status.trim().toLowerCase();
     switch (cleanStatus) {
       case 'delivered':
-        return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+        return 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
       case 'on delivery':
       case 'shipping':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
+        return 'bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
       case 'cancelled':
-        return 'bg-red-100 text-red-600 border-red-200';
+        return 'bg-rose-50 dark:bg-rose-950/80 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-800';
       case 'pending':
-        return 'bg-amber-100 text-amber-700 border-amber-200';
+        return 'bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
       default:
-        return 'bg-slate-100 text-slate-600 border-slate-200';
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700';
     }
   };
 
@@ -33,11 +34,11 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
     const cleanStatus = status.trim().toLowerCase();
     switch (cleanStatus) {
       case 'paid':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-200';
+        return 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
       case 'failed':
-        return 'bg-red-50 text-red-600 border-red-200';
+        return 'bg-rose-50 dark:bg-rose-950/80 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-800';
       default:
-        return 'bg-amber-50 text-amber-600 border-amber-200';
+        return 'bg-amber-50 dark:bg-amber-950/80 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800';
     }
   };
 
@@ -76,25 +77,25 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
     }
   };
 
-  const colSpan = resolvedRole === 'farmer' ? 8 : 8;
+  const colSpan = 8;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase text-xs tracking-wider">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm overflow-hidden w-full transition-colors">
+      <div className="overflow-x-auto custom-scrollbar">
+        <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
+          <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold uppercase text-xs tracking-wider">
             <tr>
-              <th className="px-4 md:px-6 py-4">Order Code</th>
-              <th className="px-4 md:px-6 py-4">Customer</th>
-              <th className="px-4 md:px-6 py-4">Items</th>
-              <th className="px-4 md:px-6 py-4">Total Amount</th>
-              <th className="px-4 md:px-6 py-4">Payment</th>
-              <th className="px-4 md:px-6 py-4">Fulfillment</th>
-              <th className="px-4 md:px-6 py-4">Address &amp; Contact</th>
-              <th className="px-4 md:px-6 py-4">Action</th>
+              <th className="px-4 md:px-6 py-3.5 sm:py-4">Order Code</th>
+              <th className="px-4 md:px-6 py-3.5 sm:py-4">Customer</th>
+              <th className="px-4 md:px-6 py-3.5 sm:py-4">Items</th>
+              <th className="px-4 md:px-6 py-3.5 sm:py-4">Total Amount</th>
+              <th className="px-4 md:px-6 py-3.5 sm:py-4">Payment</th>
+              <th className="px-4 md:px-6 py-3.5 sm:py-4">Fulfillment</th>
+              <th className="px-4 md:px-6 py-3.5 sm:py-4">Address &amp; Contact</th>
+              <th className="px-4 md:px-6 py-3.5 sm:py-4">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
             {orders.length > 0 ? (
               orders.map((order) => {
                 const displayCode = order?.order_code || `ACR-#${order?.id || '0000'}`;
@@ -103,23 +104,22 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                 const isLocked = order?.status === 'delivered' || order?.status === 'cancelled';
                 const isPaid = (order?.payment_status || '').toLowerCase() === 'paid';
                 const isCancelled = (order?.status || '').toLowerCase() === 'cancelled';
-                const msg = payMsg[order?.id];
 
                 return (
-                  <tr key={order?.id || Math.random()} className="hover:bg-slate-50/50 transition-all">
-                    <td className="px-4 md:px-6 py-4 font-bold text-slate-900">{displayCode}</td>
+                  <tr key={order?.id || Math.random()} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/40 transition-colors">
+                    <td className="px-4 md:px-6 py-3.5 sm:py-4 font-bold text-slate-900 dark:text-white">{displayCode}</td>
 
-                    <td className="px-4 md:px-6 py-4 font-medium text-slate-800">{buyerName}</td>
+                    <td className="px-4 md:px-6 py-3.5 sm:py-4 font-medium text-slate-800 dark:text-slate-200">{buyerName}</td>
 
-                    <td className="px-4 md:px-6 py-4">
+                    <td className="px-4 md:px-6 py-3.5 sm:py-4">
                       {order?.items && order.items.length > 0 ? (
                         <div className="space-y-1">
                           {order.items.map((item, idx) => (
-                            <div key={idx} className="text-xs text-slate-700">
-                              <span className="font-semibold text-slate-900">
+                            <div key={idx} className="text-xs text-slate-700 dark:text-slate-300">
+                              <span className="font-semibold text-slate-900 dark:text-slate-100">
                                 {item.product_name || item.product?.title || `Product #${item.product_id}`}
                               </span>{' '}
-                              <span className="text-slate-500">
+                              <span className="text-slate-400 dark:text-slate-400">
                                 x {item.quantity} (@ KES {item.unit_price})
                               </span>
                             </div>
@@ -130,23 +130,23 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                       )}
                     </td>
 
-                    <td className="px-4 md:px-6 py-4 font-bold text-emerald-600">{totalAmt}</td>
+                    <td className="px-4 md:px-6 py-3.5 sm:py-4 font-bold text-emerald-600 dark:text-emerald-400">{totalAmt}</td>
 
-                    <td className="px-4 md:px-6 py-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${getPaymentBadge(order?.payment_status)}`}>
+                    <td className="px-4 md:px-6 py-3.5 sm:py-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border capitalize ${getPaymentBadge(order?.payment_status)}`}>
                         {order?.payment_status || 'unpaid'}
                       </span>
                     </td>
 
-                    <td className="px-4 md:px-6 py-4">
+                    <td className="px-4 md:px-6 py-3.5 sm:py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1 capitalize ${getStatusBadge(order?.status)}`}>
                         <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                         {order?.status || 'pending'}
                       </span>
                     </td>
 
-                    <td className="px-4 md:px-6 py-4 text-xs">
-                      <div className="text-slate-800 max-w-[180px] truncate font-medium">
+                    <td className="px-4 md:px-6 py-3.5 sm:py-4 text-xs">
+                      <div className="text-slate-800 dark:text-slate-200 max-w-[180px] truncate font-medium">
                         {order?.delivery_address || 'N/A'}
                       </div>
                       <div className="text-slate-400 font-mono mt-0.5">
@@ -154,16 +154,16 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                       </div>
                     </td>
 
-                     {/* Action column — role-aware */}
-                     <td className="px-4 md:px-6 py-4">
-                       <div className="flex items-center gap-2 min-w-[140px]">
+                     {/* Action column */}
+                     <td className="px-4 md:px-6 py-3.5 sm:py-4">
+                       <div className="flex items-center gap-2 min-w-[130px]">
                          {resolvedRole === 'buyer' ? (
                            <>
                            {!isPaid && !isCancelled ? (
                              <button
                                disabled={payingId === order?.id}
                                onClick={() => handlePayViaMpesa(order)}
-                               className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-sm shadow-green-600/10"
+                               className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-sm shadow-green-600/10"
                              >
                                {payingId === order?.id ? (
                                  <><Loader2 className="w-3 h-3 animate-spin" /><span>Sending...</span></>
@@ -172,7 +172,7 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                                )}
                              </button>
                            ) : isPaid ? (
-                             <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
+                             <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
                                ✓ Paid
                              </span>
                            ) : (
@@ -180,7 +180,7 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                            )}
                            <button
                              onClick={() => navigate(`/orders/${order.id}`)}
-                             className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition group"
+                             className="p-1.5 text-slate-400 hover:text-green-600 dark:hover:text-emerald-400 hover:bg-green-50 dark:hover:bg-slate-700 rounded-lg transition"
                              title="Track Order"
                            >
                              <Eye className="w-4 h-4" />
@@ -191,7 +191,7 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                            <span className="text-xs text-slate-400 italic">Completed</span>
                            <button
                              onClick={() => navigate(`/orders/${order.id}`)}
-                             className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                             className="p-1.5 text-slate-400 hover:text-green-600 dark:hover:text-emerald-400 hover:bg-green-50 dark:hover:bg-slate-700 rounded-lg transition"
                              title="View Details"
                            >
                              <Eye className="w-4 h-4" />
@@ -204,7 +204,7 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                                 <button
                                   disabled={updatingId === order?.id}
                                   onClick={() => handleStatusChange(order.id, 'on delivery')}
-                                  className="flex items-center justify-center px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
+                                  className="flex items-center justify-center px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/80 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
                                   title="Approve Order"
                                 >
                                   {updatingId === order?.id ? (
@@ -220,7 +220,7 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                                       handleStatusChange(order.id, 'cancelled');
                                     }
                                   }}
-                                  className="flex items-center justify-center px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
+                                  className="flex items-center justify-center px-2.5 py-1.5 bg-rose-50 dark:bg-rose-950/80 hover:bg-rose-100 text-rose-600 dark:text-rose-300 text-xs font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
                                   title="Decline Order"
                                 >
                                   {updatingId === order?.id ? (
@@ -235,7 +235,7 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                                 disabled={updatingId === order?.id}
                                 value={order?.status || 'pending'}
                                 onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                                className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer disabled:opacity-50"
+                                className="text-xs border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer disabled:opacity-50"
                               >
                                 <option value="on delivery">On Delivery</option>
                                 <option value="delivered">Delivered</option>
@@ -244,7 +244,7 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
                             )}
                             <button
                               onClick={() => navigate(`/orders/${order.id}`)}
-                              className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                              className="p-1.5 text-slate-400 hover:text-green-600 dark:hover:text-emerald-400 hover:bg-green-50 dark:hover:bg-slate-700 rounded-lg transition"
                               title="View Details"
                             >
                               <Eye className="w-4 h-4" />
@@ -259,7 +259,7 @@ export default function OrderTable({ orders = [], onRefresh, userRole }) {
               })
             ) : (
               <tr>
-                <td colSpan={colSpan} className="px-6 py-12 text-center text-slate-400 font-medium">
+                <td colSpan={colSpan} className="px-6 py-12 text-center text-slate-400 dark:text-slate-500 font-medium">
                   No orders listed in this ledger table
                 </td>
               </tr>

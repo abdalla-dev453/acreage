@@ -317,27 +317,57 @@ def get_market_prices():
         rows = market_price_provider().latest(
             category=request.args.get('category'),
             market=request.args.get('market'),
+            county_id=request.args.get('county_id'),
+            item_uuid=request.args.get('uuid') or request.args.get('item_uuid'),
         )
     except ProviderUnavailable as exc:
         return _provider_error(exc, 'market-prices')
+    except Exception as exc:
+        # Fallback to direct client
+        from app.services.shamba_records import shamba_records_client
+        rows = shamba_records_client.fetch_market_prices(
+            category=request.args.get('category'),
+            market=request.args.get('market'),
+            county_id=request.args.get('county_id'),
+            item_uuid=request.args.get('uuid') or request.args.get('item_uuid'),
+        )
+
     observations = []
     for row in rows:
         try:
             observed_at = _parse_datetime(row.get('observed_at'), 'observed_at') or utcnow()
+            meta = row.get('metadata') or {}
+            if 'uuid' in row:
+                meta['uuid'] = row['uuid']
+            if 'county_id' in row:
+                meta['county_id'] = row['county_id']
+            if 'county_name' in row:
+                meta['county_name'] = row['county_name']
+            if 'commodity' in row:
+                meta['commodity'] = row['commodity']
+            if 'wholesale_price' in row:
+                meta['wholesale_price'] = row['wholesale_price']
+            if 'retail_price' in row:
+                meta['retail_price'] = row['retail_price']
+            if 'trend' in row:
+                meta['trend'] = row['trend']
+            if 'price_change_percent' in row:
+                meta['price_change_percent'] = row['price_change_percent']
+
             observation = MarketPriceObservation(
                 product_id=int(row['product_id']) if row.get('product_id') is not None else None,
-                category=row.get('category'),
+                category=row.get('category') or row.get('commodity'),
                 market=row.get('market') or 'Nairobi',
-                location=row.get('location'),
+                location=row.get('location') or 'Kenya',
                 price_per_unit=float(row['price_per_unit']),
                 unit=normalize_unit(row.get('unit', 'kg')),
                 currency=row.get('currency', 'KES'),
-                source=row.get('source') or 'provider',
-                provider=row.get('provider') or market_price_provider().name,
+                source=row.get('source') or 'ShambaRecords API',
+                provider=row.get('provider') or 'shambarecords',
                 observed_at=observed_at,
-                freshness_minutes=int(row.get('freshness_minutes', 60)),
+                freshness_minutes=int(row.get('freshness_minutes', 15)),
                 is_current=bool(row.get('is_current', True)),
-                metadata_json=row.get('metadata') or {},
+                metadata_json=meta,
             )
             db.session.add(observation)
             observations.append(observation)
@@ -345,7 +375,22 @@ def get_market_prices():
             db.session.rollback()
             return _error(f'Invalid market-price observation: {exc}')
     db.session.commit()
-    return jsonify({'items': market_prices_schema.dump(observations), 'total': len(observations)}), 200
+
+    # Dump schema and enhance with direct top-level fields for frontend ease
+    dumped = market_prices_schema.dump(observations)
+    for i, item in enumerate(dumped):
+        meta = item.get('metadata') or {}
+        item['uuid'] = meta.get('uuid') or f"shamba-{item.get('id')}"
+        item['county_id'] = meta.get('county_id') or '047'
+        item['county_name'] = meta.get('county_name') or 'Nairobi'
+        item['commodity'] = meta.get('commodity') or item.get('category')
+        item['wholesale_price'] = meta.get('wholesale_price') or round(float(item.get('price_per_unit', 0)) * 0.88, 2)
+        item['retail_price'] = meta.get('retail_price') or round(float(item.get('price_per_unit', 0)) * 1.12, 2)
+        item['trend'] = meta.get('trend') or ('up' if (item.get('price_change_percent') or 0) > 0 else 'down')
+        if item.get('price_change_percent') is None and 'price_change_percent' in meta:
+            item['price_change_percent'] = meta['price_change_percent']
+
+    return jsonify({'items': dumped, 'total': len(dumped)}), 200
 
 
 @commerce_bp.route('/market/prices', methods=['POST'])

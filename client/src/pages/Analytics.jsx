@@ -76,17 +76,17 @@ export default function Analytics() {
       <SEO title="Analytics | Acreage" description="Farm analytics, revenue tracking, and market intelligence for your agricultural business." />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Navbar title="Market Intelligence & Analytics" />
-        <div className="flex items-center gap-2 bg-white border border-slate-100 p-1.5 rounded-xl shadow-sm shrink-0 self-end sm:self-auto">
-          <Calendar className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
+        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-1.5 rounded-xl shadow-sm shrink-0 self-end sm:self-auto">
+          <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 ml-1.5" />
           <select
             value={timePeriod}
             onChange={(e) => setTimePeriod(e.target.value)}
-            className="text-xs font-bold text-slate-600 bg-transparent pr-4 outline-none cursor-pointer border-none focus:ring-0"
+            className="text-xs font-bold text-slate-600 dark:text-slate-200 bg-transparent pr-4 outline-none cursor-pointer border-none focus:ring-0"
           >
-            <option>Today</option>
-            <option>This Week</option>
-            <option>This Month</option>
-            <option>This Quarter</option>
+            <option className="dark:bg-slate-800">Today</option>
+            <option className="dark:bg-slate-800">This Week</option>
+            <option className="dark:bg-slate-800">This Month</option>
+            <option className="dark:bg-slate-800">This Quarter</option>
           </select>
         </div>
       </div>
@@ -100,22 +100,22 @@ export default function Analytics() {
         ].map((card, idx) => {
           const Icon = card.icon;
           return (
-            <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group transition-all hover:shadow-md">
+            <div key={idx} className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between group transition-all hover:shadow-md">
               <div className="space-y-1 min-w-0">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
+                <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
                   {card.label}
                 </span>
-                <p className="text-xl font-black text-slate-900 tracking-tight truncate">
+                <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight truncate">
                   {card.value}
                 </p>
                 <span className={`text-[10px] font-bold inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${
-                  card.isPositive ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50'
+                  card.isPositive ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40' : 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40'
                 }`}>
                   {card.isPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
                   {card.trend}
                 </span>
               </div>
-              <div className="p-3 bg-green-50 text-green-600 rounded-xl transition-all duration-300 group-hover:bg-green-600 group-hover:text-white shrink-0 shadow-sm">
+              <div className="p-3 bg-green-50 dark:bg-emerald-950/40 text-green-600 dark:text-emerald-400 rounded-xl transition-all duration-300 group-hover:bg-green-600 group-hover:text-white dark:group-hover:bg-emerald-600 shrink-0 shadow-sm">
                 <Icon className="w-4 h-4 stroke-[2.2]" />
               </div>
             </div>
@@ -124,38 +124,38 @@ export default function Analytics() {
       </div>
 
       {isLoading ? (
-        <div className="py-24 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-100 shadow-sm">
-          <Loader2 className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-slate-400 font-bold mt-2">Loading analytics...</p>
+        <div className="py-24 text-center flex flex-col items-center justify-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+          <Loader2 className="w-6 h-6 border-2 border-green-600 dark:border-emerald-400 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-bold mt-2">Loading analytics...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           <div className="h-full">
             <AnalyticsChart overview={overview} />
           </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-full">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between h-full">
             <div>
-              <h3 className="font-black text-slate-800 text-sm uppercase tracking-wide">Revenue by Category</h3>
-              <p className="text-xs text-slate-400 mt-0.5 mb-6">Share of total revenue</p>
+              <h3 className="font-black text-slate-800 dark:text-white text-sm uppercase tracking-wide">Revenue by Category</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 mb-6">Share of total revenue</p>
             </div>
             <div className="space-y-5 flex-1 flex flex-col justify-center">
               {normalizedBreakdown.length > 0 ? (
                 normalizedBreakdown.map((item, i) => (
                   <div key={i} className="space-y-1.5 group">
-                    <div className="flex justify-between items-end text-xs font-bold text-slate-700">
+                    <div className="flex justify-between items-end text-xs font-bold text-slate-700 dark:text-slate-300">
                       <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-black text-slate-800 group-hover:text-green-600 transition-colors truncate">
+                        <span className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-green-600 dark:group-hover:text-emerald-400 transition-colors truncate">
                           {item.category}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-semibold font-mono mt-0.5">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold font-mono mt-0.5">
                           KES {Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </span>
                       </div>
-                      <span className="text-xs font-black text-slate-900 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded-md shrink-0">
+                      <span className="text-xs font-black text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-700 px-2 py-0.5 rounded-md shrink-0">
                         {item.share}
                       </span>
                     </div>
-                    <div className="w-full bg-slate-50 border border-slate-100 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 h-2 rounded-full overflow-hidden">
                       <div
                         className={`${item.color} h-full rounded-full transition-all duration-1000 ease-out`}
                         style={{ width: item.share }}
@@ -164,7 +164,7 @@ export default function Analytics() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 text-slate-400 font-medium text-xs">
+                <div className="text-center py-12 text-slate-400 dark:text-slate-500 font-medium text-xs">
                   No sales data available for this period.
                 </div>
               )}

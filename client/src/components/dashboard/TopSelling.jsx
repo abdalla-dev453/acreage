@@ -2,16 +2,16 @@ export default function TopSelling({ items = [] }) {
   const maxQuantity = items.length > 0 ? Math.max(...items.map(i => i.quantity || 1)) : 1;
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col h-full min-w-[320px]">
+    <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col h-full w-full min-w-0">
       <div className="flex justify-between items-center mb-1">
-        <h3 className="font-bold text-slate-800 text-base">Top Selling Products</h3>
-        <button className="text-xs text-green-600 hover:text-green-700 font-semibold transition-colors bg-green-50 px-2.5 py-1 rounded-lg">
+        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base">Top Selling Products</h3>
+        <button className="text-xs text-green-600 dark:text-emerald-400 hover:text-green-700 dark:hover:text-emerald-300 font-semibold transition-colors bg-green-50 dark:bg-emerald-950/60 border border-green-100/50 dark:border-emerald-800/40 px-2.5 py-1 rounded-lg">
           View All
         </button>
       </div>
-      <p className="text-xs text-slate-400 mb-5">Most popular inventory assets ordered this week</p>
+      <p className="text-xs text-slate-400 dark:text-slate-400 mb-5">Most popular inventory assets ordered this week</p>
       
-      <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+      <div className="space-y-4 flex-1 overflow-y-auto pr-1 custom-scrollbar">
         {items.length > 0 ? (
           items.map((item, idx) => {
             const qty = item?.quantity || 0;
@@ -26,7 +26,7 @@ export default function TopSelling({ items = [] }) {
               <div key={item.id || idx} className="space-y-1.5 group">
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-semibold text-slate-800 group-hover:text-green-700 transition-colors truncate">
+                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-green-600 dark:group-hover:text-emerald-400 transition-colors truncate">
                       {itemTitle}
                     </span>
                     <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
@@ -34,7 +34,7 @@ export default function TopSelling({ items = [] }) {
                     </span>
                   </div>
                   <div className="text-right shrink-0 ml-4">
-                    <span className="text-sm font-bold text-slate-900 block">
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100 block">
                       {qty.toLocaleString()}
                     </span>
                     <span className="text-[10px] font-medium text-slate-400 block lowercase">
@@ -43,9 +43,9 @@ export default function TopSelling({ items = [] }) {
                   </div>
                 </div>
 
-                <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100/50">
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-100/50 dark:border-slate-700">
                   <div 
-                    className="h-full bg-green-600 rounded-full transition-all duration-500 ease-out group-hover:bg-green-500"
+                    className="h-full bg-green-600 dark:bg-emerald-500 rounded-full transition-all duration-500 ease-out group-hover:bg-green-500"
                     style={{ width: `${barWidthPercent}%` }}
                   />
                 </div>

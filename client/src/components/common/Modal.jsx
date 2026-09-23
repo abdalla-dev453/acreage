@@ -28,23 +28,23 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
       aria-modal="true"
     >
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 animate-fade-in"
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 animate-fade-in"
         onClick={onClose}
       />
 
-      <div className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-xl border border-slate-100 p-6 z-10 transform transition-all duration-300 scale-100 max-h-[90vh] flex flex-col`}>
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
-          <h3 className="text-lg font-extrabold text-slate-800 tracking-tight">{title}</h3>
+      <div className={`relative w-full ${maxWidth} bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 p-5 sm:p-6 z-10 transform transition-all duration-300 scale-100 max-h-[90vh] flex flex-col`}>
+        <div className="flex items-center justify-between pb-3.5 sm:pb-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
+          <h3 className="text-base sm:text-lg font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">{title}</h3>
           <button
             onClick={onClose}
             aria-label="Close modal dialog"
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all active:scale-95"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all active:scale-95"
           >
-            <X className="w-4.5 h-4.5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="mt-4 overflow-y-auto pr-1 flex-1 text-sm text-slate-600 leading-relaxed">
+        <div className="mt-4 overflow-y-auto pr-1 flex-1 text-sm text-slate-600 dark:text-slate-300 leading-relaxed custom-scrollbar">
           {children}
         </div>
       </div>

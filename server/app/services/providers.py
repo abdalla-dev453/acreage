@@ -43,34 +43,34 @@ class LocalTransportQuoteProvider(TransportQuoteProvider):
 class MarketPriceProvider:
     name = 'unconfigured'
 
-    def latest(self, category=None, market=None):
+    def latest(self, category=None, market=None, county_id=None, item_uuid=None):
         raise ProviderUnavailable('Market price provider is not configured')
+
+
+class ShambaRecordsMarketPriceProvider(MarketPriceProvider):
+    name = 'shambarecords'
+
+    def latest(self, category=None, market=None, county_id=None, item_uuid=None):
+        from app.services.shamba_records import shamba_records_client
+        return shamba_records_client.fetch_market_prices(
+            category=category,
+            market=market,
+            county_id=county_id,
+            item_uuid=item_uuid,
+        )
 
 
 class LocalMarketPriceProvider(MarketPriceProvider):
     name = 'local'
 
-    def latest(self, category=None, market=None):
-        if not _enabled('MARKET_PRICE_LOCAL_ENABLED'):
-            raise ProviderUnavailable('Local market-price adapter is disabled')
-        selected_market = market or 'Nairobi'
-        rows = [
-            {'category': 'Vegetables', 'market': selected_market, 'price_per_unit': 85.0, 'unit': 'kg'},
-            {'category': 'Fruits', 'market': selected_market, 'price_per_unit': 120.0, 'unit': 'kg'},
-            {'category': 'Grains', 'market': selected_market, 'price_per_unit': 65.0, 'unit': 'kg'},
-        ]
-        if category:
-            rows = [row for row in rows if row['category'].lower() == category.lower()]
-        now = utcnow()
-        return [{
-            **row,
-            'currency': 'KES',
-            'source': 'local-development',
-            'provider': self.name,
-            'observed_at': now,
-            'freshness_minutes': 60,
-            'metadata': {'adapter': 'local-development'},
-        } for row in rows]
+    def latest(self, category=None, market=None, county_id=None, item_uuid=None):
+        from app.services.shamba_records import shamba_records_client
+        return shamba_records_client.fetch_market_prices(
+            category=category,
+            market=market,
+            county_id=county_id,
+            item_uuid=item_uuid,
+        )
 
 
 class SmsProvider:
@@ -102,10 +102,12 @@ def transport_provider():
 
 
 def market_price_provider():
-    name = os.getenv('MARKET_PRICE_PROVIDER', 'local' if _enabled('MARKET_PRICE_LOCAL_ENABLED') else 'unconfigured')
+    name = os.getenv('MARKET_PRICE_PROVIDER', 'shambarecords').lower()
+    if name in {'shambarecords', 'shamba_records', 'shamba'}:
+        return ShambaRecordsMarketPriceProvider()
     if name == 'local':
         return LocalMarketPriceProvider()
-    return MarketPriceProvider()
+    return ShambaRecordsMarketPriceProvider()
 
 
 def sms_provider():
