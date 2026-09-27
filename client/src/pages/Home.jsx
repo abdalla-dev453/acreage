@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import SEO from '../components/common/SEO';
+import PremiumSiteNav from '../components/common/PremiumSiteNav';
+import PremiumFooter from '../components/common/PremiumFooter';
 
 const MARKET_ROWS = [
   { crop: 'MAIZE', unit: '90KG BAG', price: 'KES 4,250', delta: '+3.2%', up: true },
@@ -74,15 +76,18 @@ export default function Home() {
   const { user } = useContext(AuthContext);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1120] text-[#0F172A] dark:text-[#f8fafc] font-[Inter,sans-serif] antialiased selection:bg-[#15803D] selection:text-white relative overflow-x-hidden transition-colors duration-200">
+    <div className="site-shell home-page">
       <SEO
         title="Acreage | Digital Agriculture Marketplace"
         description="Connect with verified farmers and buyers. List crops, take orders, track sales, and settle via M-Pesa — all in one platform built for modern agriculture."
       />
-      <style>{`
-        .font-display { font-family: 'Fraunces', serif; }
-        .font-mono-label { font-family: 'IBM Plex Mono', monospace; }
 
+      {/* The landing page shares the global bar so the product reads as one
+          site, not a marketing page bolted in front of the app. */}
+      <PremiumSiteNav />
+
+      <main className="site-main home-main">
+      <style>{`
         @keyframes ticker-scroll {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
@@ -109,56 +114,6 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Radial Gradient Backdrops */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[650px] bg-gradient-to-b from-[#166534]/15 via-[#15803D]/10 to-transparent dark:from-[#10b981]/15 dark:via-[#052e16]/10 blur-3xl pointer-events-none -z-10" />
-      <div className="absolute top-[900px] left-[-200px] w-[500px] h-[500px] bg-gradient-to-tr from-[#166534]/20 to-transparent dark:from-[#10b981]/10 rounded-full blur-3xl pointer-events-none -z-10" />
-
-      {/* ============================== HEADER ============================== */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#F8FAFC]/90 dark:bg-[#0b1120]/90 border-b border-[#166534]/15 dark:border-slate-800 shadow-sm transition-colors">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4">
-          <div className="flex items-center gap-2.5 sm:gap-3 select-none">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-[#166534] to-[#052E16] text-white flex items-center justify-center -rotate-3 shadow-md shadow-[#166534]/30">
-              <Sprout className="w-5 h-5 stroke-[2.5]" />
-            </div>
-            <span className="font-display font-extrabold text-xl sm:text-2xl tracking-wide text-[#166534] dark:text-emerald-400">
-              Acreage
-              <span className='block text-green-500 dark:text-emerald-400 text-xs sm:text-sm font-sans mt-0.5'>Be Today, Be Nature!</span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 sm:gap-5">
-            {user ? (
-              <div className="flex items-center gap-3 sm:gap-4">
-                <span className="hidden sm:inline-block font-mono-label text-[11px] font-bold text-[#0F172A] dark:text-slate-200 tracking-wide bg-[#166534]/10 dark:bg-emerald-950/60 px-3 py-1 rounded border border-[#166534]/20 dark:border-emerald-800/60">
-                  @{user.username}
-                </span>
-                <Link
-                  to="/dashboard"
-                  className="font-mono-label text-xs uppercase tracking-widest font-bold px-3.5 sm:px-4 py-2 sm:py-2.5 bg-[#166534] dark:bg-emerald-600 text-white hover:bg-[#14532D] dark:hover:bg-emerald-500 transition-all rounded-lg shadow-md hover:shadow-lg"
-                >
-                  Workspace
-                </Link>
-              </div>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="font-mono-label text-xs uppercase tracking-widest font-bold text-[#0F172A] dark:text-slate-200 hover:text-[#166534] dark:hover:text-emerald-400 transition-colors px-2 py-1"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  to="/register"
-                  className="font-mono-label text-xs uppercase tracking-widest font-bold px-3.5 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[#166534] to-[#14532D] dark:from-emerald-600 dark:to-emerald-700 text-white hover:opacity-95 transition-all rounded-lg shadow-md hover:shadow-lg shrink-0"
-                >
-                  Get started
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
       {/* ================================ HERO =============================== */}
       <section className="relative overflow-hidden pt-8 pb-14 sm:pb-16 lg:pt-16 lg:pb-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.15fr_0.85fr] gap-10 sm:gap-12 lg:gap-16 items-center">
@@ -171,7 +126,7 @@ export default function Home() {
               </p>
             </div>
 
-            <h1 className="font-display font-black text-3.5xl sm:text-5xl lg:text-[3.8rem] leading-[1.1] tracking-tight text-[#020617] dark:text-white">
+            <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-[3.8rem] leading-[1.1] tracking-tight text-[#020617] dark:text-white">
               The ledger for your{' '}
               <span className="relative inline-block italic font-bold text-[#166534] dark:text-emerald-400 drop-shadow-sm">
                 whole harvest.
@@ -265,7 +220,7 @@ export default function Home() {
             <p className="font-mono-label text-xs uppercase tracking-[0.2em] text-[#166534] dark:text-emerald-400 font-bold mb-2">
               Simple Workflow
             </p>
-            <h2 className="font-display font-extrabold text-2.5xl sm:text-4xl text-[#020617] dark:text-white">
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#020617] dark:text-white">
               How a season moves through Acreage
             </h2>
             <p className="text-[#334155] dark:text-slate-300 font-medium mt-3 text-sm sm:text-base">
@@ -332,7 +287,7 @@ export default function Home() {
             <span className="font-mono-label text-xs uppercase tracking-[0.2em] text-[#166534] dark:text-emerald-400 font-bold">
               Field Machinery & Production
             </span>
-            <h2 className="font-display font-extrabold text-2.5xl sm:text-4xl text-[#020617] dark:text-white leading-tight">
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#020617] dark:text-white leading-tight">
               Built for commercial farms and regional supply chains
             </h2>
             <p className="text-[#334155] dark:text-slate-300 font-medium leading-relaxed text-sm sm:text-base">
@@ -358,7 +313,7 @@ export default function Home() {
           <p className="font-mono-label text-xs uppercase tracking-[0.2em] text-[#166534] dark:text-emerald-400 font-bold mb-2">
             Built For Scale
           </p>
-          <h2 className="font-display font-extrabold text-2.5xl sm:text-4xl text-[#020617] dark:text-white">
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#020617] dark:text-white">
             Everything the trade needs, nothing it doesn't
           </h2>
         </div>
@@ -392,8 +347,8 @@ export default function Home() {
             <p className="font-mono-label text-xs uppercase tracking-[0.2em] text-[#4ADE80] mb-2 sm:mb-3 font-bold">
               Get Started Today
             </p>
-            <h2 className="font-display font-extrabold text-2.5xl sm:text-4xl leading-tight">
-              Bring your harvest to the ledger. 
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl leading-tight">
+              Bring your harvest to the ledger.
                <span className='block text-green-400 mt-1.5 sm:mt-2'>Be Today, Be Nature!</span>
             </h2>
             <p className="mt-2.5 sm:mt-3 text-white/90 text-xs sm:text-base font-medium leading-relaxed">
@@ -411,21 +366,9 @@ export default function Home() {
       </section>
 
       {/* =============================== FOOTER ================================ */}
-      <footer className="border-t border-[#166534]/15 dark:border-slate-800 bg-white dark:bg-[#0b1120] transition-colors">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 flex flex-col sm:flex-row items-center justify-between gap-5 sm:gap-6">
-          <div className="flex items-center gap-2">
-            <Sprout className="w-5 h-5 text-[#166534] dark:text-emerald-400" />
-            <p className="font-mono-label text-xs text-[#0F172A] dark:text-slate-300 font-bold tracking-wide">
-              © 2026 Acreage — grown for the local trade.
-            </p>
-          </div>
-          <div className="flex gap-5 sm:gap-6 font-mono-label text-xs font-bold uppercase tracking-widest text-[#0F172A]/70 dark:text-slate-400">
-            <Link to="/privacy" className="hover:text-[#166534] dark:hover:text-emerald-400 transition-colors">Privacy</Link>
-            <Link to="/terms" className="hover:text-[#166534] dark:hover:text-emerald-400 transition-colors">Terms</Link>
-            <Link to="/login" className="hover:text-[#166534] dark:hover:text-emerald-400 transition-colors">Support</Link>
-          </div>
-        </div>
-      </footer>
+      </main>
+
+      <PremiumFooter />
     </div>
   );
 }

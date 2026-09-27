@@ -29,16 +29,16 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b1120] text-[#0F172A] dark:text-[#f8fafc] px-4 py-8 transition-colors">
+    <div className="auth-page">
       <SEO title="Sign In | Acreage" description="Sign in to your Acreage account to manage your farm, orders, and sales." />
       <div className="flex items-center space-x-2.5 mb-6">
-        <div className="p-2.5 bg-green-600 dark:bg-emerald-600 rounded-2xl text-white shadow-md shadow-green-600/20">
-          <Sprout className="w-6 h-6 stroke-[2.5]" />
+        <div className="auth-brand-icon">
+          <Sprout className="w-[22px] h-[22px] stroke-[2.5]" />
         </div>
         <span className="font-black text-xl tracking-wider text-slate-800 dark:text-white uppercase">ACREAGE</span>
       </div>
 
-      <div className="max-w-md w-full bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-xl">
+      <div className="auth-card">
         <h2 className="text-xl font-extrabold text-slate-800 dark:text-white text-center mb-1">Welcome Back</h2>
         <p className="text-xs text-slate-400 dark:text-slate-400 text-center mb-6">Sign in to manage your acreage ecosystem</p>
         

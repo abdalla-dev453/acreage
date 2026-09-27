@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 
 export default function Privacy() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-16 px-4">
-      <div className="max-w-3xl mx-auto prose prose-slate prose-sm">
+    <div className="legal-page">
+      <div>
+        <span className="legal-eyebrow">Privacy</span>
         <h1>Privacy Policy</h1>
         <p>
           At Acreage, we are committed to protecting your personal information and being
@@ -52,14 +53,10 @@ export default function Privacy() {
           changes by posting the new policy on this page.
         </p>
 
-        <p className="text-xs text-slate-500">
-          Last updated: September 17, 2026
-        </p>
+        <p className="legal-updated">Last updated: September 17, 2026</p>
 
-        <div className="mt-8 pt-6 border-t border-slate-200">
-          <Link to="/" className="text-green-600 hover:underline font-medium">
-            Back to Acreage
-          </Link>
+        <div className="legal-back">
+          <Link to="/">Back to Acreage</Link>
         </div>
       </div>
     </div>

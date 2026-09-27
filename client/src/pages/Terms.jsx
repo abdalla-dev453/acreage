@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 
 export default function Terms() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-16 px-4">
-      <div className="max-w-3xl mx-auto prose prose-slate prose-sm">
+    <div className="legal-page">
+      <div>
+        <span className="legal-eyebrow">Terms of Use</span>
         <h1>Terms of Use</h1>
         <p>
           These Terms of Use govern your access to and use of Acreage, a digital agriculture
@@ -59,14 +60,10 @@ export default function Terms() {
           These terms are governed by the laws of Kenya.
         </p>
 
-        <p className="text-xs text-slate-500">
-          Last updated: September 17, 2026
-        </p>
+        <p className="legal-updated">Last updated: September 17, 2026</p>
 
-        <div className="mt-8 pt-6 border-t border-slate-200">
-          <Link to="/" className="text-green-600 hover:underline font-medium">
-            Back to Acreage
-          </Link>
+        <div className="legal-back">
+          <Link to="/">Back to Acreage</Link>
         </div>
       </div>
     </div>
