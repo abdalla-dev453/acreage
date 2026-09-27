@@ -53,8 +53,12 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Playfair Display', 'Georgia', 'serif'],
+        // index.html actually loads Fraunces + IBM Plex Sans/Mono, so the
+        // config has to name those or every font-* utility falls back to the
+        // browser default and the type hierarchy collapses.
+        sans: ['"IBM Plex Sans"', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        display: ['Fraunces', '"Playfair Display"', 'Georgia', 'serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -78,6 +82,7 @@ export default {
         'shimmer': 'shimmer 2s linear infinite',
         'slide-up': 'slideUp 0.5s ease-out',
         'fade-in': 'fadeIn 0.5s ease-out',
+        'shake': 'shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both',
       },
       keyframes: {
         float: {
@@ -99,6 +104,11 @@ export default {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '20%, 60%': { transform: 'translateX(-5px)' },
+          '40%, 80%': { transform: 'translateX(5px)' },
         },
       },
       backdropBlur: {
