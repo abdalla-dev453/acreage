@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { Mail, MapPin, Phone, Users, Search, ShoppingBag } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 
 export default function Customers() {
@@ -39,7 +39,10 @@ export default function Customers() {
   return (
     <div className="space-y-6 w-full pb-12">
       <SEO title="Customers | Acreage" description="Browse verified buyers and manage customer relationships." />
-      <Navbar title="Client & Buyer Directory" />
+      <PageHeader
+        title="Client & Buyer Directory"
+        description="Everyone who has bought from you, with their order history and value."
+      />
 
     <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div>

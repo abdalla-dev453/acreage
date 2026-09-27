@@ -10,7 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import Navbar from "../components/common/Navbar";
+import PageHeader from "../components/common/PageHeader";
 import OrderTable from "../components/orders/OrderTable";
 import API from "../services/api";
 import SEO from "../components/common/SEO";
@@ -110,12 +110,13 @@ export default function Orders() {
     <div className="space-y-6 w-full pb-16">
       <SEO title="Orders | Acreage" description="View, manage, and track all your crop orders on the Acreage marketplace." />
 
-      <Navbar
+      <PageHeader
         title={
           userRole === "farmer"
             ? "Incoming Sales Orders"
             : "Order Invoices Ledger"
         }
+        description="Accept, fulfil and settle every order placed against your produce."
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">

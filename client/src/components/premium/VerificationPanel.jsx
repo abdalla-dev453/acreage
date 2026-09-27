@@ -62,7 +62,16 @@ export default function VerificationPanel({ user, compact = false, showAdminQueu
   const [notice, setNotice] = useState('');
   const [reviewReason, setReviewReason] = useState('');
 
+  // /trust-center is a public route, so an anonymous visitor lands here first.
+  // Hitting the authenticated endpoints would just produce a 401 and an error
+  // screen, so skip the fetch entirely and let the signed-out view render.
+  const isSignedIn = Boolean(user);
+
   const load = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -81,7 +90,8 @@ export default function VerificationPanel({ user, compact = false, showAdminQueu
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const submitRequest = async (event) => {
     event.preventDefault();
@@ -126,6 +136,24 @@ export default function VerificationPanel({ user, compact = false, showAdminQueu
       setSubmitting(false);
     }
   };
+
+  if (!isSignedIn) {
+    return (
+      <section className={`space-y-5 ${compact ? '' : 'rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm'}`} aria-labelledby="verification-heading">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+          <h3 id="verification-heading" className="text-sm font-black text-slate-800 dark:text-white">Trust &amp; Verification Center</h3>
+        </div>
+        <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+          Sign in to see your verification status, submit identity or farm checks, and upload
+          photo or video evidence for review.
+        </p>
+        <a href="/login" className="inline-flex items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-extrabold text-white">
+          Sign in to continue
+        </a>
+      </section>
+    );
+  }
 
   if (loading) return <LoadingState label="Loading trust workspace..." />;
   if (error && !verification) return <ErrorState message={error} onRetry={load} />;

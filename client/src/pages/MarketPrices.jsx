@@ -17,7 +17,7 @@ import {
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
 import shambaRecordsService, { KENYA_COUNTIES } from '../services/kenyanMarketPrices';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 import { EmptyState, ErrorState, LoadingState } from '../components/premium/PageState';
 
@@ -154,7 +154,10 @@ export default function MarketPrices() {
   return (
     <div className="space-y-6 w-full pb-16 relative">
       <SEO title="ShambaRecords Market Price Ticker | Acreage" description="Live Kenyan agricultural market prices, wholesale & retail benchmarks across all 47 counties via ShambaRecords API." />
-      <Navbar title="Market Price Discovery" />
+      <PageHeader
+        title="Market Price Discovery"
+        description="Live wholesale and retail benchmarks from ShambaRecords, county by county."
+      />
 
       {/* Header Banner */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between border-b border-slate-100 dark:border-slate-800 pb-4">

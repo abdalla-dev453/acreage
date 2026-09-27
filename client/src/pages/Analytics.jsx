@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { BarChart3, TrendingUp, DollarSign, PieChart, Calendar, ArrowUpRight, ArrowDownRight, Loader2 } from 'lucide-react';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import AnalyticsChart from '../components/dashboard/AnalyticsChart';
 import SEO from '../components/common/SEO';
 
@@ -74,22 +74,26 @@ export default function Analytics() {
   return (
     <div className="space-y-6 w-full animate-fade-in pb-12">
       <SEO title="Analytics | Acreage" description="Farm analytics, revenue tracking, and market intelligence for your agricultural business." />
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <Navbar title="Market Intelligence & Analytics" />
-        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-1.5 rounded-xl shadow-sm shrink-0 self-end sm:self-auto">
-          <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 ml-1.5" />
-          <select
-            value={timePeriod}
-            onChange={(e) => setTimePeriod(e.target.value)}
-            className="text-xs font-bold text-slate-600 dark:text-slate-200 bg-transparent pr-4 outline-none cursor-pointer border-none focus:ring-0"
-          >
-            <option className="dark:bg-slate-800">Today</option>
-            <option className="dark:bg-slate-800">This Week</option>
-            <option className="dark:bg-slate-800">This Month</option>
-            <option className="dark:bg-slate-800">This Quarter</option>
-          </select>
-        </div>
-      </div>
+      <PageHeader
+        title="Market Intelligence & Analytics"
+        description="Gross revenue, basket size and conversion across every sales channel."
+        actions={
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-1.5 rounded-xl shadow-sm shrink-0">
+            <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 ml-1.5" />
+            <select
+              value={timePeriod}
+              onChange={(e) => setTimePeriod(e.target.value)}
+              aria-label="Reporting period"
+              className="text-xs font-bold text-slate-600 dark:text-slate-200 bg-transparent pr-4 outline-none cursor-pointer border-none focus:ring-0"
+            >
+              <option className="dark:bg-slate-800">Today</option>
+              <option className="dark:bg-slate-800">This Week</option>
+              <option className="dark:bg-slate-800">This Month</option>
+              <option className="dark:bg-slate-800">This Quarter</option>
+            </select>
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[

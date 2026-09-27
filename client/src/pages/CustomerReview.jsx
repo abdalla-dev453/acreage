@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef, useContext } from 'react';
 import { Star, MessageSquare, ShieldCheck, ImagePlus, X, Send, Lock, CheckCircle2, AlertCircle, ThumbsUp } from 'lucide-react';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 import { AuthContext } from '../context/AuthContext';
 
@@ -202,7 +202,10 @@ export default function CustomerReview() {
   return (
     <div className="space-y-6 w-full pb-12">
       <SEO title="Reviews | Acreage" description="Read verified buyer reviews of farm produce and post your own feedback." />
-      <Navbar title="Marketplace Feedback Ledger" />
+      <PageHeader
+        title="Marketplace Feedback Ledger"
+        description="Verified buyer feedback on produce quality, grading and delivery."
+      />
 
        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
         <div className="md:col-span-1 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between text-center md:text-left h-full">

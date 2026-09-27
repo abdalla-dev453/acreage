@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Plus, ShoppingCart, Loader2, Image, CheckCircle, Edit2, Trash2, ToggleLeft, ToggleRight, X, Star, Crown } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 import MediaUploader from '../components/premium/MediaUploader';
 import UnitSelector, { unitLabel } from '../components/premium/UnitSelector';
@@ -223,6 +223,10 @@ const openEditModal = (product) => {
       alert(`Invalid quantity. Available supply threshold is ${maxStock} units.`);
       return;
     }
+    if (!user?.phone && !user?.phone_number) {
+      setActionStatus({ type: 'error', text: 'Add your M-Pesa phone number in Profile before placing an order.' });
+      return;
+    }
     try {
       setActionStatus({ type: 'success', text: 'Processing order request...' });
       await API.post('/orders/', {
@@ -248,18 +252,21 @@ const openEditModal = (product) => {
     <div className="space-y-6 w-full pb-16">
       <SEO title="Marketplace | Acreage" description="Browse and order fresh produce from verified local farmers. Direct trade, no middlemen." />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
-        <Navbar title="Acreage Produce Marketplace" />
-        {isFarmer && (
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md shadow-green-600/10 flex items-center space-x-2 cursor-pointer transition-all active:scale-95"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>List New Produce</span>
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="Acreage Produce Marketplace"
+        description="Live listings from verified growers. Order direct, no middlemen."
+        actions={
+          isFarmer ? (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md shadow-green-600/10 flex items-center space-x-2 cursor-pointer transition-all active:scale-95"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>List Produce</span>
+            </button>
+          ) : null
+        }
+      />
 
       {/* Category Filter Pills */}
       <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">

@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 
 export default function Wallet() {
@@ -105,7 +105,10 @@ export default function Wallet() {
   return (
     <div className="space-y-6 w-full pb-16">
       <SEO title="Wallet & Payouts | Acreage" description="View your wallet balance, payout history, and process M-Pesa withdrawals." />
-      <Navbar title="Digital Wallet & Payouts" />
+      <PageHeader
+        title="Digital Wallet & Payouts"
+        description="Escrow balances, M-Pesa and bank payouts, and your full settlement history."
+      />
 
       {/* ── Balance Overview Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">

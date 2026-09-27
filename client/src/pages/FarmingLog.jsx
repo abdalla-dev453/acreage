@@ -19,7 +19,7 @@ import {
   Loader2
 } from 'lucide-react';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
 import SEO from '../components/common/SEO';
 import HarvestPlanner from './HarvestPlanner';
@@ -233,7 +233,10 @@ export default function FarmingLog() {
   return (
     <div className="p-6 space-y-6 w-full max-w-7xl mx-auto pb-16">
       <SEO title="Farm Logs | Acreage" description="Track daily farming activities, harvest schedules, and field operations in your digital farm diary." />
-      <Navbar title="Farmer's Diary & Activity Scheduler" />
+      <PageHeader
+        title="Farmer's Diary & Activity Scheduler"
+        description="Every field activity, input and harvest, logged against the calendar."
+      />
 
       {/* Diary Control Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs gap-4">

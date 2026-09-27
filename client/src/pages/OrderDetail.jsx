@@ -8,7 +8,7 @@ import {
 import { motion } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
 import API from "../services/api";
-import Navbar from "../components/common/Navbar";
+import PageHeader from "../components/common/PageHeader";
 import SEO from "../components/common/SEO";
 import EscrowPanel from "../components/premium/EscrowPanel";
 import TransportQuoteForm from "../components/premium/TransportQuoteForm";
@@ -101,7 +101,10 @@ export default function OrderDetail() {
         description={`Track your order ${order.order_code} on the Acreage marketplace.`}
       />
 
-      <Navbar title={`Order ${order.order_code}`} />
+      <PageHeader
+        title={`Order ${order.order_code}`}
+        description="Full tracking timeline, buyer details and escrow status for this order."
+      />
 
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <h2 className="text-slate-800 text-xl font-black">Order Tracking</h2>

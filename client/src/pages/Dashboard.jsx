@@ -3,7 +3,7 @@ import { ShoppingBag, Users, DollarSign, Package, TrendingUp, ArrowRight } from 
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import StatCard from '../components/common/StatCard';
 import OrderSummary from '../components/dashboard/OrderSummary';
 import TopSelling from '../components/dashboard/TopSelling';
@@ -55,7 +55,10 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 w-full pb-12">
       <SEO title="Dashboard | Acreage" description="View your farm dashboard with order summaries, revenue metrics, and top-selling products." />
-      <Navbar title={t('dashboard.title')} />
+      <PageHeader
+        title={t('dashboard.title')}
+        description="Your season at a glance — revenue, open orders and what is selling."
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatCard label={t('dashboard.totalOrders')} value={data.metrics.total_orders} icon={ShoppingBag} delay={0.02} />

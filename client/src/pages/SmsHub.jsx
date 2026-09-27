@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Smartphone,
   MessageSquare,
-  HelpCircle,
+  CircleQuestionMark,
   ArrowRight,
   Copy,
   Check,
@@ -15,7 +15,7 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 
@@ -52,7 +52,7 @@ const ALL_COMMANDS = [
     command: 'HELP',
     description: 'Get help with SMS commands',
     example: 'HELP',
-    icon: HelpCircle,
+    icon: CircleQuestionMark,
     category: 'Support',
   },
   {
@@ -97,7 +97,10 @@ export default function SmsHub() {
           title="SMS Ordering | Acreage"
           description="Order products via SMS - no internet required. Simple text commands to buy from farmers directly."
         />
-        <Navbar title="SMS Ordering Gateway" />
+        <PageHeader
+          title="SMS Ordering Gateway"
+          description="Run the whole marketplace over SMS — orders in, stock and payouts out."
+        />
 
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-green-700 to-green-800 rounded-2xl p-6 text-white shadow-lg">
@@ -128,7 +131,7 @@ export default function SmsHub() {
             href={`sms:${smsNumber}?body=HELP`}
             className="flex items-center justify-center gap-2 px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-sm hover:border-green-300 hover:shadow-md transition text-sm font-bold text-green-700"
           >
-            <HelpCircle className="w-4 h-4" />
+                        <CircleQuestionMark className="w-4 h-4" />
             Get Help
           </a>
           <a
@@ -242,7 +245,7 @@ export default function SmsHub() {
         {/* Available Commands */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <div className="flex items-center gap-2 mb-4">
-            <HelpCircle className="w-5 h-5 text-green-600" />
+            <CircleQuestionMark className="w-5 h-5 text-green-600" />
             <h3 className="text-lg font-bold text-slate-900">Available Commands</h3>
           </div>
 

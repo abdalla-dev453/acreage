@@ -1,10 +1,10 @@
 import { useState, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings, Sun, Moon, Monitor, Globe, User as UserIcon, Shield, HelpCircle, LifeBuoy, Globe as GlobeIcon, Save, RotateCw, LogOut } from 'lucide-react';
+import { Settings, Sun, Moon, Monitor, Globe, User as UserIcon, Shield, CircleQuestionMark, LifeBuoy, Globe as GlobeIcon, Save, RotateCw, LogOut } from 'lucide-react';
 import { SettingsContext } from '../context/SettingsContext';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 
 export default function SettingsPage() {
@@ -173,7 +173,10 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 w-full pb-16">
       <SEO title={`${t('settings.title')} | Acreage`} description="Manage your theme, language, notification, and website preferences." />
-      <Navbar title={t('settings.title')} />
+      <PageHeader
+        title={t('settings.title')}
+        description="Theme, language, notifications and how Acreage behaves on this device."
+      />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
         <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -574,7 +577,7 @@ export default function SettingsPage() {
                   onClick={() => setShowFAQ(!showFAQ)}
                   className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition cursor-pointer"
                 >
-                  <HelpCircle className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  <CircleQuestionMark className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                   <div className="text-left flex-1">
                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">FAQ</p>
                     <p className="text-[10px] text-slate-400">Frequently asked questions</p>

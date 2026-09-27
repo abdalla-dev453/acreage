@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/common/SEO';
+import PageHeader from '../components/common/PageHeader';
 
 const EMOJIS = ['😄','😊','🙏','👍','✅','🌿','🌾','🚜','💰','📦','🤝','❤️','🔥','👏','😂','😎','🤔','💪','🎉','📱'];
 
@@ -278,8 +279,16 @@ export default function Chats() {
   const isPartnerTyping = typingContacts.includes(activeRecipient?.id);
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] md:h-[calc(100vh-5rem)] w-full gap-0 overflow-hidden rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <div className="space-y-6 w-full pb-16">
       <SEO title="Messages | Acreage" description="Secure messaging with verified farmers and buyers on the Acreage marketplace." />
+      <PageHeader
+        title="Messages"
+        description="Negotiate, confirm and settle with verified buyers and growers."
+      />
+
+      {/* A fixed-height two-pane workspace: the list scrolls on its own and the
+          composer stays pinned to the bottom of the conversation. */}
+      <div className="chats-shell flex w-full gap-0 overflow-hidden rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900">
 
       {/* ── LEFT PANEL: Conversation List ── */}
       <div className={`
@@ -765,6 +774,7 @@ export default function Chats() {
             </div>
           </>
         )}
+      </div>
       </div>
     </div>
   );

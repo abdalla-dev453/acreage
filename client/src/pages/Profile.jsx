@@ -2,7 +2,7 @@ import { useState, useContext, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { User, Building2, CreditCard, Lock, Save, Loader2, Phone, Mail, MapPin, Landmark, Camera, X, ShieldCheck } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import API from '../services/api';
 import SEO from '../components/common/SEO';
 import VerificationPanel from '../components/premium/VerificationPanel';
@@ -130,7 +130,10 @@ export default function Profile() {
   return (
     <div className="p-8 space-y-6 max-w-5xl mx-auto pb-16">
       <SEO title="Profile & Settings | Acreage" description="Update your account profile, payment channels, and security credentials." />
-      <Navbar title={isFarmer ? "Account & Farm Settings" : "Account Settings"} />
+      <PageHeader
+        title={isFarmer ? "Account & Farm Settings" : "Account Settings"}
+        description="Your details, payment channels and the credentials buyers see."
+      />
 
       {/* Profile Overview Banner Card */}
       <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 group transition-all hover:shadow-md">

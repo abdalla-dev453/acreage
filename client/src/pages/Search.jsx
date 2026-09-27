@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { Search as SearchIcon, ShoppingBag, User, Package, Calendar } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 
 export default function Search() {
@@ -61,7 +61,10 @@ export default function Search() {
   return (
     <div className="space-y-6 w-full pb-12">
       <SEO title={`Search | Acreage`} description="Search across products, users, and marketplace content." />
-      <Navbar title="Marketplace Search" />
+      <PageHeader
+        title="Marketplace Search"
+        description="Search produce, growers and buyers across the whole marketplace."
+      />
 
       <div className="mb-6">
         <form onSubmit={handleSubmit} className="relative">

@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CalendarDays, Plus, ShoppingCart, UsersRound, XCircle } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
-import Navbar from '../components/common/Navbar';
+import PageHeader from '../components/common/PageHeader';
 import SEO from '../components/common/SEO';
 import UnitSelector, { unitLabel } from '../components/premium/UnitSelector';
 import { EmptyState, ErrorState, LoadingState } from '../components/premium/PageState';
@@ -112,7 +112,10 @@ export default function GroupCommerce() {
   return (
     <div className="space-y-6 w-full pb-16">
       <SEO title="Group Buying & Selling | Acreage" description="Pool demand, commit to harvest lots, and share transport with verified farmers." />
-      <Navbar title="Group Buying & Selling" />
+      <PageHeader
+        title="Group Buying & Selling"
+        description="Pool demand with neighbouring growers, commit to lots and share transport."
+      />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div><h1 className="text-xl font-black text-slate-900">Collective commerce</h1><p className="mt-1 text-xs font-bold text-slate-500">Pool demand, reduce transport cost, and reserve harvest lots together.</p></div>
         {user?.role === 'farmer' && <button type="button" onClick={() => setCreateOpen((value) => !value)} className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2.5 text-[11px] font-extrabold text-white hover:bg-emerald-700"><Plus className="h-3.5 w-3.5" /> Open group order</button>}

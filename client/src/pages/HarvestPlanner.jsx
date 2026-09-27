@@ -1,9 +1,10 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { CalendarDays, LockKeyhole, Plus, Sprout, UsersRound } from 'lucide-react';
+import { CalendarDays, LockKeyhole, Plus, UsersRound } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
 import UnitSelector, { unitLabel } from '../components/premium/UnitSelector';
 import { EmptyState, ErrorState, LoadingState } from '../components/premium/PageState';
+import PageHeader from '../components/common/PageHeader';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -17,6 +18,7 @@ function dateKey(value) {
 export default function HarvestPlanner() {
   const { user } = useContext(AuthContext);
   const [plans, setPlans] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [month, setMonth] = useState(new Date());
@@ -45,7 +47,12 @@ export default function HarvestPlanner() {
     setLoading(true);
     setError('');
     try {
-      const planResponse = await API.get('/harvest/plans');
+      const [planResponse, productResponse] = await Promise.all([
+        API.get('/harvest/plans'),
+        API.get('/products/'),
+      ]);
+      const productData = productResponse.data?.items || productResponse.data || [];
+      setProducts(Array.isArray(productData) ? productData : []);
       const planData = planResponse.data?.items || planResponse.data || [];
       setPlans((Array.isArray(planData) ? planData : []).map((plan) => ({
         ...plan,
@@ -130,8 +137,18 @@ export default function HarvestPlanner() {
   const selectedPlans = plansByDate[selectedDate] || [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><div className="flex items-center gap-2"><Sprout className="h-5 w-5 text-emerald-600" /><h1 className="text-xl font-black text-slate-900">Harvest calendar & preorders</h1></div><p className="mt-1 text-xs font-bold text-slate-500">Plan future supply and let buyers reserve verified harvest windows.</p></div>{user?.role === 'farmer' && <button type="button" onClick={() => setCreateOpen((value) => !value)} className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2.5 text-[11px] font-extrabold text-white hover:bg-emerald-700"><Plus className="h-3.5 w-3.5" /> New harvest plan</button>}</div>
+    <div className="space-y-6 w-full pb-16">
+      <PageHeader
+        title="Harvest Planner"
+        description="Plan future supply and let buyers reserve verified harvest windows."
+        actions={
+          user?.role === 'farmer' ? (
+            <button type="button" onClick={() => setCreateOpen((value) => !value)} className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2.5 text-[11px] font-extrabold text-white hover:bg-emerald-700">
+              <Plus className="h-3.5 w-3.5" /> New harvest plan
+            </button>
+          ) : null
+        }
+      />
       {notice && <div className="rounded-xl bg-emerald-50 p-3 text-[11px] font-bold text-emerald-800" role="status">{notice}</div>}
       {error && <div className="rounded-xl bg-rose-50 p-3 text-[11px] font-bold text-rose-700" role="alert">{error}</div>}
 
