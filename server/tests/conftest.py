@@ -18,6 +18,14 @@ def app():
         MAIL_SERVER = None
         LOG_LEVEL = "WARNING"
         RATELIMIT_ENABLED = False
+        # TestConfig replaces the app config wholesale rather than layering over
+        # app.config.Config, so every key orders.py reads through
+        # current_app.config[...] has to be restated here. Without these the M-Pesa
+        # STK push raised KeyError and order creation returned 502.
+        MPESA_ENV = "sandbox"
+        MPESA_SHORTCODE = "174379"
+        MPESA_PASSKEY = "test-passkey"
+        MPESA_CALLBACK_URL = "http://localhost:5170/mpesa/callback"
 
     application = create_app(TestConfig)
     with application.app_context():

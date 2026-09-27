@@ -1,6 +1,7 @@
 from app import db
 from app.models.commerce import EscrowEvent, EscrowTransaction
 from app.models.order import Order
+from app.models.product import Product
 from app.models.user import User
 from app.utils.time import utcnow
 
@@ -36,6 +37,37 @@ def add_event(escrow, actor, event_type, amount=None, metadata=None):
     )
     db.session.add(event)
     return event
+
+
+def release_reserved_stock(order, escrow=None):
+    """Restore an order reservation exactly once."""
+    escrow = escrow or getattr(order, 'escrow_transaction', None)
+    metadata = dict(escrow.metadata_json or {}) if escrow else {}
+    if metadata.get('stock_released'):
+        return False
+
+    for item in order.items:
+        product = db.session.get(Product, item.product_id)
+        if product:
+            product.stock_quantity += item.quantity
+    if escrow:
+        metadata['stock_released'] = True
+        escrow.metadata_json = metadata
+    return True
+
+
+def cancel_unpaid_order(order, escrow=None, failed=False):
+    """Cancel an unpaid order and release its reservation exactly once."""
+    if order.payment_status == 'paid' or escrow and escrow.status == 'funded':
+        return False
+
+    escrow = escrow or getattr(order, 'escrow_transaction', None)
+    release_reserved_stock(order, escrow)
+    order.payment_status = 'failed' if failed else order.payment_status
+    order.status = 'cancelled'
+    if escrow:
+        escrow.status = 'failed' if failed else 'cancelled'
+    return True
 
 
 def fund_escrow(escrow, actor, provider_transaction_id=None, mpesa_receipt_number=None):
