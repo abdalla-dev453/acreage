@@ -2,7 +2,9 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import { lazy, Suspense } from "react";
 
-import Sidebar from "../components/common/Sidebar";
+import PremiumSiteNav from "../components/common/PremiumSiteNav";
+import PremiumFooter from "../components/common/PremiumFooter";
+import PublicLayout from "../components/common/PublicLayout";
 import Home from "../pages/Home"; // Keep Home as regular import for landing page
 import ErrorBoundary from "../components/common/ErrorBoundary";
 
@@ -28,6 +30,7 @@ const Search = lazy(() => import("../pages/Search"));
 const Terms = lazy(() => import("../pages/Terms"));
 const MarketPrices = lazy(() => import("../pages/MarketPrices"));
 const GroupCommerce = lazy(() => import("../pages/GroupCommerce"));
+const TrustCenter = lazy(() => import("../pages/TrustCenter"));
 import SmsHub from "../pages/SmsHub";
 const HarvestPlanner = lazy(() => import("../pages/HarvestPlanner"));
 
@@ -43,19 +46,23 @@ function PageLoader() {
   );
 }
 
+/**
+ * The authenticated shell. Identical chrome to PublicLayout — same global
+ * navigation and footer — with the content width cap and vertical gutters that
+ * the dense application pages need.
+ */
 function AppLayout() {
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-[#0F172A] dark:text-slate-100 antialiased font-sans">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden max-h-screen ml-0 lg:ml-20">
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-20 lg:pt-6">
-          <div className="w-full max-w-7xl mx-auto">
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
-          </div>
-        </main>
-      </div>
+    <div className="site-shell">
+      <PremiumSiteNav />
+      <main className="site-main">
+        <div className="site-content">
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
+        </div>
+      </main>
+      <PremiumFooter />
     </div>
   );
 }
@@ -63,32 +70,49 @@ function AppLayout() {
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* Public marketing site — Home keeps its own bespoke header/footer, so
+          it sits outside PublicLayout. Every other public page shares the
+          premium nav + footer so the chrome is consistent across the site. */}
+      <Route element={<PublicLayout />}>
+        <Route path="/login" element={
+          <Suspense fallback={<PageLoader />}>
+            <Login />
+          </Suspense>
+        } />
+        <Route path="/register" element={
+          <Suspense fallback={<PageLoader />}>
+            <Register />
+          </Suspense>
+        } />
+        <Route path="/thank-you" element={
+          <Suspense fallback={<PageLoader />}>
+            <ThankYou />
+          </Suspense>
+        } />
+        <Route path="/privacy" element={
+          <Suspense fallback={<PageLoader />}>
+            <Privacy />
+          </Suspense>
+        } />
+        <Route path="/terms" element={
+          <Suspense fallback={<PageLoader />}>
+            <Terms />
+          </Suspense>
+        } />
+        <Route path="/trust-center" element={
+          <Suspense fallback={<PageLoader />}>
+            <TrustCenter />
+          </Suspense>
+        } />
+        {/* Declared last inside the same layout element, so an unknown path
+            still gets the premium nav and footer instead of a bare page. */}
+        <Route path="*" element={
+          <Suspense fallback={<PageLoader />}>
+            <NotFound />
+          </Suspense>
+        } />
+      </Route>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={
-        <Suspense fallback={<PageLoader />}>
-          <Login />
-        </Suspense>
-      } />
-      <Route path="/register" element={
-        <Suspense fallback={<PageLoader />}>
-          <Register />
-        </Suspense>
-      } />
-      <Route path="/thank-you" element={
-        <Suspense fallback={<PageLoader />}>
-          <ThankYou />
-        </Suspense>
-      } />
-      <Route path="/privacy" element={
-        <Suspense fallback={<PageLoader />}>
-          <Privacy />
-        </Suspense>
-      } />
-      <Route path="/terms" element={
-        <Suspense fallback={<PageLoader />}>
-          <Terms />
-        </Suspense>
-      } />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
@@ -184,12 +208,6 @@ export default function AppRoutes() {
           } />
         </Route>
       </Route>
-
-      <Route path="*" element={
-        <Suspense fallback={<PageLoader />}>
-          <NotFound />
-        </Suspense>
-      } />
     </Routes>
   );
 }
