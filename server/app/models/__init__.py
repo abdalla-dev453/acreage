@@ -24,9 +24,12 @@ from .commerce import (
     Receipt,
 )
 from .trust import MediaAsset, VerificationRequest, ReviewEvidence
+from .admin import AdminAuditLog, SuperadminSession
 
 __all__ = [
     "User",
+    "AdminAuditLog",
+    "SuperadminSession",
     "Product",
     "Order",
     "OrderItem",

@@ -4,12 +4,14 @@ import os
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from app import db, limiter
+from app.models.admin import SuperadminSession
 from app.models.user import User
 from app.schemas.user import user_schema
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.utils.validators import validate_password, validate_email, sanitize_string
 from app.utils.security import expiry, is_valid_token, new_token, send_security_email
 from app.utils.http import json_object
+from app.utils.time import utcnow
 
 auth_bp = Blueprint('auth', __name__)
 logger = logging.getLogger(__name__)
@@ -113,7 +115,41 @@ def login():
     if not user.email_verified:
         return jsonify({'message': 'Verify your email before signing in'}), 403
 
-    access_token = create_access_token(identity=str(user.id))
+    # A frozen or suspended account keeps its data but must not be able to
+    # authenticate. Checked after the password so the response does not reveal
+    # whether the account exists.
+    if not user.can_authenticate:
+        logger.warning('Blocked login for %s account', user.account_status,
+                       extra={'user_id': user.id})
+        return jsonify({
+            'message': f'This account is {user.account_status}.',
+            'account_status': user.account_status,
+            'reason': user.frozen_reason,
+            'contact_admin': True,
+        }), 403
+
+    # 'ver' is compared against user.token_version on every subsequent request
+    # (app/__init__.py), which is what makes freezing and session revocation
+    # actually take effect before the token would have expired.
+    access_token = create_access_token(
+        identity=str(user.id), additional_claims={'ver': user.token_version}
+    )
+    user.last_login_at = utcnow()
+
+    if user.is_superadmin:
+        # Privileged sign-ins get their own log so that reviewing "who has been
+        # logging in as admin" does not depend on the general audit table.
+        db.session.add(SuperadminSession(
+            user_id=user.id,
+            ip_address=request.headers.get('X-Forwarded-For', request.remote_addr),
+            user_agent=(request.headers.get('User-Agent') or '')[:255],
+            was_successful=True,
+        ))
+        logger.warning('SUPERADMIN SIGN-IN: %s from %s', user.username,
+                       request.headers.get('X-Forwarded-For', request.remote_addr))
+
+    db.session.commit()
+
     return jsonify({
         'token': access_token,
         'access_token': access_token,

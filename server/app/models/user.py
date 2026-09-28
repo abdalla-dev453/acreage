@@ -28,6 +28,28 @@ class User(db.Model):
     reset_token_expires_at = db.Column(db.DateTime, nullable=True)
     cooperative_id = db.Column(db.Integer, db.ForeignKey('cooperatives.id'), nullable=True)
 
+    # ── Platform administration ────────────────────────────────────────────
+    # Kept separate from `role` on purpose. `role` drives product permissions
+    # (farmer / buyer) and is copied into plenty of UI conditionals; `admin` as
+    # a role value meant "may review verifications" and was reachable by any
+    # row that happened to carry it. A superadmin is a distinct, explicit grant.
+    is_superadmin = db.Column(db.Boolean, nullable=False, default=False)
+
+    # 'active' | 'frozen' | 'suspended'
+    # Frozen accounts keep their data but cannot authenticate; suspended
+    # accounts are the same but are expected to be deleted once reviewed.
+    account_status = db.Column(db.String(20), nullable=False, default='active')
+    frozen_reason = db.Column(db.String(255), nullable=True)
+    frozen_at = db.Column(db.DateTime, nullable=True)
+    frozen_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+
+    # Bumped on any action that must invalidate outstanding access tokens.
+    # JWTs are stateless and live for an hour, so freezing a user has nothing
+    # else to act on; the token's embedded version is compared against this on
+    # every authenticated request (see admin_required / app/__init__.py).
+    token_version = db.Column(db.Integer, nullable=False, default=1)
+    last_login_at = db.Column(db.DateTime, nullable=True)
+
     # relationships
     products = db.relationship('Product', backref='farmer', lazy=True)
     farm_orders = db.relationship('Order', foreign_keys='Order.farmer_id', back_populates='farmer', lazy=True)
@@ -55,3 +77,38 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    @property
+    def can_authenticate(self):
+        """Frozen and suspended accounts are refused at the login boundary."""
+        return self.account_status == 'active'
+
+    def freeze(self, actor, reason=None):
+        """Suspend sign-in and invalidate every outstanding access token.
+
+        JWTs are stateless and last an hour, so flipping account_status alone
+        would leave a frozen user fully operational until the token expired.
+        Bumping token_version is what actually cuts them off.
+        """
+        self.account_status = 'frozen'
+        self.frozen_reason = reason
+        self.frozen_at = utcnow()
+        self.frozen_by_id = getattr(actor, 'id', None)
+        self.token_version = (self.token_version or 1) + 1
+
+    def unfreeze(self):
+        self.account_status = 'active'
+        self.frozen_reason = None
+        self.frozen_at = None
+        self.frozen_by_id = None
+        # Also bumped so a token issued before the freeze cannot be replayed
+        # after the account is restored.
+        self.token_version = (self.token_version or 1) + 1
+
+    def revoke_tokens(self):
+        """Invalidate outstanding tokens without changing account status."""
+        self.token_version = (self.token_version or 1) + 1
+
+    @property
+    def is_privileged(self):
+        return bool(self.is_superadmin) or self.role == 'admin'

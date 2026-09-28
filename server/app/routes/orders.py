@@ -119,6 +119,62 @@ def get_order(order_id):
     return order_schema.jsonify(order), 200
 
 
+@orders_bp.route('/counterparties', methods=['GET'])
+@jwt_required()
+def list_counterparties():
+    """Trading partners of the caller, with the contact details of those orders.
+
+    Replaces the old client directory, which let any signed-in account read the
+    email and phone number of every user on the platform. A farmer has a
+    legitimate need to see who they have actually traded with, so this scopes
+    the lookup to the caller's own orders and returns full contact fields only
+    for genuine counterparties.
+    """
+    user_id = int(get_jwt_identity())
+    user = db.get_or_404(User, user_id)
+
+    if user.role == 'farmer':
+        counterparty_id = Order.farmer_id
+        other_id = Order.buyer_id
+    elif user.role == 'buyer':
+        counterparty_id = Order.buyer_id
+        other_id = Order.farmer_id
+    else:
+        # Admins have no trading counterparties of their own.
+        return jsonify({'items': [], 'total': 0}), 200
+
+    rows = (
+        db.session.query(
+            User,
+            func.count(Order.id).label('order_count'),
+            func.coalesce(func.sum(Order.total_amount), 0.0).label('total_value'),
+            func.max(Order.created_at).label('last_order_at'),
+        )
+        .join(Order, other_id == User.id)
+        .filter(counterparty_id == user_id)
+        .group_by(User.id)
+        .order_by(func.max(Order.created_at).desc())
+        .all()
+    )
+
+    items = [
+        {
+            'id': partner.id,
+            'username': partner.username,
+            'email': partner.email,
+            'role': partner.role,
+            'location': partner.location or '',
+            'phone_number': partner.phone_number or '',
+            'order_count': order_count,
+            'total_value': round(float(total_value), 2),
+            'last_order_at': last_order_at.isoformat() if last_order_at else None,
+        }
+        for partner, order_count, total_value, last_order_at in rows
+    ]
+
+    return jsonify({'items': items, 'total': len(items)}), 200
+
+
 @orders_bp.route('/', methods=['POST'])
 @jwt_required()
 def place_order():

@@ -14,7 +14,13 @@ from flask_marshmallow import Marshmallow
 
 db = SQLAlchemy()
 jwt = JWTManager()
-limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
+# Backstop only. This was "200 per day, 50 per hour", which is far too tight for
+# ordinary browsing: a single user loading a dozen pages, each firing several API
+# calls, exhausted the hourly budget and every response after it was a 429 —
+# indistinguishable from the API being unreachable. Sensitive endpoints carry
+# their own much tighter limits; this ceiling exists to stop abuse, not to
+# ration normal traffic.
+limiter = Limiter(key_func=get_remote_address, default_limits=["5000 per day", "600 per hour"])
 migrate = Migrate()
 ma = Marshmallow()
 
@@ -126,6 +132,7 @@ def create_app(config_class=None):
     from .routes.whatsapp import whatsapp_bp
     from .routes.price_alerts import price_alerts_bp
     from .routes.cooperatives import cooperatives_bp
+    from .routes.admin import admin_bp
 
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     app.register_blueprint(products_bp, url_prefix="/api/products")
@@ -142,6 +149,53 @@ def create_app(config_class=None):
     app.register_blueprint(whatsapp_bp, url_prefix="/api/whatsapp")
     app.register_blueprint(price_alerts_bp, url_prefix="/api/price-alerts")
     app.register_blueprint(cooperatives_bp, url_prefix="/api/cooperatives")
+    app.register_blueprint(admin_bp, url_prefix="/api/admin")
+
+    # Enforce the account's standing on every authenticated request.
+    #
+    # JWTs are stateless and last an hour, so setting account_status alone
+    # would leave a frozen user fully operational until their token expired.
+    # The login route refuses a frozen account outright, and this guard closes
+    # the gap for tokens that were issued before the freeze: every request
+    # re-checks that the token's embedded version still matches the stored one.
+    @app.before_request
+    def enforce_account_status():
+        from flask_jwt_extended import get_jwt, get_jwt_identity, verify_jwt_in_request
+
+        # CORS preflights carry no credentials by definition. flask-jwt-extended
+        # exempts OPTIONS by default, so verify_jwt_in_request() would succeed
+        # and populate an empty claim set, and get_jwt_identity() would then
+        # raise outside the guarded block. Skipping OPTIONS outright is what
+        # keeps the preflight from 500-ing.
+        if request.method == "OPTIONS":
+            return None
+
+        try:
+            verify_jwt_in_request()
+            user_id = int(get_jwt_identity())
+        except Exception:
+            # No, expired, malformed or identity-less token. The route's own
+            # @jwt_required produces the correct 401; nothing to do here.
+            return None
+
+        from app.models.user import User
+        account = db.session.get(User, user_id)
+        if account is None:
+            return jsonify({'message': 'Account no longer exists'}), 401
+        if not account.can_authenticate:
+            return jsonify({
+                'message': f'This account is {account.account_status}.',
+                'account_status': account.account_status,
+                'reason': account.frozen_reason,
+            }), 403
+
+        token_version = get_jwt().get('ver')
+        if token_version is not None and token_version != account.token_version:
+            return jsonify({
+                'message': 'Your session has been ended. Please sign in again.',
+                'code': 'token_revoked',
+            }), 401
+        return None
 
     # Global Health Check Endpoint
     @app.route("/health")
