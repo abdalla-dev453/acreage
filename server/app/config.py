@@ -78,7 +78,7 @@ class Config:
     elif IS_PROD:
         # A production deploy with no CORS_ORIGINS set is the single most likely
         # cause of "the frontend cannot reach the API": every browser preflight
-        # is refused and nothing in the UI explains why. Default to the known
+        # is refused and nothing in the UI explains why. Default to the real
         # production frontend and the Vercel preview pattern instead of
         # silently allowing nobody.
         CORS_ORIGINS = ["https://acreage-one.vercel.app"]
@@ -130,6 +130,14 @@ class Config:
     WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN", "")
     WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
     WHATSAPP_API_VERSION = os.getenv("WHATSAPP_API_VERSION", "v18.0")
-    WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv("WHATSAPP_WEBHOOK_VERIFY_TOKEN", "test_token")
+    # Meta's app secret. Used to verify the X-Hub-Signature-256 header on the
+    # inbound webhook; the webhook authenticates senders by phone number, so
+    # without this anyone can post as any user.
+    WHATSAPP_APP_SECRET = os.getenv("WHATSAPP_APP_SECRET", "")
+    # A committed literal default means every deployment shares one verify
+    # token, so production must supply its own.
+    WHATSAPP_WEBHOOK_VERIFY_TOKEN = os.getenv("WHATSAPP_WEBHOOK_VERIFY_TOKEN") or (
+        "" if IS_PROD else "test_token"
+    )
     RECEIPT_PROCESSING_FEE = float(os.getenv("RECEIPT_PROCESSING_FEE", "0"))
     RECEIPT_DISCOUNT = float(os.getenv("RECEIPT_DISCOUNT", "0"))

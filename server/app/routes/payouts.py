@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models.payout import Payout
+from app.models.commerce import EscrowTransaction
 from app.models.user import User
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from sqlalchemy import func
 import uuid
 import os
 import base64
@@ -14,6 +16,53 @@ from app.utils.http import json_object
 
 payouts_bp = Blueprint('payouts', __name__)
 logger = logging.getLogger(__name__)
+
+# A Payout row is written with status 'Pending'/'completed'/'failed'. Anything
+# in flight or already paid must be subtracted from the balance, otherwise a
+# farmer can fire the same withdrawal twice before either settles.
+PAYOUTS_HOLDING_FUNDS = ('Pending', 'pending', 'completed', 'Completed')
+
+
+def withdrawable_balance(farmer_id):
+    """Money a farmer may still withdraw: released escrow, less payouts in flight.
+
+    Escrow only counts once it reaches 'released' — that is the point at which
+    the platform holds the funds on the farmer's behalf. Funded-but-unreleased
+    escrow is still the buyer's money.
+    """
+    released = (
+        db.session.query(func.coalesce(func.sum(EscrowTransaction.amount), 0.0))
+        .filter(
+            EscrowTransaction.farmer_id == farmer_id,
+            EscrowTransaction.status == 'released',
+        )
+        .scalar()
+    ) or 0.0
+
+    already_drawn = (
+        db.session.query(func.coalesce(func.sum(Payout.amount), 0.0))
+        .filter(
+            Payout.farmer_id == farmer_id,
+            Payout.status.in_(PAYOUTS_HOLDING_FUNDS),
+        )
+        .scalar()
+    ) or 0.0
+
+    return max(released - already_drawn, 0.0)
+
+
+@payouts_bp.route('/balance', methods=['GET'])
+@jwt_required()
+def payout_balance():
+    current_user_id = int(get_jwt_identity())
+    user = db.get_or_404(User, current_user_id)
+    if user.role != 'farmer':
+        return jsonify({'message': 'Access restricted. Only farmers have a payout balance.'}), 403
+    return jsonify({
+        'balance': round(withdrawable_balance(user.id), 2),
+        'currency': 'KES',
+    }), 200
+
 
 @payouts_bp.route('/withdraw', methods=['POST'])
 @jwt_required()
@@ -33,6 +82,15 @@ def initiate_payout():
     # 1. FIXED: Corrected amount check condition boundary logic
     if not amount or float(amount) <= 0:
         return jsonify({'message': 'Invalid withdrawal amount specified. Must be greater than 0.'}), 400
+
+    # Without this, any self-registered farmer can drain the B2C float: the only
+    # check above was "amount > 0" and a Kenyan phone number.
+    available = withdrawable_balance(current_user_id)
+    if float(amount) > available:
+        return jsonify({
+            'message': 'Amount exceeds your available balance.',
+            'available_balance': round(available, 2),
+        }), 400
 
     if not mpesa_number:
         return jsonify({'message': 'M-pesa recipient phone number is required.'}), 400

@@ -54,7 +54,7 @@ def update_preferences():
     # persisted nothing and clients kept receiving the stale preferences.
     user.preferences_json = {**(user.preferences_json or {}), **valid_updates}
     db.session.commit()
-    return jsonify({'preferences': current, 'message': 'Preferences saved'}), 200
+    return jsonify({'preferences': user.preferences_json, 'message': 'Preferences saved'}), 200
 
 
 @settings_bp.route('/account', methods=['GET'])

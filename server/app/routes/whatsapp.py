@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app import db
 from app.models.order import Order, OrderItem
 from app.models.product import Product
@@ -10,12 +11,11 @@ from app.utils.whatsapp import (
     send_order_status_whatsapp, 
     send_payment_confirmation_whatsapp
 )
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+import hashlib
+import hmac
 import logging
 
 whatsapp_bp = Blueprint('whatsapp', __name__)
-limiter = Limiter(key_func=get_remote_address)
 logger = logging.getLogger(__name__)
 
 
@@ -45,6 +45,25 @@ def whatsapp_webhook():
     """
     Receive incoming messages from WhatsApp webhook.
     """
+    # The handler below treats message['from'] as an authenticated identity and
+    # looks the user up by phone number, so an unsigned POST would let anyone
+    # impersonate any buyer and place orders against their stock. Meta signs
+    # every delivery with the app secret; verify before reading the body.
+    app_secret = current_app.config.get('WHATSAPP_APP_SECRET')
+    signature = request.headers.get('X-Hub-Signature-256', '')
+    if not app_secret:
+        logger.error(
+            "WHATSAPP_APP_SECRET is not configured — refusing the webhook "
+            "rather than accepting unauthenticated sender identities."
+        )
+        return jsonify({'message': 'Webhook not configured'}), 503
+    expected = 'sha256=' + hmac.new(
+        app_secret.encode('utf-8'), request.get_data(), hashlib.sha256
+    ).hexdigest()
+    if not hmac.compare_digest(signature, expected):
+        logger.warning('Rejected WhatsApp webhook with an invalid signature')
+        return jsonify({'message': 'Invalid signature'}), 401
+
     data = request.get_json()
     
     if not data or 'entry' not in data:
@@ -460,11 +479,18 @@ def send_test_whatsapp():
 
 
 @whatsapp_bp.route('/logs', methods=['GET'])
+@jwt_required()
 def get_whatsapp_logs():
-    """Get WhatsApp logs (admin only - simplified for now)"""
+    """Get WhatsApp logs (admin only)"""
+    user = db.session.get(User, int(get_jwt_identity()))
+    if user is None:
+        return jsonify({'message': 'User not found'}), 401
+    if user.role != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 20, type=int), 100)
-    
+
     logs = WhatsAppLog.query.order_by(WhatsAppLog.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )

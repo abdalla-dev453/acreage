@@ -3,7 +3,7 @@ import logging
 import os
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
-from app import db
+from app import db, limiter
 from app.models.user import User
 from app.schemas.user import user_schema
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -13,6 +13,15 @@ from app.utils.http import json_object
 
 auth_bp = Blueprint('auth', __name__)
 logger = logging.getLogger(__name__)
+
+# `limiter` is imported from the app package on purpose. This module used to
+# build its own Limiter instance, but only the shared one in app/__init__.py
+# ever gets init_app() called — a second instance registers nothing with Flask,
+# so every @limiter.limit in this file silently did nothing. Importing the
+# shared object is what makes these limits actually enforce.
+#
+# The app-wide default is only a loose abuse backstop; these per-route limits
+# are the real credential-stuffing guard on the unauthenticated auth endpoints.
 
 
 def _send_verification(user):
@@ -25,6 +34,7 @@ def _send_verification(user):
 
 
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit('5 per hour; 20 per day', override_defaults=True)
 def register():
     data, error = json_object()
     if error:
@@ -84,6 +94,7 @@ def register():
 
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit('10 per minute; 30 per hour; 100 per day', override_defaults=True)
 def login():
     data, error = json_object()
     if error:
@@ -111,6 +122,7 @@ def login():
 
 
 @auth_bp.route('/verify-email', methods=['POST'])
+@limiter.limit('20 per hour', override_defaults=True)
 def verify_email():
     data, error = json_object()
     if error:
@@ -129,6 +141,7 @@ def verify_email():
 
 
 @auth_bp.route('/password-reset/request', methods=['POST'])
+@limiter.limit('5 per hour', override_defaults=True)
 def request_password_reset():
     data, error = json_object()
     if error:
@@ -147,6 +160,7 @@ def request_password_reset():
 
 
 @auth_bp.route('/password-reset/confirm', methods=['POST'])
+@limiter.limit('10 per hour', override_defaults=True)
 def confirm_password_reset():
     data, error = json_object()
     if error:
@@ -255,12 +269,25 @@ def update_profile():
 @auth_bp.route('/users', methods=['GET'])
 @jwt_required()
 def list_users():
-    """Return all registered users except the caller — used by the chat contacts list."""
+    """Return other registered users for the chat contacts picker.
+
+    This is a contact picker, not a directory. It previously returned every
+    user's email and phone number to any authenticated caller. The phone number
+    is the key needed to impersonate that user on the SMS and WhatsApp webhooks,
+    which authenticate senders by phone number, so handing it to every logged-in
+    account chained those two flaws together. Farmers who need the contact
+    details of their own trading partners should use /api/orders/counterparties.
+    """
     current_user_id = int(get_jwt_identity())
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 20, type=int), 100)
+    search = (request.args.get('q') or request.args.get('search') or '').strip()
 
-    pagination = User.query.filter(User.id != current_user_id).order_by(
+    query = User.query.filter(User.id != current_user_id)
+    if search:
+        query = query.filter(User.username.ilike(f'%{search}%'))
+
+    pagination = query.order_by(
         User.username.asc()
     ).paginate(page=page, per_page=per_page, error_out=False)
 
@@ -268,10 +295,8 @@ def list_users():
         'items': [{
             'id': u.id,
             'username': u.username,
-            'email': u.email,
             'role': u.role,
             'location': u.location or '',
-            'phone_number': u.phone_number or ''
         } for u in pagination.items],
         'total': pagination.total,
         'page': page,

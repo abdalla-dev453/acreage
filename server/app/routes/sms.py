@@ -1,17 +1,16 @@
 from flask import Blueprint, request, jsonify, current_app
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app import db
 from app.models.order import Order, OrderItem
 from app.models.product import Product
 from app.models.user import User
 from app.models.sms_log import SMSLog
 from app.utils.sms import send_sms_notification, send_order_status_sms, send_payment_confirmation_sms
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+import hmac
 import logging
 import re
 
 sms_bp = Blueprint('sms', __name__)
-limiter = Limiter(key_func=get_remote_address)
 logger = logging.getLogger(__name__)
 
 
@@ -21,10 +20,18 @@ def sms_webhook():
     Receive incoming SMS from SMS provider webhook.
     Expected format: {"from": "+254712345678", "message": "ORDER 123 5", "provider": "africas_talking"}
     """
-    # Verify webhook token for security (skip in development if token not set)
-    webhook_token = request.headers.get('X-Webhook-Token')
+    # Verify webhook token for security. This must fail CLOSED: SMS_WEBHOOK_TOKEN
+    # defaults to an empty string, and a falsy check would let anyone on the
+    # internet post messages that create orders and decrement stock.
+    webhook_token = request.headers.get('X-Webhook-Token', '')
     config_token = current_app.config.get('SMS_WEBHOOK_TOKEN')
-    if config_token and webhook_token != config_token:
+    if not config_token:
+        logger.error(
+            "SMS_WEBHOOK_TOKEN is not configured — refusing the webhook rather "
+            "than accepting unauthenticated sender identities."
+        )
+        return jsonify({'message': 'Webhook not configured'}), 503
+    if not hmac.compare_digest(str(webhook_token), str(config_token)):
         logger.warning("Unauthorized SMS webhook attempt")
         return jsonify({'message': 'Unauthorized'}), 401
     
@@ -275,11 +282,18 @@ def send_test_sms():
 
 
 @sms_bp.route('/logs', methods=['GET'])
+@jwt_required()
 def get_sms_logs():
-    """Get SMS logs (admin only - simplified for now)"""
+    """Get SMS logs (admin only)"""
+    user = db.session.get(User, int(get_jwt_identity()))
+    if user is None:
+        return jsonify({'message': 'User not found'}), 401
+    if user.role != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 20, type=int), 100)
-    
+
     logs = SMSLog.query.order_by(SMSLog.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )

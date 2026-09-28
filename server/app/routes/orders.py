@@ -475,35 +475,31 @@ def mpesa_callback():
             mpesa_receipt_number = item.get('Value')
             break
 
-    # CheckoutRequestID is returned by Daraja and is the reliable asynchronous
-    # correlation key. AccountReference is not guaranteed in every callback.
-    account_ref = stk_callback.get('AccountReference', '')
-    escrow = None
-    if checkout_request_id:
-        escrow = (
-            EscrowTransaction.query.filter_by(checkout_request_id=str(checkout_request_id))
-            .with_for_update()
-            .first()
-        )
-    if escrow is None and account_ref:
-        try:
-            referenced_order_id = int(str(account_ref).removeprefix('ACR'))
-        except ValueError:
-            referenced_order_id = None
-        if referenced_order_id:
-            escrow = (
-                EscrowTransaction.query.filter_by(order_id=referenced_order_id)
-                .with_for_update()
-                .first()
-            )
-            # Do not accept an unrelated checkout ID through the fallback path.
-            if escrow and checkout_request_id and escrow.checkout_request_id not in {None, str(checkout_request_id)}:
-                escrow = None
+    # CheckoutRequestID is the only correlation key this callback is allowed to
+    # use. It is issued by Daraja in response to our own STK push, so a genuine
+    # callback always carries one.
+    #
+    # There used to be an AccountReference fallback here ("it is not guaranteed
+    # in every callback"). AccountReference is a sequential integer we minted
+    # ourselves, and the guard below it was written as
+    # `if escrow and checkout_request_id and ...` — so omitting CheckoutRequestID
+    # skipped the guard entirely. Anyone who could reach this public endpoint
+    # could then mark any order in the system as paid with a receipt number of
+    # their choosing. Correlation keys must never be guessable.
+    if not checkout_request_id:
+        logger.warning('M-Pesa callback arrived without a CheckoutRequestID; refusing to correlate')
+        return jsonify({'ResultCode': 1, 'ResultDesc': 'Missing CheckoutRequestID'}), 400
+
+    escrow = (
+        EscrowTransaction.query.filter_by(checkout_request_id=str(checkout_request_id))
+        .with_for_update()
+        .first()
+    )
     order = escrow.order if escrow else None
 
     if not order:
         logger.warning('M-Pesa callback has no matching checkout request', extra={
-            'checkout_id': checkout_request_id, 'account_reference': account_ref,
+            'checkout_id': checkout_request_id,
         })
         return jsonify({'ResultCode': 1, 'ResultDesc': 'Payment transaction not found'}), 404
 
