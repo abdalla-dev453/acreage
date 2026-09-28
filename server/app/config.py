@@ -66,12 +66,22 @@ class Config:
     # work consistently across multiple web workers.
     RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
 
+    # ── CORS ──────────────────────────────────────────────────────────────
+    # Two separate knobs:
+    #   CORS_ORIGINS         exact origins, comma separated
+    #   CORS_ORIGIN_PATTERNS anchored regular expressions, comma separated
+    # Vercel gives every preview deployment its own `*.vercel.app` subdomain,
+    # so a literal allow-list breaks the moment anyone opens a branch preview.
     raw_cors = os.getenv("CORS_ORIGINS", "")
     if raw_cors:
         CORS_ORIGINS = [origin.strip() for origin in raw_cors.split(",") if origin.strip()]
     elif IS_PROD:
-        # Production must declare its origins explicitly; never widen by default.
-        CORS_ORIGINS = []
+        # A production deploy with no CORS_ORIGINS set is the single most likely
+        # cause of "the frontend cannot reach the API": every browser preflight
+        # is refused and nothing in the UI explains why. Default to the known
+        # production frontend and the Vercel preview pattern instead of
+        # silently allowing nobody.
+        CORS_ORIGINS = ["https://acreage-one.vercel.app"]
     else:
         # Local development: the Vite dev server and the common fallbacks.
         CORS_ORIGINS = [
@@ -80,6 +90,20 @@ class Config:
             "http://localhost:3000",
             "http://127.0.0.1:3000",
         ]
+
+    raw_cors_patterns = os.getenv("CORS_ORIGIN_PATTERNS", "")
+    if raw_cors_patterns:
+        CORS_ORIGIN_PATTERNS = [
+            pattern.strip()
+            for pattern in raw_cors_patterns.split(",")
+            if pattern.strip()
+        ]
+    elif IS_PROD:
+        # Anchored so that lookalikes such as
+        # "https://acreage-frontend.vercel.app.evil.com" are rejected.
+        CORS_ORIGIN_PATTERNS = [r"^https://[a-z0-9-]+\.vercel\.app$"]
+    else:
+        CORS_ORIGIN_PATTERNS = []
 
     #Safaricom M-Pesa Settings
     MPESA_ENV = os.getenv("MPESA_ENV", "sandbox")

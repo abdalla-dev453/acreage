@@ -17,9 +17,13 @@ services:
       - key: FLASK_ENV
         value: production
       - key: CORS_ORIGINS
-        value: https://acreage-frontend.vercel.app,http://localhost:5173,http://localhost:3000
+        value: https://acreage-one.vercel.app,http://localhost:5173,http://localhost:3000
+      # Vercel issues a unique subdomain to every preview deployment, so a
+      # literal allow-list breaks the moment a branch preview is opened.
+      - key: CORS_ORIGIN_PATTERNS
+        value: ^https://[a-z0-9-]+\.vercel\.app$
       - key: FRONTEND_URL
-        value: https://acreage-frontend.vercel.app
+        value: https://acreage-one.vercel.app
       - key: MPESA_CALLBACK_URL
         value: https://acreage-n2h1.onrender.com/api/orders/mpesa-callback
       - key: SECRET_KEY

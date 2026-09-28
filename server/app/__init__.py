@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 from flask import Flask, jsonify, request
 from werkzeug.exceptions import HTTPException
@@ -36,20 +37,39 @@ def create_app(config_class=None):
     ma.init_app(app)
     migrate.init_app(app, db)
     
-    # 1. Parse CORS origins cleanly (ensures list format)
-    raw_origins = app.config.get("CORS_ORIGINS") or [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ]
+    # 1. Build the CORS allow-list from exact origins plus anchored patterns.
+    #    flask-cors 6.x matches a compiled regex and a literal string against
+    #    the same option, so the two kinds can be combined in one list.
+    raw_origins = app.config.get("CORS_ORIGINS")
     if isinstance(raw_origins, str):
         origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
     else:
-        origins = raw_origins
+        origins = list(raw_origins or [])
     # Never leave a placeholder origin in the list — it would silently
     # refuse every real browser origin in development.
     origins = [origin for origin in origins if origin and origin != "<local>"]
+
+    patterns = app.config.get("CORS_ORIGIN_PATTERNS") or []
+    if isinstance(patterns, str):
+        patterns = [p.strip() for p in patterns.split(",") if p.strip()]
+    for pattern in patterns:
+        try:
+            origins.append(re.compile(pattern))
+        except re.error:
+            logging.warning("Ignoring invalid CORS_ORIGIN_PATTERNS entry: %r", pattern)
+
+    # A production API that allows no browser origin looks healthy to Render's
+    # health check while every real request fails, so make it visible in the logs.
+    if not origins:
+        logging.error(
+            "CORS is configured with zero allowed origins — every browser "
+            "request will be refused. Set CORS_ORIGINS on this service."
+        )
+    else:
+        logging.info(
+            "CORS allowed origins: %s",
+            ", ".join(o.pattern if hasattr(o, "pattern") else str(o) for o in origins),
+        )
 
     # 2. Configure CORS with authorization credentials support
     CORS(app, resources={r"/api/*": {"origins": origins}}, supports_credentials=True)
