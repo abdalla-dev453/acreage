@@ -21,8 +21,20 @@ export default function ProtectedRoute({ allowedRoles = [] }) {
     return <Navigate to="/login" replace />;
   }
 
-  // Enforce role-based access tokens clearance checks
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+  // Enforce role-based access tokens clearance checks.
+  //
+  // A superadmin is granted visibility of every role-gated page, because the
+  // whole point of the grant is to be able to inspect and moderate anything on
+  // the platform. Without this, /farm-logs bounced the superadmin to the
+  // dashboard and there was no route at all from which to review farm records.
+  // This is presentation only — the server still enforces its own ownership and
+  // role checks on every data-bearing request.
+  const isSuperadmin = Boolean(user.is_superadmin);
+  if (
+    allowedRoles.length > 0 &&
+    !isSuperadmin &&
+    !allowedRoles.includes(user.role)
+  ) {
     return <Navigate to="/dashboard" replace />; // Gracefully bounce unauthorized view shifts to dashboard root
   }
 

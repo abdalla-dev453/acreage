@@ -13,21 +13,15 @@ export default function Customers() {
 
   useEffect(() => {
     setIsLoading(true);
-    // Reuses your fully verified global users endpoint
-    API.get('/auth/users')
+    // Scoped to the caller's own orders. The global /auth/users contact picker
+    // deliberately omits email and phone number, so it cannot back a customer
+    // directory — only genuine trading partners expose contact details.
+    API.get('/orders/counterparties')
       .then((res) => {
-        // Filter out the list to uniquely display marketplace "buyers"
-        const buyersOnly = res.data.filter(u => u.role === 'buyer');
-        setCustomers(buyersOnly);
+        const items = Array.isArray(res.data) ? res.data : res.data.items || [];
+        setCustomers(items.filter(c => c.role === 'buyer'));
       })
-      .catch(() => {
-        // High-UX fallback mock data if local database holds zero buyer profiles yet
-        setCustomers([
-          { id: 2, username: 'alice_grocer', email: 'alice@grocer.co.ke', location: 'Nairobi Central', phone_number: '+254 712 345 678' },
-          { id: 3, username: 'bob_eats_restaurant', email: 'orders@bobeats.com', location: 'Mombasa Section', phone_number: '+254 722 987 654' },
-          { id: 4, username: 'nakuru_wholesalers', email: 'info@nakuruwholesale.ke', location: 'Nakuru Town', phone_number: '+254 733 111 222' }
-        ]);
-      })
+      .catch(() => setCustomers([]))
       .finally(() => setIsLoading(false));
   }, []);
 

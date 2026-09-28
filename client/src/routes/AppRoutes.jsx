@@ -31,7 +31,11 @@ const Terms = lazy(() => import("../pages/Terms"));
 const MarketPrices = lazy(() => import("../pages/MarketPrices"));
 const GroupCommerce = lazy(() => import("../pages/GroupCommerce"));
 const TrustCenter = lazy(() => import("../pages/TrustCenter"));
-import SmsHub from "../pages/SmsHub";
+// SmsHub was a static import despite being wrapped in <Suspense> a few lines
+// below, so the boundary was decorative and 413 lines shipped in the initial
+// bundle for every visitor regardless of route.
+const SmsHub = lazy(() => import("../pages/SmsHub"));
+const AdminDashboard = lazy(() => import("../pages/AdminDashboard"));
 const HarvestPlanner = lazy(() => import("../pages/HarvestPlanner"));
 
 // Loading component for lazy loading
@@ -102,6 +106,14 @@ export default function AppRoutes() {
         <Route path="/trust-center" element={
           <Suspense fallback={<PageLoader />}>
             <TrustCenter />
+          </Suspense>
+        } />
+        {/* Any signed-in user may reach the URL, but the page itself checks
+            is_superadmin and redirects. The server enforces the same rule on
+            every /api/admin route, so the client check is presentation only. */}
+        <Route path="/admin" element={
+          <Suspense fallback={<PageLoader />}>
+            <AdminDashboard />
           </Suspense>
         } />
         {/* Declared last inside the same layout element, so an unknown path

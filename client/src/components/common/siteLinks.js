@@ -26,6 +26,7 @@ import {
   MessageSquareText,
   Search,
   Settings,
+  Shield,
   ShieldCheck,
   ShoppingBag,
   Sprout,
@@ -166,6 +167,17 @@ export const SITE_MENU_GROUPS = [
         roles: EVERY_ROLE,
       },
       {
+        label: "Administration",
+        path: "/admin",
+        icon: Shield,
+        blurb: "Platform control: accounts, moderation and the audit log.",
+        roles: EVERY_ROLE,
+        // Only rendered for a superadmin. The server rejects every
+        // /api/admin route for anyone else, so this is a convenience
+        // rather than the access control.
+        superadminOnly: true,
+      },
+      {
         label: "My profile",
         path: "/profile",
         icon: User,
@@ -243,16 +255,15 @@ export function isLinkActive(pathname, path) {
 }
 
 /**
- * Links a signed-out visitor may see.
- *
- * The mega-menu doubles as the product map for visitors who have not signed up
- * yet, so the full catalogue is listed for them — clicking a protected page
- * sends them to /login, which is the expected funnel. `public: true` is
- * therefore documentation of intent, not a filter.
+ * Signed-out visitors only see pages that render without an account, so the
+ * mega-menu never advertises a route that would bounce them to /login.
  */
 export function visibleLinks(group, user) {
   if (!user) return group.links;
-  return group.links.filter((link) => link.roles.includes(user.role));
+  return group.links.filter((link) => {
+    if (link.superadminOnly && !user.is_superadmin) return false;
+    return link.roles.includes(user.role);
+  });
 }
 
 /** The register CTA is redundant once you already have an account. */
