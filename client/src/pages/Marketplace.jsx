@@ -309,6 +309,8 @@ const openEditModal = (product) => {
                       <img
                         src={prod.image_url}
                         alt={prod.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
                       />
