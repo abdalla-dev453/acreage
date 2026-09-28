@@ -35,6 +35,21 @@ class Config:
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # SQLAlchemy builds one engine per gunicorn worker process. Without an
+    # explicit pool, each worker defaults to pool_size=5 + max_overflow=10, so
+    # 4 workers can open up to 60 connections and blow past the cap on Render's
+    # free Postgres — surfacing as intermittent "sorry, too many clients
+    # already" 500s. Budget 4 x (2 + 1) = 12 connections, well under the cap.
+    # pool_pre_ping replaces sockets Render reaped while the worker was idle,
+    # and pool_recycle stays below Render's idle timeout for the same reason.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_size": int(os.getenv("DB_POOL_SIZE", "2")),
+        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "1")),
+        "pool_timeout": 10,
+        "pool_recycle": 280,
+        "pool_pre_ping": True,
+    }
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     SECURITY_TOKEN_EXPIRES_MINUTES = int(os.getenv("SECURITY_TOKEN_EXPIRES_MINUTES", "30"))
     EMAIL_VERIFICATION_REQUIRED = os.getenv(

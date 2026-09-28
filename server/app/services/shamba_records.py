@@ -1,5 +1,7 @@
 import os
 import uuid
+import threading
+import time
 import logging
 from datetime import datetime
 import requests
@@ -114,13 +116,36 @@ class ShambaRecordsClient:
         self.api_url = os.getenv("SHAMBA_RECORDS_API_URL", "https://api.shambarecords.com/v1/market-prices")
         self.api_key = os.getenv("SHAMBA_RECORDS_API_KEY", "")
         self.timeout = int(os.getenv("SHAMBA_RECORDS_TIMEOUT", "6"))
+        self.cache_ttl = int(os.getenv("SHAMBA_RECORDS_CACHE_TTL", "300"))
+        self.cache_max_entries = int(os.getenv("SHAMBA_RECORDS_CACHE_MAX", "64"))
+        self._cache = {}
+        self._cache_lock = threading.Lock()
 
     def fetch_market_prices(self, category=None, market=None, county_id=None, item_uuid=None):
         """
         Queries ShambaRecords API with county ID, UUID, category, or market filters.
         Gracefully falls back to high-resolution live Kenyan market dataset if external
         API network is offline or unconfigured.
+
+        Responses are memoised per filter combination for CACHE_TTL_SECONDS. The
+        caller is a GET endpoint on the hot market-prices page, which refetches
+        whenever the user changes category or county; without this each of those
+        clicks paid a full upstream round-trip and the route wrote an observation
+        row per result, so a minute of browsing grew the table by tens of
+        thousands of unindexed rows.
         """
+        cache_key = (category, market, county_id, item_uuid)
+        cached = self._read_cache(cache_key)
+        if cached is not None:
+            return cached
+
+        result = self._fetch_market_prices_uncached(
+            category=category, market=market, county_id=county_id, item_uuid=item_uuid
+        )
+        self._write_cache(cache_key, result)
+        return result
+
+    def _fetch_market_prices_uncached(self, category=None, market=None, county_id=None, item_uuid=None):
         params = {}
         if county_id:
             # normalize county_id e.g. "47" -> "047"
@@ -154,6 +179,26 @@ class ShambaRecordsClient:
 
         # 2. Return high-fidelity ShambaRecords synchronized Kenyan dataset
         return self._generate_kenyan_records(category=category, market=market, county_id=county_id, item_uuid=item_uuid)
+
+    def _read_cache(self, key):
+        with self._cache_lock:
+            entry = self._cache.get(key)
+            if not entry:
+                return None
+            expires_at, value = entry
+            if time.monotonic() >= expires_at:
+                self._cache.pop(key, None)
+                return None
+            return value
+
+    def _write_cache(self, key, value):
+        with self._cache_lock:
+            self._cache[key] = (time.monotonic() + self.cache_ttl, value)
+            # Bound the cache so a client sweeping every category/county
+            # combination cannot grow it without limit.
+            if len(self._cache) > self.cache_max_entries:
+                oldest = min(self._cache, key=lambda k: self._cache[k][0])
+                self._cache.pop(oldest, None)
 
     def _generate_kenyan_records(self, category=None, market=None, county_id=None, item_uuid=None):
         """

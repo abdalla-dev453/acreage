@@ -7,6 +7,7 @@ from app.models.user import User
 from app.schemas.order import order_schema, orders_schema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm import selectinload
+from sqlalchemy import func
 import uuid
 import os
 import datetime
@@ -48,26 +49,27 @@ def get_orders():
     # Check explicit query parameter, or fall back to logged-in user's role
     role = request.args.get('role', user.role)
 
+    # orders_schema nests transport_quote, escrow_transaction and receipt
+    # (schemas/order.py). Without eager-loading them, marshmallow lazy-loads
+    # each one per row: 20 orders cost 3 extra SELECTs each, so a single page
+    # of 100 issued 306 queries. These three lines take it to 9.
+    eager_loads = (
+        selectinload(Order.items).selectinload(OrderItem.product),
+        selectinload(Order.buyer),
+        selectinload(Order.farmer),
+        selectinload(Order.transport_quote),
+        selectinload(Order.escrow_transaction),
+        selectinload(Order.receipt),
+    )
+
     if role == 'farmer':
-        base_q = Order.query.options(
-            selectinload(Order.items).selectinload(OrderItem.product),
-            selectinload(Order.buyer),
-            selectinload(Order.farmer),
-        ).filter_by(farmer_id=user_id)
+        base_q = Order.query.options(*eager_loads).filter_by(farmer_id=user_id)
     elif role == 'buyer':
-        base_q = Order.query.options(
-            selectinload(Order.items).selectinload(OrderItem.product),
-            selectinload(Order.buyer),
-            selectinload(Order.farmer),
-        ).filter_by(buyer_id=user_id)
+        base_q = Order.query.options(*eager_loads).filter_by(buyer_id=user_id)
     else:
         # Fallback: Return all orders linked to this account
         base_q = (
-            Order.query.options(
-                selectinload(Order.items).selectinload(OrderItem.product),
-                selectinload(Order.buyer),
-                selectinload(Order.farmer),
-            )
+            Order.query.options(*eager_loads)
             .filter((Order.buyer_id == user_id) | (Order.farmer_id == user_id))
         )
 
@@ -99,6 +101,11 @@ def get_order(order_id):
             selectinload(Order.items).selectinload(OrderItem.product),
             selectinload(Order.buyer),
             selectinload(Order.farmer),
+            # order_schema nests these three; marshmallow otherwise lazy-loads
+            # each one separately (3 extra queries per order).
+            selectinload(Order.transport_quote),
+            selectinload(Order.escrow_transaction),
+            selectinload(Order.receipt),
         ]
     )
     if order is None:
@@ -279,6 +286,11 @@ def update_order_status(order_id):
             selectinload(Order.items).selectinload(OrderItem.product),
             selectinload(Order.buyer),
             selectinload(Order.farmer),
+            # order_schema nests these three; marshmallow otherwise lazy-loads
+            # each one separately (3 extra queries per order).
+            selectinload(Order.transport_quote),
+            selectinload(Order.escrow_transaction),
+            selectinload(Order.receipt),
         ]
     )
     if order is None:
