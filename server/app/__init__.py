@@ -133,6 +133,7 @@ def create_app(config_class=None):
     from .routes.price_alerts import price_alerts_bp
     from .routes.cooperatives import cooperatives_bp
     from .routes.admin import admin_bp
+    from .routes.admin_self import admin_self_bp
 
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     app.register_blueprint(products_bp, url_prefix="/api/products")
@@ -150,6 +151,7 @@ def create_app(config_class=None):
     app.register_blueprint(price_alerts_bp, url_prefix="/api/price-alerts")
     app.register_blueprint(cooperatives_bp, url_prefix="/api/cooperatives")
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
+    app.register_blueprint(admin_self_bp, url_prefix="/api/admin")
 
     # Enforce the account's standing on every authenticated request.
     #
@@ -196,6 +198,30 @@ def create_app(config_class=None):
                 'code': 'token_revoked',
             }), 401
         return None
+
+    # Seed the RBAC catalog so permissions exist on a fresh database and any
+    # permission added to PERMISSION_CATALOG appears after a restart. Idempotent.
+    try:
+        from app.utils.rbac import seed_permissions
+        with app.app_context():
+            # On a brand new database the tables do not exist until migrations
+            # run. Skipping quietly is correct here; failing loudly would mean a
+            # stack trace on every first boot of a fresh checkout.
+            if db.inspect(db.engine).has_table("admin_permissions"):
+                seed_permissions()
+                logging.info("Admin role and permission catalog seeded")
+            else:
+                logging.warning(
+                    "admin_permissions table missing; run 'flask db upgrade'. "
+                    "Every /api/admin route will return 403 until then."
+                )
+    except Exception:
+        # Must not stop the app booting, but must be loud: an unseeded catalog
+        # means every permission check denies.
+        logging.exception(
+            "Could not seed admin permissions; every /api/admin route will 403 "
+            "until this is fixed"
+        )
 
     # Global Health Check Endpoint
     @app.route("/health")

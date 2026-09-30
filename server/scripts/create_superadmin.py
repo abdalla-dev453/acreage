@@ -20,7 +20,9 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import create_app, db                       # noqa: E402
+from app.models.rbac import AdminRole                # noqa: E402
 from app.models.user import User                     # noqa: E402
+from app.utils.rbac import seed_permissions          # noqa: E402
 from app.utils.validators import validate_password   # noqa: E402
 
 
@@ -71,6 +73,8 @@ def main():
     app = create_app()
     with app.app_context():
         db.create_all()
+        # Ensure the RBAC catalog exists before assigning a role from it.
+        seed_permissions()
 
         existing = User.query.filter(
             (User.email == email) | (User.username == username)).first()
@@ -79,12 +83,20 @@ def main():
             account = User(
                 username=username,
                 email=email,
-                role='admin',
+                # Both representations are set: the role string is what the
+                # rest of the app reads, the flag keeps accounts created before
+                # `super_admin` working. is_super_admin_role covers either.
+                role='super_admin',
                 is_superadmin=True,
                 account_status='active',
                 email_verified=True,
                 verification_status='verified',
             )
+            # Assign the RBAC bundle too, so the permission matrix in the UI
+            # shows what this account actually holds.
+            super_admin_role = AdminRole.query.filter_by(key='super_admin').first()
+            if super_admin_role is not None:
+                account.admin_role = super_admin_role
             account.set_password(password)
             db.session.add(account)
             action = 'created'
@@ -93,7 +105,7 @@ def main():
             # Re-running always repairs the grant, so an accidental demotion
             # or a forgotten password is fixable without hand-editing SQL.
             account.is_superadmin = True
-            account.role = 'admin'
+            account.role = 'super_admin'
             account.account_status = 'active'
             account.frozen_reason = None
             account.frozen_at = None

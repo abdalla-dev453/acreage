@@ -27,10 +27,15 @@ from sqlalchemy.orm import selectinload
 from app import db
 from app.models.admin import AdminAuditLog, SuperadminSession
 from app.models.commerce import EscrowTransaction
+from app.models.payout import Payout
+from app.models.sms_log import SMSLog
+from app.models.trust import VerificationRequest
 from app.models.order import Order
 from app.models.product import Product
 from app.models.review import Review
 from app.models.user import User
+from app.utils import admin_auth
+from app.utils.rbac import permissions_for
 from app.utils.time import utcnow
 
 admin_bp = Blueprint('admin', __name__)
@@ -47,13 +52,20 @@ def _error(message, status=400, **extra):
     return jsonify(payload), status
 
 
-def _record(actor, action, target=None, **detail):
-    """Append an audit row. Called inside the action's own transaction."""
+def _record(actor, action, target=None, before=None, after=None, **detail):
+    """Append an audit row. Called inside the action's own transaction.
+
+    `before` and `after` are the field-level snapshots, kept separate from
+    `detail` so a reviewer can read what changed without parsing prose and an
+    exporter can diff columns mechanically.
+    """
     entry = AdminAuditLog(
         actor_id=actor.id,
         target_user_id=getattr(target, 'id', None),
         action=action,
         detail_json=detail,
+        before_json=before,
+        after_json=after,
         ip_address=request.headers.get('X-Forwarded-For', request.remote_addr),
         user_agent=(request.headers.get('User-Agent') or '')[:255],
     )
@@ -61,11 +73,26 @@ def _record(actor, action, target=None, **detail):
     return entry
 
 
-def require_superadmin():
-    """Resolve the caller, or return a ready-made error response.
+def _snapshot(obj, fields):
+    """Take a before/after snapshot of named attributes.
 
-    Returns (user, None) or (None, response). A frozen or deleted account
-    fails here even with a syntactically valid token.
+    Only the listed fields are captured. Snapshotting a whole model would put
+    password hashes and token digests into the audit table.
+    """
+    out = {}
+    for field in fields:
+        value = getattr(obj, field, None)
+        out[field] = value.isoformat() if hasattr(value, 'isoformat') else value
+    return out
+
+
+def require_admin(permission=None):
+    """Resolve the caller and check one permission.
+
+    Returns (user, None) on success or (None, response) on failure. A frozen,
+    deleted or downgraded account fails here even with a syntactically valid
+    token, which is what makes freezing and role revocation take effect before
+    the JWT would have expired.
     """
     identity = get_jwt_identity()
     try:
@@ -76,30 +103,59 @@ def require_superadmin():
     user = db.session.get(User, user_id)
     if user is None or not user.can_authenticate:
         return None, _error('Account is not active', 403)
-    if not user.is_superadmin:
+    if not user.is_privileged:
         # Do not leak that the account exists at all.
         return None, _error('Administrator access required', 403)
+
+    if permission:
+        granted = permissions_for(user)
+        if permission not in granted:
+            logger.warning(
+                'Admin %s denied %s (role=%s)',
+                user.username, permission,
+                getattr(getattr(user, 'admin_role', None), 'key', None),
+            )
+            return None, _error(
+                f'Missing permission: {permission}', 403,
+                required_permission=permission,
+            )
     return user, None
 
 
 def admin_required(view):
-    """Decorator form of require_superadmin()."""
+    """Decorator form. Annotate with @permission_required('users.freeze')."""
 
     @wraps(view)
     def wrapper(*args, **kwargs):
-        actor, failure = require_superadmin()
+        actor, failure = require_admin(getattr(view, 'required_permission', None))
         if failure is not None:
             return failure
+        # Idle and absolute session lifetime. Only meaningful once the account
+        # actually has a session row; a token issued before this feature falls
+        # back to the JWT expiry that flask-jwt-extended already enforces.
+        expired = admin_auth.enforce_session(actor)
+        if expired is not None:
+            return expired
         return view(actor, *args, **kwargs)
 
     return wrapper
+
+
+def permission_required(permission):
+    """Bind a required permission to a view, for use with @admin_required."""
+
+    def decorate(view):
+        view.required_permission = permission
+        return admin_required(view)
+
+    return decorate
 
 
 # ── Platform overview ─────────────────────────────────────────────────────
 
 @admin_bp.route('/stats', methods=['GET'])
 @jwt_required()
-@admin_required
+@permission_required('dashboard.view')
 def platform_stats(actor):
     """Headline numbers for the admin dashboard."""
     counts = {
@@ -124,17 +180,70 @@ def platform_stats(actor):
         EscrowTransaction.status.in_(['funded', 'disputed'])).scalar()
     volume = db.session.query(func.coalesce(func.sum(Order.total_amount), 0.0)).scalar()
 
+    # Alerts: things a human has to look at, not just counters.
+    alerts = []
+    frozen = counts.get('frozen_users') or 0
+    if frozen:
+        alerts.append({
+            'level': 'warning', 'module': 'users',
+            'message': f'{frozen} account(s) are frozen and need a decision.',
+            'link': '/admin/users?status=frozen',
+        })
+    pending_payouts = db.session.query(func.count(Payout.id)).filter(
+        Payout.status.in_(['Pending', 'pending'])).scalar()
+    if pending_payouts:
+        alerts.append({
+            'level': 'info', 'module': 'payouts',
+            'message': f'{pending_payouts} payout(s) are awaiting settlement.',
+            'link': '/admin/payouts',
+        })
+    failed_sms = db.session.query(func.count(SMSLog.id)).filter(
+        SMSLog.status == 'failed').scalar()
+    if failed_sms:
+        alerts.append({
+            'level': 'warning', 'module': 'sms',
+            'message': f'{failed_sms} SMS message(s) failed to deliver.',
+            'link': '/admin/sms',
+        })
+    open_verifications = db.session.query(
+        func.count(VerificationRequest.id)).filter(
+        VerificationRequest.status == 'pending').scalar()
+    if open_verifications:
+        alerts.append({
+            'level': 'info', 'module': 'trust',
+            'message': f'{open_verifications} verification request(s) awaiting review.',
+            'link': '/admin/trust',
+        })
+    disputed = db.session.query(func.count(EscrowTransaction.id)).filter(
+        EscrowTransaction.status == 'disputed').scalar()
+    if disputed:
+        alerts.append({
+            'level': 'critical', 'module': 'disputes',
+            'message': f'{disputed} escrow transaction(s) are disputed.',
+            'link': '/admin/disputes',
+        })
+
+    # 14-day signup series for the dashboard chart.
+    series = (
+        db.session.query(func.date(User.created_at), func.count(User.id))
+        .filter(User.created_at >= utcnow() - timedelta(days=14))
+        .group_by(func.date(User.created_at))
+        .order_by(func.date(User.created_at))
+        .all()
+    )
+
     return jsonify({
         'counts': counts,
         'escrow_held_value': round(float(held or 0), 2),
         'gross_order_volume': round(float(volume or 0), 2),
-        'newest_user_at': None,
+        'signups_series': [{'date': str(d), 'count': int(c)} for d, c in series],
+        'alerts': alerts,
     }), 200
 
 
 @admin_bp.route('/activity', methods=['GET'])
 @jwt_required()
-@admin_required
+@permission_required('dashboard.view')
 def platform_activity(actor):
     """A cross-user activity feed: who joined, who ordered, what was reviewed.
 
@@ -183,7 +292,7 @@ def platform_activity(actor):
 
 @admin_bp.route('/users', methods=['GET'])
 @jwt_required()
-@admin_required
+@permission_required('users.view')
 def list_users(actor):
     """Searchable, filterable, paginated user list."""
     page = request.args.get('page', 1, type=int)
@@ -245,7 +354,7 @@ def list_users(actor):
 
 @admin_bp.route('/users/<int:user_id>', methods=['GET'])
 @jwt_required()
-@admin_required
+@permission_required('users.view')
 def user_detail(actor, user_id):
     """Full profile plus whatever activity the platform holds for that account."""
     user = db.session.get(User, user_id)
@@ -310,7 +419,7 @@ def user_detail(actor, user_id):
 
 @admin_bp.route('/users/<int:user_id>/status', methods=['PATCH'])
 @jwt_required()
-@admin_required
+@permission_required('users.suspend')
 def set_account_status(actor, user_id):
     """Freeze, suspend, or restore an account.
 
@@ -340,13 +449,17 @@ def set_account_status(actor, user_id):
     if previous == new_status:
         return _error(f"Account is already '{new_status}'", 409)
 
+    before = _snapshot(target, ['role', 'account_status', 'email', 'username', 'email_verified', 'is_superadmin'])
+
     if new_status == 'active':
         target.unfreeze()
     else:
         target.freeze(actor, reason=reason)
 
     _record(actor, f'user.{new_status}', target=target,
-            previous_status=previous, reason=reason)
+            before=before, after=_snapshot(target, ['role', 'account_status', 'email', 'username', 'email_verified', 'is_superadmin']),
+            previous_status=previous, new_status=new_status,
+            reason=reason)
 
     db.session.commit()
 
@@ -361,7 +474,7 @@ def set_account_status(actor, user_id):
 
 @admin_bp.route('/users/<int:user_id>/role', methods=['PATCH'])
 @jwt_required()
-@admin_required
+@permission_required('users.edit')
 def set_user_role(actor, user_id):
     """Change a user's product role. Admin and superadmin are not assignable."""
     target = db.session.get(User, user_id)
@@ -385,8 +498,10 @@ def set_user_role(actor, user_id):
     if previous == new_role:
         return _error(f'User is already a {new_role}', 409)
 
+    before = _snapshot(target, ['role', 'account_status', 'email', 'username', 'email_verified', 'is_superadmin'])
     target.role = new_role
     _record(actor, 'user.role_change', target=target,
+            before=before, after=_snapshot(target, ['role', 'account_status', 'email', 'username', 'email_verified', 'is_superadmin']),
             previous_role=previous, new_role=new_role)
     db.session.commit()
 
@@ -395,7 +510,7 @@ def set_user_role(actor, user_id):
 
 @admin_bp.route('/users/<int:user_id>/revoke-sessions', methods=['POST'])
 @jwt_required()
-@admin_required
+@permission_required('users.revoke_sessions')
 def revoke_sessions(actor, user_id):
     """Force a sign-out without changing the account's standing."""
     target = db.session.get(User, user_id)
@@ -406,8 +521,10 @@ def revoke_sessions(actor, user_id):
     if target.is_superadmin:
         return _error('Superadmin accounts cannot be modified by another admin', 403)
 
+    before = _snapshot(target, ['token_version'])
     target.revoke_tokens()
-    _record(actor, 'user.revoke_sessions', target=target)
+    _record(actor, 'user.revoke_sessions', target=target,
+            before=before, after=_snapshot(target, ['token_version']))
     db.session.commit()
 
     return jsonify({
@@ -418,7 +535,7 @@ def revoke_sessions(actor, user_id):
 
 @admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
 @jwt_required()
-@admin_required
+@permission_required('users.delete')
 def delete_user(actor, user_id):
     """Delete an account.
 
@@ -452,9 +569,28 @@ def delete_user(actor, user_id):
             409, blockers=blockers,
         )
 
+    # An administrator is not deleted through this route. Removing the account
+    # that owns the audit trail would make previously recorded actions
+    # unattributable; deactivate it instead so the history stays readable.
+    if target.is_privileged:
+        return _error(
+            'Administrator accounts cannot be deleted. Suspend the account '
+            'instead so the audit trail remains attributable.', 403,
+        )
+
     username, email = target.username, target.email
     _record(actor, 'user.delete', target=target,
             username=username, email=email, blockers='none')
+
+    # Purge rows that hold a NOT NULL reference to the user. Leaving them
+    # makes SQLAlchemy try to null the FK and the delete fails with a 500
+    # instead of succeeding.
+    from app.models.rbac import AdminLoginAttempt, AdminSession, UserMFA
+    AdminSession.query.filter_by(user_id=target.id).delete()
+    AdminLoginAttempt.query.filter_by(user_id=target.id).delete()
+    UserMFA.query.filter_by(user_id=target.id).delete()
+    db.session.flush()
+
     db.session.delete(target)
     db.session.commit()
 
@@ -466,7 +602,7 @@ def delete_user(actor, user_id):
 
 @admin_bp.route('/audit', methods=['GET'])
 @jwt_required()
-@admin_required
+@permission_required('security.view')
 def audit_log(actor):
     """Every recorded admin action, newest first."""
     page = request.args.get('page', 1, type=int)
@@ -494,7 +630,7 @@ def audit_log(actor):
 
 @admin_bp.route('/admin-sessions', methods=['GET'])
 @jwt_required()
-@admin_required
+@permission_required('security.view')
 def admin_sessions(actor):
     """Sign-in history for privileged accounts, successful and failed."""
     page = request.args.get('page', 1, type=int)
