@@ -24,6 +24,12 @@ class Order(db.Model):
     group_order_id = db.Column(db.Integer, db.ForeignKey('group_orders.id'), nullable=True)
     harvest_preorder_id = db.Column(db.Integer, db.ForeignKey('harvest_preorders.id'), nullable=True)
     price_snapshot_json = db.Column(db.JSON, nullable=True)
+    # Set when an administrator intervenes out of band. The audit log records
+    # who and when; this keeps the reason attached to the order itself.
+    admin_note = db.Column(db.Text, nullable=True)
+    intervened_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    intervened_at = db.Column(db.DateTime, nullable=True)
+
     created_at = db.Column(db.DateTime, default=utcnow)
 
     # Relationships with explicit foreign_keys to prevent ambiguity with User model.

@@ -21,6 +21,40 @@ class Product(db.Model):
     is_premium = db.Column(db.Boolean, default=False)
     allows_group_buying = db.Column(db.Boolean, default=False)
     quality_score = db.Column(db.Float, nullable=True)
+
+    # ── Moderation ────────────────────────────────────────────────────────
+    # Separate from is_available, which the farmer owns. A listing can be held
+    # for review without the farmer being able to quietly un-hide it, and
+    # publication requires 'approved' — 'flagged' withdraws a listing that was
+    # already live.
+    # 'draft' | 'pending' | 'approved' | 'rejected' | 'flagged'
+    moderation_status = db.Column(db.String(20), nullable=False, default='approved')
+    is_featured = db.Column(db.Boolean, nullable=False, default=False)
+    moderation_note = db.Column(db.Text, nullable=True)
+    moderated_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    moderated_at = db.Column(db.DateTime, nullable=True)
+    view_count = db.Column(db.Integer, nullable=False, default=0)
+    report_count = db.Column(db.Integer, nullable=False, default=0)
+
+    moderated_by = db.relationship(
+        'User', foreign_keys=[moderated_by_id],
+        backref=db.backref('moderated_products', lazy=True), lazy=True)
+
+    @property
+    def is_published(self):
+        """True when the listing may appear in the public marketplace.
+
+        Requires the farmer's own switch AND a moderation state that permits
+        publication. A flagged listing is a statement about trust, not about
+        availability, which is why the two are not folded together.
+        """
+        return bool(self.is_available) and self.moderation_status in (
+            'approved', 'pending')
+
+    @property
+    def is_visible_to_public(self):
+        """Stricter than is_published: 'pending' is not yet cleared for sale."""
+        return bool(self.is_available) and self.moderation_status == 'approved'
     created_at = db.Column(db.DateTime, default=utcnow)
 
 

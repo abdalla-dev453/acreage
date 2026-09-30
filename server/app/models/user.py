@@ -65,7 +65,16 @@ class User(db.Model):
     suspended_until = db.Column(db.DateTime, nullable=True)
 
     # relationships
-    products = db.relationship('Product', backref='farmer', lazy=True)
+    # products.farmer_id and products.moderated_by_id are both foreign keys to
+    # users, so this relationship must name which one it joins on or SQLAlchemy
+    # cannot tell "products this farmer owns" from "products this farmer
+    # moderated".
+    products = db.relationship(
+        'Product',
+        foreign_keys='Product.farmer_id',
+        backref=db.backref('farmer', lazy=True),
+        lazy=True,
+    )
     farm_orders = db.relationship('Order', foreign_keys='Order.farmer_id', back_populates='farmer', lazy=True)
     buyer_orders = db.relationship('Order', foreign_keys='Order.buyer_id', back_populates='buyer', lazy=True)
     farm_logs = db.relationship('FarmLog', backref='farmer', lazy=True)

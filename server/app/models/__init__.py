@@ -24,6 +24,7 @@ from .commerce import (
     Receipt,
 )
 from .trust import MediaAsset, VerificationRequest, ReviewEvidence
+from .moderation import ProductCategory, UserFlag, ContentReport
 from .admin import AdminAuditLog, SuperadminSession
 from .rbac import (
     AdminRole,
@@ -71,6 +72,9 @@ __all__ = [
     "HarvestPreorder",
     "Receipt",
     "MediaAsset",
+    "ProductCategory",
+    "UserFlag",
+    "ContentReport",
     "VerificationRequest",
     "ReviewEvidence",
 ]
