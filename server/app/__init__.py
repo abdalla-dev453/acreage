@@ -24,6 +24,60 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["5000 per day", "
 migrate = Migrate()
 ma = Marshmallow()
 
+def _expected_revision():
+    """The newest Alembic revision this build of the code expects.
+
+    Read from the migration files on disk rather than hardcoded, so a migration
+    merged without a deploy is still detected as a mismatch.
+    """
+    import os
+    import re
+    here = os.path.dirname(os.path.abspath(__file__))
+    migrations = os.path.join(os.path.dirname(here), 'migrations', 'versions')
+    if not os.path.isdir(migrations):
+        return None
+    revisions, parents = set(), set()
+    for name in os.listdir(migrations):
+        if not name.endswith('.py'):
+            continue
+        with open(os.path.join(migrations, name), encoding='utf-8') as handle:
+            body = handle.read()
+        found = re.search(r"^revision\s*=\s*['\"]([^'\"]+)", body, re.M)
+        if found:
+            revisions.add(found.group(1))
+        down = re.search(r"^down_revision\s*=\s*['\"]([^'\"]+)", body, re.M)
+        if down:
+            parents.add(down.group(1))
+    heads = revisions - parents
+    return heads.pop() if len(heads) == 1 else None
+
+
+def _log_schema_status(app):
+    """Warn loudly at boot when the database is behind the code.
+
+    Without this the only symptom is a 500 on every request that touches the
+    affected table, which reads as a broken application rather than a missing
+    migration step.
+    """
+    try:
+        from sqlalchemy import text
+        current = db.session.execute(
+            text("SELECT version_num FROM alembic_version")).scalar()
+        expected = _expected_revision()
+    except Exception as exc:
+        app.logger.warning(
+            "Could not read alembic_version (%s). If this is a fresh database, "
+            "run 'flask db upgrade'.", exc)
+        return
+    if expected and current != expected:
+        app.logger.error(
+            "DATABASE SCHEMA IS OUT OF DATE. Code expects revision %s but the "
+            "database is at %s. Every request touching an altered table will "
+            "return 500 until you run: flask db upgrade", expected, current)
+    else:
+        app.logger.info("Database schema at %s", current)
+
+
 def create_app(config_class=None):
     app = Flask(__name__)
     
@@ -238,10 +292,39 @@ def create_app(config_class=None):
             "until this is fixed"
         )
 
+    try:
+        with app.app_context():
+            _log_schema_status(app)
+    except Exception:
+        pass
+
     # Global Health Check Endpoint
+    #
+    # Reports the database schema revision. A deploy whose migrations did not
+    # run leaves the code and the schema out of step, and the symptom is every
+    # query on the mismatched table returning a 500 with no explanation. That
+    # is indistinguishable from a broken application, so the revision is
+    # published here where it can be checked directly and by a monitor.
     @app.route("/health")
     def health_check():
-        return jsonify({"status": "healthy"}), 200
+        revision = None
+        schema_ok = True
+        try:
+            from sqlalchemy import text
+            revision = db.session.execute(
+                text("SELECT version_num FROM alembic_version")).scalar()
+        except Exception:
+            revision = None
+        try:
+            expected = _expected_revision()
+            schema_ok = revision == expected
+        except Exception:
+            schema_ok = False
+        body = {
+            "status": "healthy" if schema_ok else "schema_out_of_date",
+            "schema_revision": revision,
+        }
+        return jsonify(body), 200 if schema_ok else 503
 
     # Global 404 & 500 JSON Handlers
     @app.errorhandler(404)
