@@ -25,6 +25,17 @@ from .commerce import (
 )
 from .trust import MediaAsset, VerificationRequest, ReviewEvidence
 from .moderation import ProductCategory, UserFlag, ContentReport
+from .platform import (
+    Dispute,
+    PlatformSetting,
+    ContentPage,
+    Announcement,
+    NotificationDelivery,
+    ModerationKeyword,
+    UserMute,
+    SupportTicket,
+    SupportMessage,
+)
 from .admin import AdminAuditLog, SuperadminSession
 from .rbac import (
     AdminRole,
@@ -75,6 +86,15 @@ __all__ = [
     "ProductCategory",
     "UserFlag",
     "ContentReport",
+    "Dispute",
+    "PlatformSetting",
+    "ContentPage",
+    "Announcement",
+    "NotificationDelivery",
+    "ModerationKeyword",
+    "UserMute",
+    "SupportTicket",
+    "SupportMessage",
     "VerificationRequest",
     "ReviewEvidence",
 ]
