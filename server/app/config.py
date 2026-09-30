@@ -50,6 +50,26 @@ class Config:
         "pool_recycle": 280,
         "pool_pre_ping": True,
     }
+    # ── Administrator authentication ─────────────────────────────────────
+    # Consecutive failures allowed per identifier AND per source IP before the
+    # admin login path locks. Counted from the admin_login_attempts table, so
+    # the limit survives a restart and is shared across all gunicorn workers —
+    # an in-memory counter would be per-worker and would multiply the real limit
+    # by the worker count.
+    ADMIN_MAX_LOGIN_ATTEMPTS = int(os.getenv("ADMIN_MAX_LOGIN_ATTEMPTS", "5"))
+    ADMIN_LOGIN_WINDOW_MINUTES = int(os.getenv("ADMIN_LOGIN_WINDOW_MINUTES", "15"))
+
+    # An admin session that is idle longer than this ends, and ending it bumps
+    # the account's token version so the old token cannot be replayed.
+    ADMIN_SESSION_IDLE_MINUTES = int(os.getenv("ADMIN_SESSION_IDLE_MINUTES", "30"))
+    # Hard ceiling regardless of activity.
+    ADMIN_SESSION_ABSOLUTE_HOURS = int(os.getenv("ADMIN_SESSION_ABSOLUTE_HOURS", "8"))
+
+    # Fernet key protecting TOTP secrets at rest. Generated from SECRET_KEY when
+    # unset, so a SECRET_KEY rotation would invalidate every enrolled
+    # authenticator — set this explicitly in production.
+    FERNET_KEY = os.getenv("FERNET_KEY") or None
+
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     SECURITY_TOKEN_EXPIRES_MINUTES = int(os.getenv("SECURITY_TOKEN_EXPIRES_MINUTES", "30"))
     EMAIL_VERIFICATION_REQUIRED = os.getenv(

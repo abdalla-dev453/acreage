@@ -34,3 +34,9 @@ pytest==9.0.3
 gunicorn==23.0.0
 gevent==25.8.2
 greenlet==3.5.4
+
+# Admin multi-factor authentication.
+# cryptography also provides the Fernet cipher used to encrypt TOTP secrets at
+# rest, so a database dump cannot be used to generate valid codes.
+cryptography==50.0.2
+pyotp==2.10.0

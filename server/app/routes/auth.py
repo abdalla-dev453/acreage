@@ -5,6 +5,8 @@ from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from app import db, limiter
 from app.models.admin import SuperadminSession
+from app.utils import admin_auth, mfa
+from flask_jwt_extended import decode_token
 from app.models.user import User
 from app.schemas.user import user_schema
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -107,9 +109,33 @@ def login():
     if not login_identifier or not password:
         return jsonify({'message': 'Username/Email and password required'}), 400
 
+    # ── Administrator-only hardening, applied before any credential work ──
+    blocked = admin_auth.is_ip_blocked(admin_auth.client_ip())
+    if blocked is not None:
+        db.session.commit()
+        logger.warning('Blocked admin login from a listed IP')
+        return jsonify({'message': 'This address is not permitted to sign in.'}), 403
+
     user = User.query.filter((User.email == login_identifier) | (User.username == login_identifier)).first()
+    is_admin_candidate = bool(user and user.is_privileged)
+
+    if is_admin_candidate:
+        locked, remaining, reason = admin_auth.lockout_state(
+            login_identifier, admin_auth.client_ip())
+        if locked:
+            admin_auth.record_attempt(login_identifier, False, user_id=user.id,
+                                     reason='locked_out')
+            return jsonify({
+                'message': reason,
+                'retry_after_seconds': remaining,
+                'code': 'admin_locked',
+            }), 429
+
     if not user or not isinstance(password, str) or not user.check_password(password):
         logger.warning('Failed login', extra={'identifier': login_identifier})
+        if is_admin_candidate:
+            admin_auth.record_attempt(login_identifier, False, user_id=user.id,
+                                     reason='bad_password')
         return jsonify({'message': 'Invalid credentials'}), 401
 
     if not user.email_verified:
@@ -128,6 +154,50 @@ def login():
             'contact_admin': True,
         }), 403
 
+    # ── Second factor for administrators ─────────────────────────────────
+    # Checked after the password so a wrong password is still reported as a
+    # wrong password, and so the response never reveals whether MFA is enrolled
+    # for an account the attacker does not own.
+    mfa_method = None
+    if user.is_privileged and mfa.is_enabled(user):
+        supplied = sanitize_string(data.get('mfa_code'))
+        if not supplied:
+            # A partial challenge token, not a session: no permissions are
+            # granted, so a stolen challenge is useless on its own.
+            challenge = create_access_token(
+                identity=str(user.id),
+                additional_claims={'ver': user.token_version, 'adm': 'mfa_pending'},
+            )
+            admin_auth.record_attempt(login_identifier, False, user_id=user.id,
+                                     reason='mfa_required')
+            return jsonify({
+                'message': 'Two-factor authentication required.',
+                'mfa_required': True,
+                'mfa_challenge': challenge,
+            }), 401
+
+        try:
+            outcome = mfa.verify(user, supplied)
+        except mfa.MFAUnavailable:
+            # Never fall back to allowing the login when the second factor
+            # cannot be checked — that is the exact failure MFA prevents.
+            logger.exception('MFA unavailable for user %s', user.id)
+            admin_auth.record_attempt(login_identifier, False, user_id=user.id,
+                                     reason='mfa_unavailable')
+            return jsonify({
+                'message': 'Two-factor authentication is temporarily unavailable.',
+                'code': 'mfa_unavailable',
+            }), 503
+
+        if outcome == 'invalid':
+            admin_auth.record_attempt(login_identifier, False, user_id=user.id,
+                                     reason='mfa_failed')
+            return jsonify({
+                'message': 'Invalid verification code.',
+                'mfa_required': True,
+            }), 401
+        mfa_method = 'recovery_code' if outcome == 'recovery' else 'totp'
+
     # 'ver' is compared against user.token_version on every subsequent request
     # (app/__init__.py), which is what makes freezing and session revocation
     # actually take effect before the token would have expired.
@@ -135,6 +205,15 @@ def login():
         identity=str(user.id), additional_claims={'ver': user.token_version}
     )
     user.last_login_at = utcnow()
+
+    if user.is_privileged:
+        admin_auth.record_attempt(login_identifier, True, user_id=user.id)
+        session = admin_auth.start_session(
+            user, jti=decode_token(access_token).get('jti'),
+            mfa_verified=bool(mfa_method), mfa_method=mfa_method,
+        )
+        if mfa_method == 'recovery_code':
+            logger.warning('ADMIN SIGN-IN via recovery code: %s', user.username)
 
     if user.is_superadmin:
         # Privileged sign-ins get their own log so that reviewing "who has been
