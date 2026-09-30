@@ -1356,3 +1356,122 @@ option {
     background: rgba(100, 116, 139, 0.5);
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   ADMIN CONSOLE
+   The main application has no sidebar by design; the admin console does,
+   because it has sixteen modules and a top bar cannot carry them. Everything
+   reuses the existing surface, border and brand tokens rather than introducing
+   a second palette.
+   ────────────────────────────────────────────────────────────────────────── */
+.admin-shell { min-height: calc(100vh - var(--site-chrome, 120px)); }
+
+.admin-topbar {
+  position: sticky;
+  top: var(--site-chrome, 120px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  min-height: 60px;
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, .92);
+  backdrop-filter: blur(16px);
+}
+.dark .admin-topbar { background: rgba(6, 22, 16, .92); border-color: #1f2937; }
+.admin-topbar-brand { display: flex; align-items: center; gap: 8px; }
+.admin-topbar-menu {
+  display: none;
+  width: 38px; height: 38px;
+  align-items: center; justify-content: center;
+  border-radius: 10px;
+  color: #475569;
+}
+.admin-topbar-menu:hover { background: #f1f5f9; }
+.dark .admin-topbar-menu:hover { background: #172a22; }
+
+.admin-body { position: relative; display: flex; align-items: flex-start; }
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+.admin-sidebar {
+  position: sticky;
+  top: calc(var(--site-chrome, 120px) + 60px);
+  flex: none;
+  width: 244px;
+  max-height: calc(100vh - var(--site-chrome, 120px) - 60px);
+  overflow-y: auto;
+  padding: 18px 12px 40px;
+  border-right: 1px solid #e2e8f0;
+  background: #fbfdfc;
+}
+.dark .admin-sidebar { border-color: #1f2937; background: #051410; }
+.admin-sidebar-nav { display: flex; flex-direction: column; gap: 16px; }
+.admin-sidebar-group-label {
+  margin: 0 0 6px 10px;
+  color: #94a3b8;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.admin-sidebar-group ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 1px; }
+.admin-sidebar-group a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  color: #475569;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: 10px;
+  transition: background .15s ease, color .15s ease;
+}
+.dark .admin-sidebar-group a { color: #cbd5e1; }
+.admin-sidebar-group a:hover { background: #f1f5f9; color: #0f172a; }
+.dark .admin-sidebar-group a:hover { background: #10231b; color: #f1f5f9; }
+.admin-sidebar-group a.active {
+  color: #fff;
+  font-weight: 800;
+  background: linear-gradient(135deg, #166534, #0b4a2a);
+  box-shadow: 0 6px 16px rgba(11, 107, 58, .22);
+}
+.admin-sidebar-scrim { display: none; }
+
+.admin-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 24px 28px 60px;
+}
+.admin-scrim { display: none; }
+
+/* ── Responsive: the sidebar collapses to an overlay ──────────────────── */
+@media (max-width: 1024px) {
+  .admin-topbar-menu { display: flex; }
+  .admin-sidebar {
+    position: fixed;
+    top: var(--site-chrome, 120px);
+    bottom: 0;
+    left: 0;
+    z-index: 60;
+    width: 268px;
+    max-height: none;
+    transform: translateX(-100%);
+    transition: transform .24s ease;
+    box-shadow: 0 0 50px rgba(2, 6, 23, .22);
+  }
+  .admin-sidebar.open { transform: none; }
+  .admin-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    border: 0;
+    background: rgba(15, 23, 42, .45);
+  }
+  .admin-content { padding: 20px 16px 48px; }
+}
+@media (max-width: 700px) {
+  .admin-topbar { padding: 0 12px; gap: 8px; }
+  .admin-content { padding: 16px 12px 40px; }
+}

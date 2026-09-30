@@ -35,7 +35,7 @@ const TrustCenter = lazy(() => import("../pages/TrustCenter"));
 // below, so the boundary was decorative and 413 lines shipped in the initial
 // bundle for every visitor regardless of route.
 const SmsHub = lazy(() => import("../pages/SmsHub"));
-const AdminDashboard = lazy(() => import("../pages/AdminDashboard"));
+const AdminLayout = lazy(() => import("../pages/admin/AdminLayout"));
 const HarvestPlanner = lazy(() => import("../pages/HarvestPlanner"));
 
 // Loading component for lazy loading
@@ -108,12 +108,13 @@ export default function AppRoutes() {
             <TrustCenter />
           </Suspense>
         } />
-        {/* Any signed-in user may reach the URL, but the page itself checks
-            is_superadmin and redirects. The server enforces the same rule on
-            every /api/admin route, so the client check is presentation only. */}
-        <Route path="/admin" element={
+        {/* The console checks its own access via /api/admin/me, which returns
+            403 for a non-admin. Rendering it behind the same ProtectedRoute as
+            the rest of the app keeps the URL reachable for the redirect path
+            while every API call below it is independently gated server-side. */}
+        <Route path="/admin/*" element={
           <Suspense fallback={<PageLoader />}>
-            <AdminDashboard />
+            <AdminLayout />
           </Suspense>
         } />
         {/* Declared last inside the same layout element, so an unknown path
