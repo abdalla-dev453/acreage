@@ -112,7 +112,7 @@ def get_order(order_id):
         return jsonify({'message': 'Order not found'}), 404
 
     # Access control: only buyer or farmer on this order can view
-    is_participant = (order.buyer_id == user_id) or (order.farmer_id == user_id) or user.role == 'admin'
+    is_participant = (order.buyer_id == user_id) or (order.farmer_id == user_id) or user.is_privileged
     if not is_participant:
         return jsonify({'message': 'Unauthorized'}), 403
 

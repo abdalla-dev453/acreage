@@ -107,6 +107,13 @@ ADMIN_DEFAULT_PERMISSIONS = [
         'security.backup',
         'users.delete',
         'disputes.resolve',
+        # A campaign is an irreversible broadcast that spends the provider's
+        # balance and reaches every matched user at once, so it belongs with
+        # the other high-impact powers rather than with day-to-day operations.
+        'sms.send',
+        # Overriding a trust score decides a user's reputation by hand, and
+        # nothing records what it was before except the audit log.
+        'trust.scores',
     }
 ]
 
@@ -167,9 +174,11 @@ def seed_permissions(db_session=None):
     )
     ensure_role(
         'auditor', 'Auditor',
-        'Read-only access to the audit trail and financial reports.',
-        ['dashboard.view', 'reports.view', 'reports.export', 'escrow.view',
-         'payouts.view', 'users.view', 'security.view', 'trust.view'],
+        'Read-only access to the audit trail and financial reporting.',
+        # No reports.export: a read-only role that can download the whole user
+        # table is not read-only, it is exfiltration with extra steps.
+        ['dashboard.view', 'reports.view', 'escrow.view', 'payouts.view',
+         'users.view', 'security.view', 'trust.view', 'content.view'],
     )
     session.commit()
 

@@ -74,7 +74,7 @@ def _order_or_404(order_id):
 
 
 def _can_access_order(user, order):
-    return user.role == 'admin' or user.id in {order.buyer_id, order.farmer_id}
+    return user.is_privileged or user.id in {order.buyer_id, order.farmer_id}
 
 
 def _parse_datetime(value, field):
@@ -207,7 +207,7 @@ def escrow_dispute(escrow_id):
 @jwt_required()
 def escrow_refund(escrow_id):
     user = _user()
-    if user.role != 'admin':
+    if not user.is_privileged:
         return _error('Admin access required', 403)
     escrow = db.get_or_404(EscrowTransaction, escrow_id)
     try:
@@ -397,7 +397,7 @@ def get_market_prices():
 @jwt_required()
 def create_market_price():
     user = _user()
-    if user.role != 'admin':
+    if not user.is_privileged:
         return _error('Admin access required', 403)
     data, error = json_object()
     if error:
@@ -431,7 +431,7 @@ def create_market_price():
 @jwt_required()
 def refresh_market_prices():
     user = _user()
-    if user.role != 'admin':
+    if not user.is_privileged:
         return _error('Admin access required', 403)
     try:
         rows = market_price_provider().latest()
@@ -570,7 +570,7 @@ def sms_inbox_webhook():
 def list_sms_inbox():
     user = _user()
     query = SmsCommand.query.filter_by(direction='inbound')
-    if user.role != 'admin':
+    if not user.is_privileged:
         query = query.filter_by(phone=_phone(user.phone_number))
     items = query.order_by(SmsCommand.received_at.desc()).all()
     return jsonify({'items': sms_commands_schema.dump(items), 'total': len(items)}), 200
@@ -614,7 +614,7 @@ def create_sms_command():
 def list_sms_outbox():
     user = _user()
     query = SmsCommand.query.filter_by(direction='outbound')
-    if user.role != 'admin':
+    if not user.is_privileged:
         query = query.filter_by(phone=_phone(user.phone_number))
     items = query.order_by(SmsCommand.created_at.desc()).all()
     return jsonify({'items': sms_commands_schema.dump(items), 'total': len(items)}), 200
@@ -625,7 +625,7 @@ def list_sms_outbox():
 def list_group_orders():
     user = _user()
     query = GroupOrder.query
-    if user.role != 'admin':
+    if not user.is_privileged:
         query = query.filter((GroupOrder.farmer_id == user.id) | (GroupOrder.status == 'open'))
     items = query.options(selectinload(GroupOrder.commitments)).order_by(GroupOrder.created_at.desc()).all()
     return jsonify({'items': group_orders_schema.dump(items), 'total': len(items)}), 200
@@ -685,7 +685,7 @@ def get_group_order(group_order_id):
 def update_group_order(group_order_id):
     user = _user()
     group_order = db.get_or_404(GroupOrder, group_order_id)
-    if group_order.farmer_id != user.id and user.role != 'admin':
+    if group_order.farmer_id != user.id and not user.is_privileged:
         return _error('Unauthorized', 403)
     data, error = json_object()
     if error:
@@ -776,7 +776,7 @@ def commit_group_order(group_order_id):
 def list_harvest_plans():
     user = _user()
     query = HarvestPlan.query
-    if user.role == 'admin':
+    if user.is_privileged:
         pass
     elif user.role == 'farmer':
         query = query.filter((HarvestPlan.farmer_id == user.id) | (HarvestPlan.visibility == 'buyers'))
@@ -829,7 +829,7 @@ def create_harvest_plan():
 def get_harvest_plan(plan_id):
     user = _user()
     plan = db.get_or_404(HarvestPlan, plan_id)
-    if user.role != 'admin' and plan.farmer_id != user.id and plan.visibility != 'buyers':
+    if not user.is_privileged and plan.farmer_id != user.id and plan.visibility != 'buyers':
         return _error('Unauthorized', 403)
     return harvest_plan_schema.jsonify(plan), 200
 
@@ -839,7 +839,7 @@ def get_harvest_plan(plan_id):
 def update_harvest_plan(plan_id):
     user = _user()
     plan = db.get_or_404(HarvestPlan, plan_id)
-    if plan.farmer_id != user.id and user.role != 'admin':
+    if plan.farmer_id != user.id and not user.is_privileged:
         return _error('Unauthorized', 403)
     data, error = json_object()
     if error:
@@ -904,7 +904,7 @@ def list_harvest_preorders(plan_id):
     user = _user()
     plan = db.get_or_404(HarvestPlan, plan_id)
     query = HarvestPreorder.query.filter_by(harvest_plan_id=plan.id)
-    if user.role != 'admin' and plan.farmer_id != user.id:
+    if not user.is_privileged and plan.farmer_id != user.id:
         query = query.filter_by(buyer_id=user.id)
     items = query.all()
     return jsonify({'items': harvest_preorders_schema.dump(items), 'total': len(items)}), 200
@@ -915,7 +915,7 @@ def list_harvest_preorders(plan_id):
 def list_receipts():
     user = _user()
     query = Receipt.query
-    if user.role != 'admin':
+    if not user.is_privileged:
         query = query.filter((Receipt.buyer_id == user.id) | (Receipt.farmer_id == user.id))
     items = query.order_by(Receipt.issued_at.desc()).all()
     return jsonify({'items': receipts_schema.dump(items), 'total': len(items)}), 200
@@ -926,7 +926,7 @@ def list_receipts():
 def get_receipt(receipt_id):
     user = _user()
     receipt = db.get_or_404(Receipt, receipt_id)
-    if user.role != 'admin' and user.id not in {receipt.buyer_id, receipt.farmer_id}:
+    if not user.is_privileged and user.id not in {receipt.buyer_id, receipt.farmer_id}:
         return _error('Unauthorized', 403)
     return receipt_schema.jsonify(receipt), 200
 

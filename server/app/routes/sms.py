@@ -288,7 +288,7 @@ def get_sms_logs():
     user = db.session.get(User, int(get_jwt_identity()))
     if user is None:
         return jsonify({'message': 'User not found'}), 401
-    if user.role != 'admin':
+    if not user.is_privileged:
         return jsonify({'message': 'Admin access required'}), 403
 
     page = request.args.get('page', 1, type=int)

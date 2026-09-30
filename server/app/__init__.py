@@ -135,6 +135,9 @@ def create_app(config_class=None):
     from .routes.admin import admin_bp
     from .routes.admin_self import admin_self_bp
     from .routes.admin_moderation import admin_mod_bp
+    from .routes.admin_finance import finance_bp
+    from .routes.admin_safety import safety_bp
+    from .routes.admin_platform import platform_bp
 
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     app.register_blueprint(products_bp, url_prefix="/api/products")
@@ -154,6 +157,9 @@ def create_app(config_class=None):
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
     app.register_blueprint(admin_self_bp, url_prefix="/api/admin")
     app.register_blueprint(admin_mod_bp, url_prefix="/api/admin")
+    app.register_blueprint(finance_bp, url_prefix="/api/admin")
+    app.register_blueprint(safety_bp, url_prefix="/api/admin")
+    app.register_blueprint(platform_bp, url_prefix="/api/admin")
 
     # Enforce the account's standing on every authenticated request.
     #
@@ -212,7 +218,14 @@ def create_app(config_class=None):
             if db.inspect(db.engine).has_table("admin_permissions"):
                 seed_permissions()
                 logging.info("Admin role and permission catalog seeded")
+                # Default settings are inserted alongside the permission
+                # catalog so the settings screen is populated on a fresh
+                # database rather than showing an empty list.
+                from app.routes.admin_platform import seed_defaults
+                seed_defaults()
             else:
+                # Migrations have not run yet. Skip quietly and log; do NOT
+                # return, because create_app must keep building the app.
                 logging.warning(
                     "admin_permissions table missing; run 'flask db upgrade'. "
                     "Every /api/admin route will return 403 until then."

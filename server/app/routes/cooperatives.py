@@ -44,7 +44,7 @@ def create_cooperative():
     user_id = int(get_jwt_identity())
     user = db.get_or_404(User, user_id)
     
-    if user.role != 'admin':
+    if not user.is_privileged:
         return jsonify({'message': 'Only admins can create cooperatives'}), 403
     
     try:

@@ -119,7 +119,7 @@ def list_media():
     user_id = int(get_jwt_identity())
     user = db.get_or_404(User, user_id)
     query = MediaAsset.query
-    if user.role != 'admin':
+    if not user.is_privileged:
         query = query.filter_by(uploaded_by_id=user_id)
     else:
         query = query.filter(MediaAsset.owner_type != 'review')
@@ -142,7 +142,7 @@ def list_verification_requests():
     user_id = int(get_jwt_identity())
     user = db.get_or_404(User, user_id)
     query = VerificationRequest.query
-    if user.role != 'admin':
+    if not user.is_privileged:
         query = query.filter_by(user_id=user_id)
     items = query.order_by(VerificationRequest.submitted_at.desc()).all()
     return jsonify({'items': verification_requests_schema.dump(items), 'total': len(items)}), 200
@@ -189,7 +189,7 @@ def create_verification_request():
 def get_verification_request(request_id):
     user = db.get_or_404(User, int(get_jwt_identity()))
     item = db.get_or_404(VerificationRequest, request_id)
-    if user.role != 'admin' and item.user_id != user.id:
+    if not user.is_privileged and item.user_id != user.id:
         return jsonify({'message': 'Unauthorized'}), 403
     return verification_request_schema.jsonify(item), 200
 
@@ -198,7 +198,7 @@ def get_verification_request(request_id):
 @jwt_required()
 def review_verification(request_id):
     user = db.get_or_404(User, int(get_jwt_identity()))
-    if user.role != 'admin':
+    if not user.is_privileged:
         return jsonify({'message': 'Admin access required'}), 403
     item = db.get_or_404(VerificationRequest, request_id)
     data, error = json_object()

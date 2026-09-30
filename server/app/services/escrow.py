@@ -91,21 +91,37 @@ def confirm_quality(escrow, actor):
     return escrow
 
 
-def release_escrow(escrow, actor):
-    if escrow.status != 'funded' or escrow.order.quality_status != 'confirmed':
+def release_escrow(escrow, actor, reason=None, from_dispute=False):
+    """Release held funds to the farmer.
+
+    The quality precondition is relaxed only when `from_dispute` is set, which
+    the dispute resolution path passes after an administrator has explicitly
+    decided the outcome. Going through this function rather than updating the
+    row directly is what keeps the state machine and the escrow_events ledger
+    in agreement; a console that moved money around it would leave the two
+    permanently out of step.
+    """
+    if from_dispute:
+        if escrow.status not in ('disputed', 'funded'):
+            raise ValueError(
+                f'Only disputed or funded escrow can be released from a '
+                f'dispute decision; this one is {escrow.status}'
+            )
+    elif escrow.status != 'funded' or escrow.order.quality_status != 'confirmed':
         raise ValueError('Quality must be confirmed before release')
-    if actor.id != escrow.farmer_id and actor.role != 'admin':
+    if actor.id != escrow.farmer_id and not actor.is_privileged:
         raise PermissionError('Only the farmer or an admin can release escrow')
     escrow.status = 'released'
     escrow.released_at = utcnow()
-    add_event(escrow, actor, 'released', escrow.amount)
+    add_event(escrow, actor, 'released', escrow.amount,
+              metadata={'reason': reason} if reason else None)
     return escrow
 
 
 def dispute_escrow(escrow, actor, reason):
     if not reason or not reason.strip():
         raise ValueError('A dispute reason is required')
-    if actor.id not in {escrow.buyer_id, escrow.farmer_id} and actor.role != 'admin':
+    if actor.id not in {escrow.buyer_id, escrow.farmer_id} and not actor.is_privileged:
         raise PermissionError('Only order participants can open a dispute')
     if escrow.status in ESCROW_FINAL_STATES:
         raise ValueError('Finalized escrow cannot be disputed')
@@ -115,14 +131,16 @@ def dispute_escrow(escrow, actor, reason):
     return escrow
 
 
-def refund_escrow(escrow, actor):
+def refund_escrow(escrow, actor, reason=None):
+    """Return held funds to the buyer."""
     if escrow.status not in {'funded', 'disputed'}:
         raise ValueError('Only funded or disputed escrow can be refunded')
-    if actor.role != 'admin':
+    if not actor.is_privileged:
         raise PermissionError('Only an admin can refund escrow')
     escrow.status = 'refunded'
     escrow.refunded_at = utcnow()
-    add_event(escrow, actor, 'refunded', escrow.amount)
+    add_event(escrow, actor, 'refunded', escrow.amount,
+              metadata={'reason': reason} if reason else None)
     return escrow
 
 
@@ -134,4 +152,4 @@ def escrow_for_order(order_id):
 
 
 def user_can_view(actor, escrow):
-    return actor.role == 'admin' or actor.id in {escrow.buyer_id, escrow.farmer_id}
+    return actor.is_privileged or actor.id in {escrow.buyer_id, escrow.farmer_id}
