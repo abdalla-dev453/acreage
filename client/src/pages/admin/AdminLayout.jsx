@@ -30,6 +30,8 @@ import AdminUsers from "./AdminUsers";
 import AdminAdministrators from "./AdminAdministrators";
 import AdminRoles from "./AdminRoles";
 import AdminSecurity from "./AdminSecurity";
+import AdminProducts from "./AdminProducts";
+import AdminOrders from "./AdminOrders";
 import PhasePlaceholder from "./PhasePlaceholder";
 
 
@@ -229,14 +231,9 @@ function AdminRoutes() {
         AdminContext, so a role that lacks `escrow.release` never sees the
         button and the server would refuse the call anyway.
       */}
-      <Route
-        path="products"
-        element={<PhasePlaceholder module="Listings" phase="Phase 2" permission="products.view" />}
-      />
-      <Route
-        path="orders"
-        element={<PhasePlaceholder module="Orders" phase="Phase 2" permission="orders.view" />}
-      />
+      {/* Phase 2 */}
+      <Route path="products" element={<AdminProducts />} />
+      <Route path="orders" element={<AdminOrders />} />
       <Route
         path="escrow"
         element={<PhasePlaceholder module="Escrow" phase="Phase 3" permission="escrow.view" />}

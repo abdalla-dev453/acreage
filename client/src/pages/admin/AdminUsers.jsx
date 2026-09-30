@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Ban, RotateCcw, Search, ShieldCheck, Trash2, UserCog } from "lucide-react";
+import { BadgeCheck, Flag, KeyRound, Search, ShieldAlert, ShieldCheck, Trash2, UserCog } from "lucide-react";
 import API from "../../services/api";
 import PageHeader from "../../components/common/PageHeader";
 import { useAdmin } from "../../context/AdminContext";
+import { ReasonDialog } from "./AdminProducts";
 
 /* User management: browse, freeze, restore, change role, sign out, delete.
    Every button is permission-gated from the server-supplied grant set, so the
@@ -36,11 +37,48 @@ export default function AdminUsers() {
   const [busy, setBusy] = useState(null);
   const [notice, setNotice] = useState(null);
   const [reason, setReason] = useState("");
+  const [modal, setModal] = useState(null);
 
   const flash = useCallback((message) => {
     setNotice(message);
-    window.setTimeout(() => setNotice(null), 4000);
+    window.setTimeout(() => setNotice(null), 5000);
   }, []);
+
+  async function verify(row, decision, badge) {
+    try {
+      const { data } = await API.patch(`/admin/users/${row.id}/verify`, {
+        decision, verification_badge: badge,
+      });
+      flash(data.message);
+      setModal(null);
+      await load();
+    } catch (err) {
+      flash(err?.response?.data?.message || "That decision was refused.");
+    }
+  }
+
+  async function flag(row, why) {
+    try {
+      const { data } = await API.post(`/admin/users/${row.id}/flag`, {
+        reason: why, severity: "medium",
+      });
+      flash(data.message);
+      setModal(null);
+      await load();
+    } catch (err) {
+      flash(err?.response?.data?.message || "Could not flag that account.");
+    }
+  }
+
+  async function resetPassword(row) {
+    try {
+      const { data } = await API.post(`/admin/users/${row.id}/reset-password`);
+      flash(data.message);
+      setModal(null);
+    } catch (err) {
+      flash(err?.response?.data?.message || "Could not reset that password.");
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -185,7 +223,14 @@ export default function AdminUsers() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3"><Pill className="bg-slate-100 text-slate-600 ring-slate-200">{row.role}</Pill></td>
+                  <td className="px-4 py-3">
+                    <Pill className="bg-slate-100 text-slate-600 ring-slate-200">{row.role}</Pill>
+                    {row.verification_status !== "verified" && (
+                      <span className="mt-1 block text-[10px] font-bold text-amber-600">
+                        {row.verification_status}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <Pill className={STATUS_STYLES[row.account_status] || STATUS_STYLES.active}>{row.account_status}</Pill>
                   </td>
@@ -223,6 +268,30 @@ export default function AdminUsers() {
                         <UserCog className="h-3.5 w-3.5" />
                       </ActionButton>
                       <ActionButton
+                        show={can("users.verify") && !row.is_superadmin && row.verification_status !== "verified"}
+                        onClick={() => setModal({ kind: "verify", row, decision: "approve" })}
+                        label="Verify"
+                        className="bg-emerald-50 text-emerald-700"
+                      >
+                        <BadgeCheck className="h-3.5 w-3.5" />
+                      </ActionButton>
+                      <ActionButton
+                        show={can("users.edit") && !row.is_superadmin && !row.is_self}
+                        onClick={() => setModal({ kind: "flag", row })}
+                        label="Flag"
+                        className="bg-violet-50 text-violet-700"
+                      >
+                        <Flag className="h-3.5 w-3.5" />
+                      </ActionButton>
+                      <ActionButton
+                        show={can("users.reset_password") && !row.is_superadmin && !row.is_self}
+                        onClick={() => setModal({ kind: "reset", row })}
+                        label="Reset pw"
+                        className="bg-amber-50 text-amber-700"
+                      >
+                        <KeyRound className="h-3.5 w-3.5" />
+                      </ActionButton>
+                      <ActionButton
                         show={can("users.delete") && !row.is_superadmin && !row.is_self}
                         onClick={() => act(row, () => API.delete(`/admin/users/${row.id}`),
                           `${row.username} deleted.`)}
@@ -250,6 +319,52 @@ export default function AdminUsers() {
           </div>
         </div>
       </div>
+
+      {modal?.kind === "verify" && (
+        <ReasonDialog
+          title={`Verify ${modal.row.username}?`}
+          busy={false}
+          onCancel={() => setModal(null)}
+          onConfirm={() => verify(modal.row, modal.decision)}
+          confirmLabel={modal.decision === "approve" ? "Approve registration" : "Reject registration"}
+        >
+          <p className="mt-1 text-[12px] text-slate-500">
+            Approving marks the account verified and clears any pending email token.
+            Rejecting requires a note.
+          </p>
+        </ReasonDialog>
+      )}
+
+      {modal?.kind === "flag" && (
+        <ReasonDialog
+          title={`Flag ${modal.row.username}`}
+          required
+          busy={false}
+          onCancel={() => setModal(null)}
+          onConfirm={(why) => flag(modal.row, why)}
+          confirmLabel="Raise flag"
+        >
+          <p className="mt-1 text-[12px] text-slate-500">
+            A flag records a concern. It does not by itself block the account —
+            freeze it for that.
+          </p>
+        </ReasonDialog>
+      )}
+
+      {modal?.kind === "reset" && (
+        <ReasonDialog
+          title={`Force a password reset for ${modal.row.username}?`}
+          busy={false}
+          onCancel={() => setModal(null)}
+          onConfirm={() => resetPassword(modal.row)}
+          confirmLabel="Force reset"
+        >
+          <p className="mt-1 text-[12px] text-slate-500">
+            Their current password stops working and every session ends. No new
+            password is set here — they choose it at /forgot-password.
+          </p>
+        </ReasonDialog>
+      )}
     </div>
   );
 }
