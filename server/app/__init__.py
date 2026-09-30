@@ -134,6 +134,7 @@ def create_app(config_class=None):
     from .routes.cooperatives import cooperatives_bp
     from .routes.admin import admin_bp
     from .routes.admin_self import admin_self_bp
+    from .routes.admin_moderation import admin_mod_bp
 
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     app.register_blueprint(products_bp, url_prefix="/api/products")
@@ -152,6 +153,7 @@ def create_app(config_class=None):
     app.register_blueprint(cooperatives_bp, url_prefix="/api/cooperatives")
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
     app.register_blueprint(admin_self_bp, url_prefix="/api/admin")
+    app.register_blueprint(admin_mod_bp, url_prefix="/api/admin")
 
     # Enforce the account's standing on every authenticated request.
     #
