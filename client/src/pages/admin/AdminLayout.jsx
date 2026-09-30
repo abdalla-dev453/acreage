@@ -32,7 +32,11 @@ import AdminRoles from "./AdminRoles";
 import AdminSecurity from "./AdminSecurity";
 import AdminProducts from "./AdminProducts";
 import AdminOrders from "./AdminOrders";
-import PhasePlaceholder from "./PhasePlaceholder";
+import AdminEscrow from "./AdminEscrow";
+import AdminPayouts from "./AdminPayouts";
+import AdminDisputes from "./AdminDisputes";
+import AdminSafety from "./AdminSafety";
+import AdminPlatform from "./AdminPlatform";
 
 
 const ICONS = {
@@ -226,50 +230,18 @@ function AdminRoutes() {
       <Route path="roles" element={<AdminRoles />} />
       <Route path="mfa" element={<Suspense fallback={<AdminLoading />}><AdminMfa /></Suspense>} />
       <Route path="security" element={<AdminSecurity />} />
-      {/*
-        Phases 2-5 land here. Each module is gated by its own permission in
-        AdminContext, so a role that lacks `escrow.release` never sees the
-        button and the server would refuse the call anyway.
-      */}
-      {/* Phase 2 */}
+      {/* Phases 2-5 */}
       <Route path="products" element={<AdminProducts />} />
       <Route path="orders" element={<AdminOrders />} />
-      <Route
-        path="escrow"
-        element={<PhasePlaceholder module="Escrow" phase="Phase 3" permission="escrow.view" />}
-      />
-      <Route
-        path="payouts"
-        element={<PhasePlaceholder module="Payouts" phase="Phase 3" permission="payouts.view" />}
-      />
-      <Route
-        path="disputes"
-        element={<PhasePlaceholder module="Disputes" phase="Phase 3" permission="disputes.view" />}
-      />
-      <Route
-        path="chat"
-        element={<PhasePlaceholder module="Chat moderation" phase="Phase 4" permission="chat.view" />}
-      />
-      <Route
-        path="sms"
-        element={<PhasePlaceholder module="SMS & campaigns" phase="Phase 4" permission="sms.view" />}
-      />
-      <Route
-        path="trust"
-        element={<PhasePlaceholder module="Trust centre" phase="Phase 4" permission="trust.view" />}
-      />
-      <Route
-        path="reports"
-        element={<PhasePlaceholder module="Reports" phase="Phase 5" permission="reports.view" />}
-      />
-      <Route
-        path="support"
-        element={<PhasePlaceholder module="Support" phase="Phase 5" permission="support.view" />}
-      />
-      <Route
-        path="settings"
-        element={<PhasePlaceholder module="Site settings" phase="Phase 5" permission="settings.view" />}
-      />
+      <Route path="escrow" element={<AdminEscrow />} />
+      <Route path="payouts" element={<AdminPayouts />} />
+      <Route path="disputes" element={<AdminDisputes />} />
+      <Route path="chat" element={<AdminSafety />} />
+      <Route path="trust" element={<AdminSafety />} />
+      <Route path="sms" element={<AdminPlatform />} />
+      <Route path="reports" element={<AdminPlatform />} />
+      <Route path="settings" element={<AdminPlatform />} />
+      <Route path="support" element={<AdminPlatform />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>
   );
