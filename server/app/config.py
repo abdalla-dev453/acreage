@@ -4,7 +4,24 @@ from datetime import timedelta
 class Config:
     # Flask Environment State
     FLASK_ENV = os.getenv("FLASK_ENV", "development")
-    IS_PROD = FLASK_ENV == "production"
+
+    # Production is inferred from any strong signal, not just FLASK_ENV.
+    # Relying on one variable meant a hosted service created without
+    # FLASK_ENV=production silently ran as development: dev secret keys, a
+    # localhost-only CORS allow-list (so the deployed frontend could not reach
+    # it at all), no HSTS, and email verification not enforced. Render sets
+    # RENDER=true automatically, and any hosted deployment is on Postgres, so
+    # either of those is proof enough. An explicit
+    # FLASK_ENV=development still forces development for local work.
+    _FLASK_ENV_SAYS_PROD = FLASK_ENV == "production"
+    _FLASK_ENV_FORCED_DEV = FLASK_ENV == "development" and not os.getenv("RENDER")
+    IS_PROD = (
+        _FLASK_ENV_SAYS_PROD
+        or bool(os.getenv("RENDER"))
+        or os.getenv("DYNO")  # Heroku
+        or os.getenv("RAILWAY_ENVIRONMENT")
+        or "postgres" in os.getenv("DATABASE_URL", "").lower()
+    ) and not _FLASK_ENV_FORCED_DEV
 
     #Security: Fall back to auto-generated keys in production if env vars are missing
     SECRET_KEY = os.getenv("SECRET_KEY") or (
