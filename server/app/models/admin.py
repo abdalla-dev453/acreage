@@ -26,6 +26,11 @@ class AdminAuditLog(db.Model):
 
     # Human-readable detail: the reason, the before/after state, the query.
     detail_json = db.Column(db.JSON, nullable=False, default=dict)
+    # Field-level before/after values. Kept separate from detail_json so a
+    # reviewer can see exactly what changed without parsing prose, and so an
+    # exporter can diff columns mechanically.
+    before_json = db.Column(db.JSON, nullable=True)
+    after_json = db.Column(db.JSON, nullable=True)
 
     # Request context, useful when investigating a disputed action.
     ip_address = db.Column(db.String(45), nullable=True)
@@ -49,6 +54,8 @@ class AdminAuditLog(db.Model):
             'target_username': self.target_user.username if self.target_user else None,
             'action': self.action,
             'detail': self.detail_json or {},
+            'before': self.before_json,
+            'after': self.after_json,
             'ip_address': self.ip_address,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }

@@ -25,10 +25,25 @@ from .commerce import (
 )
 from .trust import MediaAsset, VerificationRequest, ReviewEvidence
 from .admin import AdminAuditLog, SuperadminSession
+from .rbac import (
+    AdminRole,
+    AdminPermission,
+    AdminSession,
+    AdminLoginAttempt,
+    UserMFA,
+    BlockedIP,
+    admin_role_permissions,
+)
 
 __all__ = [
     "User",
     "AdminAuditLog",
+    "AdminRole",
+    "AdminPermission",
+    "AdminSession",
+    "AdminLoginAttempt",
+    "UserMFA",
+    "BlockedIP",
     "SuperadminSession",
     "Product",
     "Order",
