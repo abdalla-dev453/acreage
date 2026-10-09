@@ -35,6 +35,9 @@ class Order(db.Model):
     # Relationships with explicit foreign_keys to prevent ambiguity with User model.
     # back_populates must point at the matching collection on User (buyer_orders /
     # farm_orders) so both sides of each relationship stay in sync within a session.
+    # Relationship to status history
+    status_history = db.relationship('OrderStatusHistory', back_populates='order', cascade="all, delete-orphan", lazy=True)
+
     buyer = db.relationship('User', foreign_keys=[buyer_id], back_populates='buyer_orders')
     farmer = db.relationship('User', foreign_keys=[farmer_id], back_populates='farm_orders')
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade="all, delete-orphan")

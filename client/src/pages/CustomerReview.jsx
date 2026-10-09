@@ -58,8 +58,8 @@ export default function CustomerReview() {
         } else {
           setReviews(res.data);
           const total = res.data.length;
-          const avg = total > 0 ? (res.data.reduce((acc, curr) => acc + curr.rating, 0) / total).toFixed(1) : 4.8;
-          setStats({ average_rating: parseFloat(avg), total_reviews: total || 24 });
+          const avg = total > 0 ? (res.data.reduce((acc, curr) => acc + curr.rating, 0) / total).toFixed(1) : 0;
+          setStats({ average_rating: parseFloat(avg), total_reviews: total });
         }
       })
       .catch(() => {
@@ -110,8 +110,8 @@ export default function CustomerReview() {
         setHasCompletedTransaction(Boolean(res.data?.has_completed_orders));
       })
       .catch(() => {
-        // Fallback for testing: Toggle true if token exists or local dev state
-        setHasCompletedTransaction(true);
+        // Do not invite a review when transaction eligibility could not be verified.
+        setHasCompletedTransaction(false);
       });
   };
 

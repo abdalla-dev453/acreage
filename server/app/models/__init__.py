@@ -3,6 +3,7 @@
 from .user import User
 from .product import Product
 from .order import Order, OrderItem
+from .order_history import OrderStatusHistory
 from .farm_log import FarmLog
 from .chat import ChatMessage
 from .review import Review, ReviewLike, ReviewComment
@@ -60,6 +61,7 @@ __all__ = [
     "Product",
     "Order",
     "OrderItem",
+    "OrderStatusHistory",
     "FarmLog",
     "ChatMessage",
     "Review",

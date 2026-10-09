@@ -87,13 +87,63 @@ def create_review(farmer_id=None):
         data = request.get_json() or {}
         rating = data.get("rating")
         comment = data.get("comment", "")
+        quality_freshness = data.get("quality_freshness")
+        quality_accuracy = data.get("quality_accuracy")
+        quality_packaging = data.get("quality_packaging")
+        quality_delivery = data.get("quality_delivery")
+        quality_communication = data.get("quality_communication")
+        quality_honesty = data.get("quality_honesty")
+        quality_fulfillment = data.get("quality_fulfillment")
+        order_id = data.get("order_id")
     else:
         rating = request.form.get("rating")
         comment = request.form.get("comment", "")
+        quality_freshness = request.form.get("quality_freshness")
+        quality_accuracy = request.form.get("quality_accuracy")
+        quality_packaging = request.form.get("quality_packaging")
+        quality_delivery = request.form.get("quality_delivery")
+        quality_communication = request.form.get("quality_communication")
+        quality_honesty = request.form.get("quality_honesty")
+        quality_fulfillment = request.form.get("quality_fulfillment")
+        order_id = request.form.get("order_id")
 
-    # Validate Rating
-    if not rating or not (1 <= int(rating) <= 5):
+    # Validate Rating without allowing malformed input to escape as a 500.
+    try:
+        rating = int(rating)
+    except (TypeError, ValueError):
+        rating = None
+    if rating is None or not (1 <= rating <= 5):
         return jsonify({"message": "Rating must be an integer between 1 and 5"}), 400
+
+    # Validate sub-ratings if provided
+    for field_name, field_value in [
+        ("quality_freshness", quality_freshness),
+        ("quality_accuracy", quality_accuracy),
+        ("quality_packaging", quality_packaging),
+        ("quality_delivery", quality_delivery),
+        ("quality_communication", quality_communication),
+        ("quality_honesty", quality_honesty),
+        ("quality_fulfillment", quality_fulfillment),
+    ]:
+        if field_value is not None:
+            try:
+                parsed_value = int(field_value)
+            except (TypeError, ValueError):
+                parsed_value = None
+            if parsed_value is None or not (1 <= parsed_value <= 5):
+                return jsonify({"message": f"{field_name} must be an integer between 1 and 5"}), 400
+
+    # If order_id provided, verify it belongs to the reviewer and is delivered
+    if order_id:
+        try:
+            order_id = int(order_id)
+        except (TypeError, ValueError):
+            return jsonify({"message": "Invalid order for review"}), 400
+        order = db.session.get(Order, order_id)
+        if not order or order.buyer_id != reviewer_id or order.status != 'delivered':
+            return jsonify({"message": "Invalid order for review"}), 400
+    else:
+        order_id = None
 
     # 3. Handle Verification Image File Attachment
     image_url = None
@@ -116,7 +166,28 @@ def create_review(farmer_id=None):
     review = Review(
         reviewer_id=reviewer_id,
         farmer_id=farmer_id,
+        order_id=order_id,
         rating=int(rating),
+        quality_freshness=int(quality_freshness) if quality_freshness else None,
+        quality_accuracy=int(quality_accuracy) if quality_accuracy else None,
+        quality_packaging=int(quality_packaging) if quality_packaging else None,
+        quality_delivery=int(quality_delivery) if quality_delivery else None,
+        quality_communication=int(quality_communication) if quality_communication else None,
+        quality_honesty=int(quality_honesty) if quality_honesty else None,
+        quality_fulfillment=int(quality_fulfillment) if quality_fulfillment else None,
+        quality_score=round(sum(filter(None, [
+            int(quality_freshness) if quality_freshness else None,
+            int(quality_accuracy) if quality_accuracy else None,
+            int(quality_packaging) if quality_packaging else None,
+            int(quality_delivery) if quality_delivery else None,
+            int(quality_communication) if quality_communication else None,
+            int(quality_honesty) if quality_honesty else None,
+            int(quality_fulfillment) if quality_fulfillment else None,
+        ])) / len([x for x in [
+            quality_freshness, quality_accuracy, quality_packaging, quality_delivery,
+            quality_communication, quality_honesty, quality_fulfillment
+        ] if x is not None]), 1) if any([quality_freshness, quality_accuracy, quality_packaging, quality_delivery, quality_communication, quality_honesty, quality_fulfillment]) else None,
+        verified_purchase=bool(order_id),
         comment=comment,
         image_url=image_url  
     )
@@ -174,3 +245,51 @@ def add_comment(review_id):
     db.session.commit()
 
     return review_comment_schema.jsonify(comment), 201
+
+
+@reviews_bp.route('/farmer/<int:farmer_id>/summary', methods=['GET'])
+@jwt_required()
+def get_farmer_review_summary(farmer_id):
+    """Get review summary for a farmer including average sub-ratings"""
+    user_id = int(get_jwt_identity())
+
+    reviews = Review.query.filter_by(farmer_id=farmer_id).all()
+    if not reviews:
+        return jsonify({
+            'total_reviews': 0,
+            'average_rating': 0,
+            'quality_breakdown': {}
+        }), 200
+
+    total = len(reviews)
+    avg_rating = sum(r.rating for r in reviews) / total
+
+    # Calculate average for each sub-rating
+    sub_ratings = {
+        'quality_freshness': [],
+        'quality_accuracy': [],
+        'quality_packaging': [],
+        'quality_delivery': [],
+        'quality_communication': [],
+        'quality_honesty': [],
+        'quality_fulfillment': [],
+    }
+
+    for r in reviews:
+        for key in sub_ratings:
+            val = getattr(r, key)
+            if val is not None:
+                sub_ratings[key].append(val)
+
+    quality_breakdown = {}
+    for key, values in sub_ratings.items():
+        if values:
+            quality_breakdown[key] = round(sum(values) / len(values), 1)
+        else:
+            quality_breakdown[key] = None
+
+    return jsonify({
+        'total_reviews': total,
+        'average_rating': round(avg_rating, 1),
+        'quality_breakdown': quality_breakdown,
+    }), 200

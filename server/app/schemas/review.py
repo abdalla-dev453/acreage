@@ -33,6 +33,8 @@ class ReviewSchema(ma.SQLAlchemyAutoSchema):
             'quality_packaging',
             'quality_delivery',
             'quality_communication',
+            'quality_honesty',
+            'quality_fulfillment',
             'quality_score',
             'verified_purchase',
             'comment',

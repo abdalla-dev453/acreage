@@ -52,6 +52,10 @@ export default function Marketplace() {
 
   // Buyer quantity mapping
   const [orderQuantities, setOrderQuantities] = useState({});
+  // In-flight checkout guard. Double-clicks, double taps on slow mobile
+  // connections and key repeats all fire this handler twice, which the buyer
+  // experiences as two M-Pesa prompts for one order.
+  const [placingProductId, setPlacingProductId] = useState(null);
 
   const categories = ['Vegetables', 'Cereals', 'Fruits', 'Grains & Tubers'];
 
@@ -218,6 +222,9 @@ const openEditModal = (product) => {
 
   // Buyer: place order
   const handlePlaceOrder = async (productId, farmerId, maxStock) => {
+    // One checkout at a time: a second click while the STK push is in flight
+    // must be a no-op, not a duplicate order.
+    if (placingProductId !== null) return;
     const qty = parseFloat(orderQuantities[productId] || 1);
     if (qty <= 0 || qty > maxStock) {
       alert(`Invalid quantity. Available supply threshold is ${maxStock} units.`);
@@ -228,6 +235,7 @@ const openEditModal = (product) => {
       return;
     }
     try {
+      setPlacingProductId(productId);
       setActionStatus({ type: 'success', text: 'Processing order request...' });
       await API.post('/orders/', {
         items: [{ product_id: productId, quantity: qty }],
@@ -240,6 +248,7 @@ const openEditModal = (product) => {
     } catch (err) {
       alert(err.response?.data?.message || 'Checkout connection error.');
     } finally {
+      setPlacingProductId(null);
       setActionStatus({ type: '', text: '' });
     }
   };
@@ -384,14 +393,19 @@ const openEditModal = (product) => {
                           max={prod.stock_quantity}
                           value={orderQuantities[prod.id] || 1}
                           onChange={(e) => handleQtyChange(prod.id, e.target.value)}
+                          inputMode="numeric"
                           className="w-16 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl font-mono text-xs font-bold text-center focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         />
                         <button
                           onClick={() => handlePlaceOrder(prod.id, prod.farmer_id, prod.stock_quantity)}
-                          className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider py-1.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center space-x-1 shadow-sm shadow-green-600/5"
+                          disabled={placingProductId !== null}
+                          className={`flex-1 ${placingProductId !== null ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider py-1.5 rounded-xl transition-colors flex items-center justify-center space-x-1 shadow-sm shadow-green-600/5`}
                         >
-                          <ShoppingCart className="w-3.5 h-3.5" />
-                          <span>Place Order</span>
+                          {placingProductId === prod.id ? (
+                            <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Placing…</span></>
+                          ) : (
+                            <><ShoppingCart className="w-3.5 h-3.5" /><span>Place Order</span></>
+                          )}
                         </button>
                       </div>
                     )}

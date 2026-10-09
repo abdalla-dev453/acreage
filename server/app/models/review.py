@@ -16,6 +16,8 @@ class Review(db.Model):
     quality_packaging = db.Column(db.Integer, nullable=True)
     quality_delivery = db.Column(db.Integer, nullable=True)
     quality_communication = db.Column(db.Integer, nullable=True)
+    quality_honesty = db.Column(db.Integer, nullable=True)
+    quality_fulfillment = db.Column(db.Integer, nullable=True)
     quality_score = db.Column(db.Float, nullable=True)
     verified_purchase = db.Column(db.Boolean, nullable=False, default=False)
     comment = db.Column(db.Text, nullable=True)

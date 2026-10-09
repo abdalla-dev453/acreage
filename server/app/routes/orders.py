@@ -201,6 +201,11 @@ def place_order():
         .first_or_404()
     )
     farmer_id = first_product.farmer_id
+    farmer_user = db.session.get(User, farmer_id)
+    if not farmer_user or farmer_user.account_status != 'active':
+        # A frozen/suspended farmer cannot accept new money. The listing may
+        # still be cached client-side, so the API is the last line of defense.
+        return jsonify({'message': 'This seller cannot currently accept orders'}), 400
     if farmer_id == buyer_id:
         return jsonify({'message': 'You cannot place an order for your own product'}), 400
 
