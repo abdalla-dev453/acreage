@@ -2,11 +2,11 @@ services:
   - type: web
     name: acreage-api
     runtime: python
-    build:
-      buildCommand: |
-        pip install -r requirements.txt
-        python -m flask db upgrade
-      startCommand: gunicorn -k gevent --workers 4 --worker-connections 1000 "app:create_app()"
+    rootDir: server
+    buildCommand: |
+      pip install -r requirements.txt
+      FLASK_APP=app.py PYTHONPATH=. python -m flask db upgrade
+    startCommand: gunicorn -k gevent --workers 4 --worker-connections 1000 "app:create_app()"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -18,8 +18,7 @@ services:
         value: production
       - key: CORS_ORIGINS
         value: https://acreage-one.vercel.app,http://localhost:5173,http://localhost:3000
-      # Vercel issues a unique subdomain to every preview deployment, so a
-      # literal allow-list breaks the moment a branch preview is opened.
+      # Vercel creates a subdomain for each preview deployment.
       - key: CORS_ORIGIN_PATTERNS
         value: ^https://[a-z0-9-]+\.vercel\.app$
       - key: FRONTEND_URL
@@ -32,9 +31,9 @@ services:
         generateValue: true
       - key: LOG_LEVEL
         value: INFO
-    healthCheck:
-      path: /health
-    databases:
-      - name: acreage-db
-        region: oregon
-        plan: free
+    healthCheckPath: /health
+
+databases:
+  - name: acreage-db
+    region: oregon
+    plan: free

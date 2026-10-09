@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'offline.html'],
+      includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png', 'offline.html'],
       manifest: {
         name: 'Acreage - Digital Agriculture Marketplace',
         short_name: 'Acreage',
