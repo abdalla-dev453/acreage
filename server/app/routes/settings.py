@@ -57,6 +57,37 @@ def update_preferences():
     return jsonify({'preferences': user.preferences_json, 'message': 'Preferences saved'}), 200
 
 
+@settings_bp.route('/profile-details', methods=['GET'])
+@jwt_required()
+def get_profile_details():
+    user_id = int(get_jwt_identity())
+    user = db.get_or_404(User, user_id)
+    details = (user.preferences_json or {}).get('profile_details', {})
+    return jsonify({'profile_details': details}), 200
+
+
+@settings_bp.route('/profile-details', methods=['PUT'])
+@jwt_required()
+def update_profile_details():
+    user_id = int(get_jwt_identity())
+    user = db.get_or_404(User, user_id)
+    data, error = json_object()
+    if error:
+        return error
+
+    allowed = {'farm_name', 'mpesa_number', 'bank_name', 'account_number'}
+    details = dict((user.preferences_json or {}).get('profile_details', {}))
+    for key in allowed.intersection(data):
+        value = str(data[key] or '').strip()
+        if len(value) > 120:
+            return jsonify({'message': f'{key} must be 120 characters or fewer'}), 400
+        details[key] = value
+
+    user.preferences_json = {**(user.preferences_json or {}), 'profile_details': details}
+    db.session.commit()
+    return jsonify({'profile_details': details, 'message': 'Profile details saved'}), 200
+
+
 @settings_bp.route('/account', methods=['GET'])
 @jwt_required()
 def get_account():
@@ -157,8 +188,8 @@ def submit_feedback():
                 return jsonify({'message': 'Rating must be between 1 and 5'}), 400
         except (TypeError, ValueError):
             return jsonify({'message': 'Rating must be an integer'}), 400
-    preferences = user.preferences_json or {}
-    feedbacks = preferences.get('feedback', [])
+    preferences = dict(user.preferences_json or {})
+    feedbacks = list(preferences.get('feedback', []))
     feedbacks.append({'message': feedback, 'rating': rating})
     preferences['feedback'] = feedbacks
     user.preferences_json = preferences

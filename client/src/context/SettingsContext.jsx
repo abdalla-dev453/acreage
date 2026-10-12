@@ -84,14 +84,11 @@ export const SettingsProvider = ({ children }) => {
         }
         const response = await API.get('/settings/preferences');
         const serverPrefs = response.data?.preferences || {};
-        // First visit on this device: adopt the synced preferences wholesale.
-        // Returning visit: the local copy wins. Letting the server copy
-        // overwrite local settings snapped the theme back to a stale value on
-        // every page load, visibly flipping the UI between light and dark.
-        const returningVisitor = (() => {
-          try { return !!localStorage.getItem('app_settings'); } catch { return false; }
-        })();
-        setSettings((prev) => (returningVisitor ? { ...serverPrefs, ...prev } : { ...prev, ...serverPrefs }));
+        // The account copy is authoritative when signed in. Local storage is
+        // only the fast startup cache (and the source for signed-out visitors);
+        // letting it override the server meant defaults or another account's
+        // cached values could mask saved preferences after every reload.
+        setSettings((prev) => ({ ...prev, ...serverPrefs }));
       } catch {
         // Offline / unauthorized — keep local preferences.
       } finally {
@@ -102,13 +99,16 @@ export const SettingsProvider = ({ children }) => {
 
     // Re-sync when the user logs out (keep local) or a token appears (login).
     const handleLogout = () => setSettings((prev) => ({ ...prev }));
+    const handleLogin = () => loadPreferences();
     const handleStorage = (event) => {
       if (event.key === 'token' && event.newValue) loadPreferences();
     };
     window.addEventListener('auth-logout', handleLogout);
+    window.addEventListener('auth-login', handleLogin);
     window.addEventListener('storage', handleStorage);
     return () => {
       window.removeEventListener('auth-logout', handleLogout);
+      window.removeEventListener('auth-login', handleLogin);
       window.removeEventListener('storage', handleStorage);
     };
   }, []);
@@ -160,8 +160,10 @@ export const SettingsProvider = ({ children }) => {
       if (token) {
         await API.put('/settings/preferences', newSettings);
       }
+      return true;
     } catch (error) {
       console.error('Failed to save settings:', error);
+      return false;
     }
   }, []);
 

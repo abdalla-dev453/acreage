@@ -4,8 +4,21 @@ import App from './App.jsx'
 import './index.css'
 import './i18n' // Initialize i18n
 
-// Register Service Worker for PWA functionality
-if ('serviceWorker' in navigator) {
+// The legacy worker uses cache-first for scripts. In Vite development that
+// caches stable /src/*.jsx URLs and can keep an old app shell (including the
+// former dashboard sidebar) alive across code changes. Keep the worker out of
+// development and remove only this app's old /sw.js registration. Production
+// still registers the worker for PWA/offline support.
+if ('serviceWorker' in navigator && import.meta.env.DEV) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations
+      .filter((registration) => {
+        const worker = registration.active || registration.waiting || registration.installing;
+        return worker && new URL(worker.scriptURL).pathname === '/sw.js';
+      })
+      .forEach((registration) => registration.unregister());
+  });
+} else if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
