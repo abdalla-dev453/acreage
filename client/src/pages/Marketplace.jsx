@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Plus, ShoppingCart, Loader2, Image, CheckCircle, Edit2, Trash2, ToggleLeft, ToggleRight, X, Star, Crown } from 'lucide-react';
+import { Plus, ShoppingCart, Loader2, Image, CheckCircle, Edit2, Trash2, ToggleLeft, ToggleRight, X, Star, Crown, MapPin } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../services/api';
 import PageHeader from '../components/common/PageHeader';
@@ -268,7 +268,7 @@ const openEditModal = (product) => {
           isFarmer ? (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md shadow-green-600/10 flex items-center space-x-2 cursor-pointer transition-all active:scale-95"
+              className="bg-brand-forest hover:bg-brand-forest-deep text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-forest flex items-center space-x-2 cursor-pointer transition-all active:scale-95"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>List Produce</span>
@@ -281,7 +281,7 @@ const openEditModal = (product) => {
       <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
         <button
           onClick={() => setActiveCategory('')}
-          className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${!activeCategory ? 'bg-slate-900 dark:bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+          className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${!activeCategory ? 'bg-brand-forest text-white shadow-sm' : 'bg-white text-brand-muted border border-brand-sand hover:border-brand-forest/30 hover:bg-brand-stone'}`}
         >
           All Produce
         </button>
@@ -289,7 +289,7 @@ const openEditModal = (product) => {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${activeCategory === cat ? 'bg-slate-900 dark:bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${activeCategory === cat ? 'bg-brand-forest text-white shadow-sm' : 'bg-white text-brand-muted border border-brand-sand hover:border-brand-forest/30 hover:bg-brand-stone'}`}
           >
             {cat}
           </button>
@@ -310,10 +310,10 @@ const openEditModal = (product) => {
             products.map((prod) => {
               const isOwner = isFarmer && prod.farmer_id === user?.id;
               return (
-                <div key={prod.id} className={`bg-white dark:bg-slate-800 rounded-2xl border shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-lg hover:border-green-100 dark:hover:border-emerald-500/30 transition-all ${prod.is_available ? 'border-slate-100 dark:border-slate-700' : 'border-slate-200 dark:border-slate-700/60 opacity-75'}`}>
+                <div key={prod.id} className={`bg-white dark:bg-slate-800 rounded-2xl border border-brand-sand dark:border-slate-700 shadow-premium overflow-hidden flex flex-col justify-between group hover:shadow-premium-lg transition-all ${prod.is_available ? '' : 'opacity-75'}`}>
 
                   {/* Product Image */}
-                  <div className="h-44 w-full bg-slate-50 dark:bg-slate-900/60 relative overflow-hidden flex items-center justify-center border-b border-slate-50 dark:border-slate-700/50">
+                  <div className="h-44 w-full bg-brand-stone dark:bg-slate-900/60 relative overflow-hidden flex items-center justify-center border-b border-brand-sand dark:border-slate-700/50">
                     {prod.image_url ? (
                       <img
                         src={prod.image_url}
@@ -324,27 +324,27 @@ const openEditModal = (product) => {
                         onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
                       />
                     ) : (
-                      <div className="flex flex-col items-center text-slate-300 dark:text-slate-600 font-bold text-[10px] uppercase">
-                        <Image className="w-8 h-8 stroke-[1.5] text-slate-200 dark:text-slate-600 mb-1" />
+                      <div className="flex flex-col items-center text-brand-muted/60 font-bold text-[10px] uppercase">
+                        <Image className="w-8 h-8 stroke-[1.5] text-brand-sand mb-1" />
                         <span>No Photo Attached</span>
                       </div>
                     )}
-                    <span className="absolute left-3 top-3 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
+                    <span className="absolute left-3 top-3 bg-brand-charcoal/85 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
                       {prod.category}
                     </span>
                     {prod.is_premium && (
-                      <span className="absolute left-3 bottom-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-sm">
+                      <span className="absolute left-3 bottom-3 bg-brand-amber text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-sm">
                         <Crown className="w-2.5 h-2.5" /> Premium
                       </span>
                     )}
                     {/* Availability badge */}
                     {isFarmer && isOwner && !prod.is_available && (
-                      <span className="absolute right-3 top-3 bg-red-500/90 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
+                      <span className="absolute right-3 top-3 bg-brand-brick/90 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
                         Unlisted
                       </span>
                     )}
                     {!prod.is_available && !isOwner && (
-                      <span className="absolute right-3 top-3 bg-slate-500/90 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
+                      <span className="absolute right-3 top-3 bg-brand-muted/90 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
                         Sold Out
                       </span>
                     )}
@@ -354,7 +354,7 @@ const openEditModal = (product) => {
                   <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-1 flex-1">
                       <div className="flex items-center gap-2 min-w-0">
-                        <h3 className="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight truncate">{prod.title}</h3>
+                        <h3 className="font-extrabold text-brand-charcoal dark:text-slate-100 text-sm tracking-tight truncate">{prod.title}</h3>
                         <VerifiedBadge user={prod.farmer} />
                       </div>
                       {productMedia[prod.id]?.length > 0 && (
@@ -362,25 +362,37 @@ const openEditModal = (product) => {
                           {productMedia[prod.id].slice(0, 3).map((asset) => asset.kind === 'video' ? <video key={asset.id} src={asset.url} className="h-6 w-10 rounded object-cover" aria-label="Product video preview" /> : <img key={asset.id} src={asset.url} alt="Product photo preview" className="h-6 w-10 rounded object-cover" />)}
                         </div>
                       )}
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium line-clamp-2 min-h-[2rem] leading-relaxed">
+                      <p className="text-xs text-brand-muted dark:text-slate-400 font-medium line-clamp-2 min-h-[2rem] leading-relaxed">
                         {prod.description || 'No description provided.'}
                       </p>
+                      {/* Farmer & origin */}
+                      <div className="flex flex-col gap-0.5 pt-0.5">
+                        {prod.farmer?.username && (
+                          <p className="text-[11px] font-bold text-brand-charcoal dark:text-slate-200 truncate">{prod.farmer.username}</p>
+                        )}
+                        {prod.farmer?.location && (
+                          <p className="flex items-center gap-1 text-[11px] font-medium text-brand-muted dark:text-slate-400 truncate">
+                            <MapPin className="w-3 h-3 shrink-0" />
+                            {prod.farmer.location}
+                          </p>
+                        )}
+                      </div>
                       {prod.is_premium && (
-                        <div className="flex items-center gap-1 text-amber-400">
+                        <div className="flex items-center gap-1 text-brand-amber">
                           <Star className="w-3 h-3 fill-current" />
-                          <span className="text-xs font-black text-slate-800 dark:text-slate-200">Featured Listing</span>
+                          <span className="text-xs font-black text-brand-charcoal dark:text-slate-100">Featured Listing</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="pt-2 border-t border-slate-50 dark:border-slate-700/60 flex items-center justify-between">
+                    <div className="pt-2 border-t border-brand-sand dark:border-slate-700/60 flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block">Price Per Unit</span>
-                        <p className="text-sm font-black text-slate-800 dark:text-white font-mono">KES {prod.price_per_unit} <span className="text-xs font-bold text-slate-500 dark:text-slate-400">/{unitLabel(prod.unit)}</span></p>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-brand-muted dark:text-slate-400 block">Price Per Unit</span>
+                        <p className="text-sm font-black text-brand-charcoal dark:text-slate-100 font-mono">KES {prod.price_per_unit} <span className="text-xs font-bold text-brand-muted dark:text-slate-400">/{unitLabel(prod.unit)}</span></p>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block">Available Supply</span>
-                        <p className="text-xs font-extrabold text-green-600 dark:text-emerald-400 font-mono">{prod.stock_quantity} {unitLabel(prod.unit)}{Number(prod.stock_quantity) === 1 ? '' : 's'}</p>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-brand-muted dark:text-slate-400 block">Available Supply</span>
+                        <p className="text-xs font-extrabold text-brand-muted dark:text-slate-400 font-mono">{prod.stock_quantity} {unitLabel(prod.unit)}{Number(prod.stock_quantity) === 1 ? '' : 's'}</p>
                       </div>
                     </div>
 
@@ -394,12 +406,12 @@ const openEditModal = (product) => {
                           value={orderQuantities[prod.id] || 1}
                           onChange={(e) => handleQtyChange(prod.id, e.target.value)}
                           inputMode="numeric"
-                          className="w-16 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl font-mono text-xs font-bold text-center focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                          className="w-16 px-2 py-1.5 bg-white dark:bg-slate-900 border border-brand-sand dark:border-slate-700 text-brand-charcoal dark:text-white rounded-xl font-mono text-xs font-bold text-center focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest"
                         />
                         <button
                           onClick={() => handlePlaceOrder(prod.id, prod.farmer_id, prod.stock_quantity)}
                           disabled={placingProductId !== null}
-                          className={`flex-1 ${placingProductId !== null ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider py-1.5 rounded-xl transition-colors flex items-center justify-center space-x-1 shadow-sm shadow-green-600/5`}
+                          className={`flex-1 ${placingProductId !== null ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} bg-brand-amber hover:bg-brand-amber-deep text-white font-bold text-xs uppercase tracking-wider py-1.5 rounded-xl transition-colors flex items-center justify-center space-x-1 shadow-cta`}
                         >
                           {placingProductId === prod.id ? (
                             <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Placing…</span></>
@@ -497,13 +509,13 @@ const openEditModal = (product) => {
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Produce Title Name</label>
                 <input type="text" name="title" required placeholder="e.g. Export Hass Avocados" value={formData.title} onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
                   <select name="category" value={formData.category} onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest">
                     {categories.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
@@ -516,22 +528,22 @@ const openEditModal = (product) => {
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Price Per Unit (KES)</label>
                   <input type="number" name="price_per_unit" required min="1" placeholder="150" value={formData.price_per_unit} onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Total Available Stock</label>
                   <input type="number" name="stock_quantity" required min="1" placeholder="500" value={formData.stock_quantity} onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Unit Weight (kg, optional)</label>
                   <input type="number" name="unit_weight_kg" min="0.1" step="0.1" placeholder="e.g. 18" value={formData.unit_weight_kg || ''} onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Group Buying</label>
                   <select name="allows_group_buying" value={formData.allows_group_buying ? 'true' : 'false'} onChange={(event) => setFormData({ ...formData, allows_group_buying: event.target.value === 'true' })}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest">
                     <option value="false">Not available</option>
                     <option value="true">Allow group orders</option>
                   </select>
@@ -540,12 +552,12 @@ const openEditModal = (product) => {
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Image URL</label>
                 <input type="url" name="image_url" placeholder="Remote image URL" value={formData.image_url} onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
               </div>
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Description</label>
                 <textarea name="description" rows="2" placeholder="Grade A organic produce ready for dispatch..." value={formData.description} onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 resize-none" />
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest resize-none" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <label className="cursor-pointer rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-3 text-center hover:border-emerald-300 dark:hover:border-emerald-500 dark:bg-slate-900/50">
@@ -578,7 +590,7 @@ const openEditModal = (product) => {
                   Cancel
                 </button>
                 <button type="submit" disabled={isSubmitting}
-                  className="bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl transition flex items-center space-x-2 disabled:opacity-50 cursor-pointer">
+                  className="bg-brand-forest hover:bg-brand-forest-deep text-white font-bold px-5 py-2 rounded-xl transition flex items-center space-x-2 disabled:opacity-50 cursor-pointer shadow-forest">
                   {isSubmitting ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Publishing...</span></> : <span>Publish Listing</span>}
                 </button>
               </div>
@@ -609,13 +621,13 @@ const openEditModal = (product) => {
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Produce Title</label>
                 <input type="text" name="title" required value={editForm.title || ''} onChange={handleEditInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
                   <select name="category" value={editForm.category || 'Vegetables'} onChange={handleEditInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest">
                     {categories.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
@@ -628,22 +640,22 @@ const openEditModal = (product) => {
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Price Per Unit (KES)</label>
                   <input type="number" name="price_per_unit" required min="1" value={editForm.price_per_unit || ''} onChange={handleEditInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Stock Quantity</label>
                   <input type="number" name="stock_quantity" required min="0" value={editForm.stock_quantity || ''} onChange={handleEditInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Unit Weight (kg, optional)</label>
                   <input type="number" name="unit_weight_kg" min="0.1" step="0.1" value={editForm.unit_weight_kg || ''} onChange={handleEditInputChange}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Group Buying</label>
                   <select name="allows_group_buying" value={editForm.allows_group_buying ? 'true' : 'false'} onChange={(event) => setEditForm({ ...editForm, allows_group_buying: event.target.value === 'true' })}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest">
                     <option value="false">Not available</option>
                     <option value="true">Allow group orders</option>
                   </select>
@@ -652,12 +664,12 @@ const openEditModal = (product) => {
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Image URL</label>
                 <input type="url" name="image_url" value={editForm.image_url || ''} onChange={handleEditInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest" />
               </div>
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Description</label>
                 <textarea name="description" rows="2" value={editForm.description || ''} onChange={handleEditInputChange}
-                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 resize-none" />
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-forest/15 focus:border-brand-forest resize-none" />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <MediaUploader ownerType="product" ownerId={editingProduct.id} kind="photo" onUpload={fetchProducts} onError={() => setEditStatus({ type: 'error', text: 'Photo upload failed.' })} label="Add product photo" compact />
@@ -669,7 +681,7 @@ const openEditModal = (product) => {
                   type="checkbox"
                   checked={editForm.is_available ?? true}
                   onChange={(e) => setEditForm({ ...editForm, is_available: e.target.checked })}
-                  className="w-4 h-4 accent-green-600 dark:accent-emerald-500"
+                  className="w-4 h-4 accent-brand-forest"
                 />
                 <span className="font-bold text-slate-700 dark:text-slate-300">Listed / Visible on Marketplace</span>
               </label>
@@ -692,7 +704,7 @@ const openEditModal = (product) => {
                   Cancel
                 </button>
                 <button type="submit" disabled={isEditSubmitting}
-                  className="bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl transition flex items-center space-x-2 disabled:opacity-50 cursor-pointer">
+                  className="bg-brand-forest hover:bg-brand-forest-deep text-white font-bold px-5 py-2 rounded-xl transition flex items-center space-x-2 disabled:opacity-50 cursor-pointer shadow-forest">
                   {isEditSubmitting ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Saving...</span></> : <span>Save Changes</span>}
                 </button>
               </div>
