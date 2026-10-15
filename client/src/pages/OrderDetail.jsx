@@ -140,17 +140,11 @@ export default function OrderDetail() {
                   viewBox="0 0 600 300"
                   preserveAspectRatio="none"
                 >
-                  <defs>
-                    <linearGradient id="landGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#e2e8f0" />
-                      <stop offset="100%" stopColor="#cbd5e1" />
-                    </linearGradient>
-                  </defs>
-                  <rect width="600" height="300" fill="url(#landGradient)" rx="8" />
-                  <path d="M300 40 Q 380 100 360 160 T 300 200 T 240 220 T 180 200 Q 220 140 300 40 Z" fill="#dcfce7" stroke="#166534" strokeWidth="2" opacity="0.4" />
-                  <circle cx="300" cy="150" r="8" fill="#ef4444" stroke="#fff" strokeWidth="2" />
-                  <circle cx="300" cy="150" r="18" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.5" />
-                  <circle cx="300" cy="150" r="32" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.3" />
+                  <rect width="600" height="300" fill="#E3DCD1" rx="8" />
+                  <path d="M300 40 Q 380 100 360 160 T 300 200 T 240 220 T 180 200 Q 220 140 300 40 Z" fill="#F1EDE6" stroke="#5F7A5A" strokeWidth="2" opacity="0.6" />
+                  <circle cx="300" cy="150" r="8" fill="#A63A2E" stroke="#fff" strokeWidth="2" />
+                  <circle cx="300" cy="150" r="18" fill="none" stroke="#A63A2E" strokeWidth="1" opacity="0.5" />
+                  <circle cx="300" cy="150" r="32" fill="none" stroke="#A63A2E" strokeWidth="1" opacity="0.3" />
                 </svg>
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 border border-slate-200 shadow-sm">
                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">DELIVERY PIN</p>

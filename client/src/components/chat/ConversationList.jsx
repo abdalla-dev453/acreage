@@ -128,7 +128,7 @@ export default function ConversationList({
             return (
               <motion.div
                 key={contact.id}
-                whileHover={{ backgroundColor: '#f8fafc' }}
+                whileHover={{ backgroundColor: '#F1EDE6' }}
                 onClick={() => onSelect(contact)}
                 className={`p-3 rounded-xl flex items-start space-x-3 cursor-pointer transition-all border ${
                   isActive
