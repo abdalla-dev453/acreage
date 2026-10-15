@@ -12,6 +12,9 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         # which was leaking the raw token hashes in login/me/order responses.
         exclude = (
             'password_hash',
+            # Preferences can contain feedback and private profile/payment
+            # details. They are exposed only through owner-scoped settings APIs.
+            'preferences_json',
             'verification_token_hash',
             'verification_token_expires_at',
             'reset_token_hash',

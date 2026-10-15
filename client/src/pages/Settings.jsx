@@ -9,9 +9,10 @@ import SEO from '../components/common/SEO';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
-  const { settings, updateSetting, resetSettings } = useContext(SettingsContext);
-  const { user, logout } = useContext(AuthContext);
+  const { settings, updateSetting, resetSettings, saveAll } = useContext(SettingsContext);
+  const { user, setUser, logout } = useContext(AuthContext);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState({});
   const [feedback, setFeedback] = useState('');
@@ -36,7 +37,13 @@ export default function SettingsPage() {
     }
   }, [user]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaveError('');
+    const synced = await saveAll(settings);
+    if (!synced) {
+      setSaveError('Saved on this device, but account sync failed. Check your connection and try again.');
+      return;
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -99,7 +106,8 @@ export default function SettingsPage() {
 
   const updatePhone = async () => {
     try {
-      await API.put('/settings/account', { phone_number: phoneValue });
+      const response = await API.put('/settings/account', { phone_number: phoneValue });
+      setUser?.(response.data.user);
       setEditingPhone(false);
       handleSave();
     } catch (err) {
@@ -109,7 +117,8 @@ export default function SettingsPage() {
 
   const updateLocation = async () => {
     try {
-      await API.put('/settings/account', { location: locationValue });
+      const response = await API.put('/settings/account', { location: locationValue });
+      setUser?.(response.data.user);
       setEditingLocation(false);
       handleSave();
     } catch (err) {
@@ -184,6 +193,7 @@ export default function SettingsPage() {
           {t('settings.systemConfiguration')}
         </h1>
         <div className="flex items-center gap-3">
+          {saveError && <span role="alert" className="text-xs font-semibold text-rose-600">{saveError}</span>}
           {saved && (
             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-800 px-3 py-1 rounded-lg">
               {t('settings.saved')}

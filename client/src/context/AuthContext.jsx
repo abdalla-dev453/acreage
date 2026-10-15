@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('role', res.data.user.role);
     }
     setUser(res.data.user);
+    window.dispatchEvent(new Event('auth-login'));
     return res.data;
   };
 

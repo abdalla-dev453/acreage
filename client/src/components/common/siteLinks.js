@@ -123,6 +123,7 @@ export const SITE_MENU_GROUPS = [
         icon: MessageSquareText,
         blurb: "Run ordering and stock alerts over SMS.",
         roles: EVERY_ROLE,
+        public: true,
       },
       {
         label: "Search",
@@ -259,7 +260,7 @@ export function isLinkActive(pathname, path) {
  * mega-menu never advertises a route that would bounce them to /login.
  */
 export function visibleLinks(group, user) {
-  if (!user) return group.links;
+  if (!user) return group.links.filter((link) => link.public);
   return group.links.filter((link) => {
     if (link.superadminOnly && !user.is_superadmin) return false;
     return link.roles.includes(user.role);

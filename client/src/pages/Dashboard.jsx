@@ -36,11 +36,8 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center">
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-gold-500 rounded-full animate-spin opacity-50" style={{ animationDelay: '0.3s' }}></div>
-        </div>
-        <p className="text-sm text-slate-500 font-semibold mt-4 tracking-wide animate-pulse">{t('common.loading')}</p>
+        <div className="w-12 h-12 border-4 border-brand-sand border-t-brand-forest rounded-full animate-spin"></div>
+        <p className="text-sm text-brand-muted font-semibold mt-4 tracking-wide animate-pulse">{t('common.loading')}</p>
       </div>
     );
   }
@@ -85,14 +82,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="bg-premium-gradient rounded-3xl p-8 text-white shadow-premium-xl flex flex-col sm:flex-row items-center justify-between gap-6 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+      <div className="bg-brand-forest rounded-3xl p-8 text-white shadow-premium-xl flex flex-col sm:flex-row items-center justify-between gap-6 animate-slide-up" style={{ animationDelay: '0.4s' }}>
         <div className="text-center sm:text-left space-y-2">
           <h4 className="font-bold text-xl font-display">{t('dashboard.inventoryControl')}</h4>
-          <p className="text-sm text-white/90 leading-relaxed">{t('dashboard.inventoryDescription')}</p>
+          <p className="text-sm text-white/85 leading-relaxed">{t('dashboard.inventoryDescription')}</p>
         </div>
         <Link
           to="/orders"
-          className="bg-white text-primary-700 hover:bg-primary-50 transition-all font-bold text-sm px-6 py-3 rounded-2xl flex items-center gap-2 active:scale-95 shadow-lg hover:shadow-xl group"
+          className="bg-white text-brand-forest hover:bg-brand-stone transition-all font-bold text-sm px-6 py-3 rounded-2xl flex items-center gap-2 active:scale-95 shadow-lg hover:shadow-xl group"
         >
           <span>{t('dashboard.manageOrders')}</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

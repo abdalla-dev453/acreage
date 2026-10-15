@@ -108,6 +108,11 @@ export default function AppRoutes() {
             <TrustCenter />
           </Suspense>
         } />
+        <Route path="/sms" element={
+          <Suspense fallback={<PageLoader />}>
+            <SmsHub />
+          </Suspense>
+        } />
         {/* The console checks its own access via /api/admin/me, which returns
             403 for a non-admin. Rendering it behind the same ProtectedRoute as
             the rest of the app keeps the URL reachable for the redirect path
@@ -197,11 +202,6 @@ export default function AppRoutes() {
           <Route path="groups" element={
             <Suspense fallback={<PageLoader />}>
               <GroupCommerce />
-            </Suspense>
-          } />
-          <Route path="sms" element={
-            <Suspense fallback={<PageLoader />}>
-              <SmsHub />
             </Suspense>
           } />
           <Route path="harvest" element={

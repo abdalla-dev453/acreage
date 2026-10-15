@@ -35,14 +35,37 @@ export default function Profile() {
         const token = localStorage.getItem('token');
         if (token) {
           const res = await API.get('/auth/me');
-          if (setUser) setUser(res.data.user);
+          // /auth/me returns the serialized user directly (login/profile
+          // mutation endpoints wrap it in { user }).
+          if (setUser) setUser(res.data.user || res.data);
         }
       } catch {
         // Keep existing user data if server is unreachable
       }
     };
     loadProfile();
+
+    const loadPrivateDetails = async () => {
+      try {
+        const { data } = await API.get('/settings/profile-details');
+        setFormData((previous) => ({ ...previous, ...(data.profile_details || {}) }));
+      } catch {
+        // Keep the form usable if the account details endpoint is unavailable.
+      }
+    };
+    if (localStorage.getItem('token')) loadPrivateDetails();
   }, [setUser]);
+
+  useEffect(() => {
+    if (!user) return;
+    setFormData((previous) => ({
+      ...previous,
+      username: user.username || '',
+      email: user.email || '',
+      phone: user.phone_number || '',
+      location: user.location || '',
+    }));
+  }, [user]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -91,21 +114,27 @@ export default function Profile() {
         setIsSaving(false);
         return;
       }
-      if (formData.new_password.length < 6) {
-        setStatusMessage({ type: 'error', text: 'New password must be at least 6 characters.' });
+      if (formData.new_password.length < 8) {
+        setStatusMessage({ type: 'error', text: 'New password must be at least 8 characters.' });
         setIsSaving(false);
         return;
       }
     }
 
     try {
+      const accountFields = {
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location,
+      };
+      if (formData.new_password) {
+        accountFields.current_password = formData.current_password;
+        accountFields.new_password = formData.new_password;
+      }
       if (avatarFile) {
         const formDataObj = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-          if (key !== 'current_password' || formData.current_password) {
-            formDataObj.append(key, value);
-          }
-        });
+        Object.entries(accountFields).forEach(([key, value]) => formDataObj.append(key, value));
         formDataObj.append('avatar', avatarFile);
         const res = await API.put('/auth/profile', formDataObj, {
           headers: { 'Content-Type': 'multipart/form-data' },
@@ -113,8 +142,17 @@ export default function Profile() {
         if (setUser) setUser(res.data.user);
         setAvatarFile(null);
       } else {
-        const res = await API.put('/auth/profile', formData);
+        const res = await API.put('/auth/profile', accountFields);
         if (setUser) setUser(res.data.user);
+      }
+      if (activeTab === 'farm') {
+        await API.put('/settings/profile-details', { farm_name: formData.farm_name });
+      } else if (activeTab === 'payment') {
+        await API.put('/settings/profile-details', {
+          mpesa_number: formData.mpesa_number,
+          bank_name: formData.bank_name,
+          account_number: formData.account_number,
+        });
       }
       setStatusMessage({ type: 'success', text: 'Profile updated successfully!' });
       

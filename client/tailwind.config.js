@@ -1,4 +1,16 @@
-/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config}
+
+   ACREAGE — "Warm Harvest" design system.
+
+   A premium agricultural commerce platform: warm ivory paper, soft stone
+   surfaces, deep forest green used sparingly for brand and primary actions,
+   harvest amber reserved for commerce conversions, and muted olive for
+   verified / success states. No decorative gradients — flat color, clean
+   borders, soft shadows.
+
+   The legacy scales (green / emerald / lime / slate / amber …) are remapped
+   to this palette so every existing utility across the app resolves to the
+   warm system instead of the old bright greens. */
 export default {
   content: [
     "./index.html",
@@ -7,79 +19,221 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Premium brand colors
+        // ── Semantic brand scale (use these for new work) ─────────────────
+        brand: {
+          ivory: '#FAF7F2',        // app background
+          stone: '#F1EDE6',        // cards & section surfaces
+          sand: '#E3DCD1',         // borders & dividers
+          charcoal: '#1F241F',     // primary text
+          muted: '#6B6459',        // secondary text
+          forest: '#1E3A2F',       // brand: navbar, footer, primary buttons
+          'forest-deep': '#172C23',// hover / pressed forest
+          'forest-ink': '#101B16', // deepest forest slabs
+          amber: '#C97B2D',        // conversion CTA only
+          'amber-deep': '#AC6722', // hover amber
+          olive: '#5F7A5A',        // verified / success
+          'olive-deep': '#4A6146',
+          brick: '#A63A2E',        // error
+          'brick-deep': '#8C2F25',
+        },
+
+        // Forest family — brand green. Replaces the old bright green ramp:
+        // 500 = muted olive, 600 = deep forest, the rest are tints/shades.
+        green: {
+          50: '#F2F4EE',
+          100: '#E5E9DE',
+          200: '#CBD2BF',
+          300: '#A9B39B',
+          400: '#7E9073',
+          500: '#5F7A5A',
+          600: '#1E3A2F',
+          700: '#182C23',
+          800: '#12211B',
+          900: '#0D1712',
+          950: '#080F0C',
+        },
+
+        // Olive family — verified / success states (badges, confirmations).
+        emerald: {
+          50: '#F1F3ED',
+          100: '#E4E8DD',
+          200: '#C9D0C0',
+          300: '#A3AF97',
+          400: '#7C8F73',
+          500: '#5F7A5A',
+          600: '#1E3A2F',
+          700: '#182C23',
+          800: '#12211B',
+          900: '#0E1A14',
+          950: '#0A120E',
+        },
+
+        // Legacy lime green usage folds into the olive family.
+        lime: {
+          50: '#F2F3EC',
+          100: '#E6E8DB',
+          200: '#CDD2BC',
+          300: '#AAB294',
+          400: '#87936E',
+          500: '#5F7A5A',
+          600: '#4C6349',
+          700: '#41523D',
+          800: '#364332',
+          900: '#2C372C',
+          950: '#171F18',
+        },
+
+        // Warm neutral ramp — ivory / stone / sand / grey-brown / charcoal.
+        // Every slate utility in the app now renders warm instead of blue-grey.
+        slate: {
+          50: '#FAF7F2',
+          100: '#F1EDE6',
+          200: '#E3DCD1',
+          300: '#CFC7B8',
+          400: '#A79E8D',
+          500: '#6B6459',
+          600: '#57524A',
+          700: '#3F3B35',
+          800: '#2B2A26',
+          900: '#1F241F',
+          950: '#141712',
+        },
+
+        // Harvest amber — only for primary conversion actions.
+        amber: {
+          50: '#FBF4EA',
+          100: '#F6E8D2',
+          200: '#EDD3B0',
+          300: '#E0B683',
+          400: '#D2984F',
+          500: '#C97B2D',
+          600: '#AC6722',
+          700: '#8D551E',
+          800: '#6F4419',
+          900: '#573513',
+          950: '#311D08',
+        },
+
+        // Orange kept in the amber family (it anchored the old gradient chips).
+        orange: {
+          50: '#FBF4EA',
+          100: '#F6E8D2',
+          200: '#EDD3B0',
+          300: '#E0B683',
+          400: '#D2984F',
+          500: '#C97B2D',
+          600: '#AC6722',
+          700: '#8D551E',
+          800: '#6F4419',
+          900: '#573513',
+          950: '#311D08',
+        },
+
+        yellow: {
+          50: '#FBF6EA',
+          100: '#F5EBD2',
+          200: '#EBD8AE',
+          300: '#DFC285',
+          400: '#D3AA5B',
+          500: '#C2923A',
+          600: '#A87A2E',
+          700: '#8A6224',
+          800: '#6C4C1C',
+          900: '#543B16',
+          950: '#2F2009',
+        },
+
+        gold: {
+          50: '#FBF6EA',
+          100: '#F5EBD2',
+          200: '#EBD8AE',
+          300: '#DFC285',
+          400: '#D3AA5B',
+          500: '#C2923A',
+          600: '#A87A2E',
+          700: '#8A6224',
+          800: '#6C4C1C',
+          900: '#543B16',
+          950: '#2F2009',
+        },
+
+        // Deep brick red — errors and destructive actions.
+        rose: {
+          50: '#F9EFEC',
+          100: '#F2DED8',
+          200: '#E6C0B7',
+          300: '#D59C90',
+          400: '#C16C5D',
+          500: '#A63A2E',
+          600: '#8C2F25',
+          700: '#73281F',
+          800: '#5B2019',
+          900: '#471A14',
+          950: '#290D09',
+        },
+
+        red: {
+          50: '#F9EFEC',
+          100: '#F2DED8',
+          200: '#E6C0B7',
+          300: '#D59C90',
+          400: '#C16C5D',
+          500: '#A63A2E',
+          600: '#8C2F25',
+          700: '#73281F',
+          800: '#5B2019',
+          900: '#471A14',
+          950: '#290D09',
+        },
+
+        // Primary/accent aliases keep older class names meaningful.
         primary: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
+          50: '#F2F4EE',
+          100: '#E5E9DE',
+          200: '#CBD2BF',
+          300: '#A9B39B',
+          400: '#7E9073',
+          500: '#5F7A5A',
+          600: '#1E3A2F',
+          700: '#182C23',
+          800: '#12211B',
+          900: '#0D1712',
+          950: '#080F0C',
         },
         accent: {
-          50: '#fef7ee',
-          100: '#fdebd0',
-          200: '#fad5a5',
-          300: '#f7b676',
-          400: '#f49348',
-          500: '#f07528',
-          600: '#e05e15',
-          700: '#bc4d13',
-          800: '#9e4212',
-          900: '#843b14',
-          950: '#4a1f0a',
-        },
-        gold: {
-          50: '#fffef6',
-          100: '#fef9e3',
-          200: '#fef2c6',
-          300: '#fde99f',
-          400: '#fcdd6f',
-          500: '#fac93e',
-          600: '#f9b31f',
-          700: '#d99716',
-          800: '#b87d13',
-          900: '#9b6712',
-          950: '#513809',
-        },
-        slate: {
-          850: '#1e293b',
-          950: '#020617',
+          50: '#FBF4EA',
+          100: '#F6E8D2',
+          200: '#EDD3B0',
+          300: '#E0B683',
+          400: '#D2984F',
+          500: '#C97B2D',
+          600: '#AC6722',
+          700: '#8D551E',
+          800: '#6F4419',
+          900: '#573513',
+          950: '#311D08',
         },
       },
       fontFamily: {
-        // index.html actually loads Fraunces + IBM Plex Sans/Mono, so the
-        // config has to name those or every font-* utility falls back to the
-        // browser default and the type hierarchy collapses.
+        // index.html loads Fraunces (refined serif display) + IBM Plex Sans
+        // (highly readable body) + IBM Plex Mono (labels / prices).
         sans: ['"IBM Plex Sans"', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
         display: ['Fraunces', '"Playfair Display"', 'Georgia', 'serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'premium-gradient': 'linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%)',
-        'gold-gradient': 'linear-gradient(135deg, #f9b31f 0%, #fac93e 50%, #f07528 100%)',
-        'glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-      },
       boxShadow: {
-        'premium': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.05)',
-        'premium-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05)',
-        'premium-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.05)',
-        'glow': '0 0 20px rgba(34, 197, 94, 0.3), 0 0 40px rgba(34, 197, 94, 0.1)',
-        'gold-glow': '0 0 20px rgba(249, 179, 31, 0.3), 0 0 40px rgba(249, 179, 31, 0.1)',
-        'inner-glow': 'inset 0 2px 4px rgba(255, 255, 255, 0.1)',
+        // Soft, warm, flat-design shadows — no colored glows.
+        'premium': '0 1px 2px rgba(31, 36, 31, 0.04), 0 2px 8px rgba(31, 36, 31, 0.05)',
+        'premium-lg': '0 2px 4px rgba(31, 36, 31, 0.04), 0 12px 28px rgba(31, 36, 31, 0.08)',
+        'premium-xl': '0 4px 8px rgba(31, 36, 31, 0.05), 0 24px 48px rgba(31, 36, 31, 0.12)',
+        'cta': '0 2px 6px rgba(172, 103, 34, 0.24)',
+        'cta-hover': '0 6px 18px rgba(172, 103, 34, 0.3)',
+        'forest': '0 2px 6px rgba(16, 27, 22, 0.18)',
+        'forest-hover': '0 8px 22px rgba(16, 27, 22, 0.26)',
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'gradient': 'gradient 15s ease infinite',
-        'shimmer': 'shimmer 2s linear infinite',
         'slide-up': 'slideUp 0.5s ease-out',
         'fade-in': 'fadeIn 0.5s ease-out',
         'shake': 'shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both',
@@ -88,14 +242,6 @@ export default {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-20px)' },
-        },
-        gradient: {
-          '0%, 100%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '-1000px 0' },
-          '100%': { backgroundPosition: '1000px 0' },
         },
         slideUp: {
           '0%': { transform: 'translateY(20px)', opacity: '0' },

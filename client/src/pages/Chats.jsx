@@ -57,7 +57,7 @@ function Avatar({ name = '', size = 'md', online = false, role = null }) {
         className={`${sizeMap[size]} rounded-full flex items-center justify-center font-black uppercase shadow-sm border-2 border-white dark:border-slate-800 text-slate-800 dark:text-slate-100 transition-all ${
           role ? roleColors[role] || '' : ''
         }`}
-        style={{ backgroundColor: role === 'farmer' ? '#059669' : role === 'buyer' ? '#2563eb' : '#475569', color: '#ffffff' }}
+        style={{ backgroundColor: role === 'farmer' ? '#1E3A2F' : role === 'buyer' ? '#6B6459' : '#3F3B35', color: '#ffffff' }}
       >
         {initial}
       </div>
@@ -514,7 +514,7 @@ export default function Chats() {
       </div>
 
       {/* ── RIGHT PANEL: Chat Window ── */}
-      <div className="flex-1 flex flex-col bg-slate-50/40 dark:bg-[#0b1120] overflow-hidden">
+      <div className="flex-1 flex flex-col bg-slate-50/40 dark:bg-[#161A17] overflow-hidden">
         {!activeRecipient ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8 select-none">
             <div className="p-6 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 rounded-full mb-4">
