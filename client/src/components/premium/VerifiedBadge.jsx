@@ -19,7 +19,7 @@ export default function VerifiedBadge({ user, className = '' }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 ring-1 ring-inset ring-emerald-200 ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full bg-brand-olive/10 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-brand-olive-deep ring-1 ring-inset ring-brand-olive/25 ${className}`}
       aria-label={label}
       title={label}
     >

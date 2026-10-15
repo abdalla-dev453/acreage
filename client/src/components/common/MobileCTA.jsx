@@ -25,7 +25,7 @@ export default function MobileCTA() {
         </div>
         <Link
           to="/register"
-          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition shrink-0 ml-2 shadow-sm"
+          className="px-4 py-2 bg-brand-amber hover:bg-brand-amber-deep text-white font-bold rounded-xl text-xs uppercase tracking-wider transition shrink-0 ml-2 shadow-cta"
         >
           Get Started
         </Link>
