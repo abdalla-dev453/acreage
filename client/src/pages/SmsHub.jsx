@@ -103,7 +103,7 @@ export default function SmsHub() {
         />
 
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-green-700 to-green-800 rounded-2xl p-6 text-white shadow-lg">
+        <div className="bg-brand-forest rounded-2xl p-6 text-white shadow-premium-lg">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-white/20 rounded-xl">
               <Smartphone className="w-8 h-8" />
