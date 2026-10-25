@@ -73,7 +73,7 @@ export default defineConfig({
         ]
       },
       devOptions: {
-        enabled: true
+        enabled: false
       }
     })
   ],
@@ -114,6 +114,12 @@ export default defineConfig({
   server: {
     headers: {
       'Cache-Control': 'public, max-age=31536000, immutable'
+    },
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+      }
     }
   }
 })

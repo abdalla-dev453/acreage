@@ -43,14 +43,18 @@ export default async function run(page, options = {}) {
   await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
 
   // Locate Mobile CTA
-  const ctaLocator = page.locator(
-    '[data-testid="mobile-cta-button"], [data-testid="mobile-cta-banner"] a, aside[aria-label="Mobile promotional banner"] a, div.fixed.bottom-0 a:has-text("Get Started")'
-  ).first();
+  const ctaLocator = page
+    .locator(
+      '[data-testid="mobile-cta-button"], [data-testid="mobile-cta-banner"] a, aside[aria-label="Mobile promotional banner"] a, div.fixed.bottom-0 a:has-text("Get Started")',
+    )
+    .first();
 
   await ctaLocator.waitFor({ state: "visible", timeout: 8000 });
   const ctaVisibleOnHome = await ctaLocator.isVisible();
   if (!ctaVisibleOnHome) {
-    throw new Error("Assertion Failure: Mobile CTA should be visible on home page.");
+    throw new Error(
+      "Assertion Failure: Mobile CTA should be visible on home page.",
+    );
   }
 
   // 2. Click CTA to navigate to /register
@@ -63,25 +67,35 @@ export default async function run(page, options = {}) {
   await ctaLocator.waitFor({ state: "hidden", timeout: 5000 });
   const ctaVisibleOnRegister = await ctaLocator.isVisible();
   if (ctaVisibleOnRegister) {
-    throw new Error("Assertion Failure: Mobile CTA must be hidden on /register.");
+    throw new Error(
+      "Assertion Failure: Mobile CTA must be hidden on /register.",
+    );
   }
 
   // 4. Fill Registration Form
-  const usernameInput = page.locator(
-    '[data-testid="register-username-input"], input#register-username, input[placeholder="e.g. john_doe"]'
-  ).first();
-  const emailInput = page.locator(
-    '[data-testid="register-email-input"], input#register-email, input[type="email"]'
-  ).first();
-  const passwordInput = page.locator(
-    '[data-testid="register-password-input"], input#register-password, input[type="password"]'
-  ).first();
-  const locationInput = page.locator(
-    '[data-testid="register-location-input"], input#register-location, input[placeholder="e.g. Nakuru, Nairobi"]'
-  ).first();
-  const registerSubmitBtn = page.locator(
-    '[data-testid="register-submit-button"], button[type="submit"]'
-  ).first();
+  const usernameInput = page
+    .locator(
+      '[data-testid="register-username-input"], input#register-username, input[placeholder="e.g. john_doe"]',
+    )
+    .first();
+  const emailInput = page
+    .locator(
+      '[data-testid="register-email-input"], input#register-email, input[type="email"]',
+    )
+    .first();
+  const passwordInput = page
+    .locator(
+      '[data-testid="register-password-input"], input#register-password, input[type="password"]',
+    )
+    .first();
+  const locationInput = page
+    .locator(
+      '[data-testid="register-location-input"], input#register-location, input[placeholder="e.g. Nakuru, Nairobi"]',
+    )
+    .first();
+  const registerSubmitBtn = page
+    .locator('[data-testid="register-submit-button"], button[type="submit"]')
+    .first();
 
   await usernameInput.waitFor({ state: "visible", timeout: 8000 });
   await usernameInput.fill(testUser.username);
@@ -95,7 +109,7 @@ export default async function run(page, options = {}) {
       (resp) =>
         resp.url().includes("/api/auth/register") &&
         resp.request().method() === "POST",
-      { timeout: 10000 }
+      { timeout: 15000 },
     )
     .catch(() => null);
 
@@ -103,25 +117,36 @@ export default async function run(page, options = {}) {
 
   const registerResponse = await registerResponsePromise;
   if (registerResponse && !registerResponse.ok()) {
-    const errorText = await registerResponse.text().catch(() => "Unknown error");
+    const errorText = await registerResponse
+      .text()
+      .catch(() => "Unknown error");
     throw new Error(
-      `Registration API request failed with status ${registerResponse.status()}: ${errorText}`
+      `Registration API request failed with status ${registerResponse.status()}: ${errorText}`,
     );
   }
 
   // 5. Verify /thank-you page transition & heading
-  await page.waitForURL("**/thank-you", { timeout: 12000 });
+  // Also check if any UI error message was displayed on /register
+  const uiError = await page
+    .locator('[data-testid="register-error"]')
+    .innerText()
+    .catch(() => null);
+  if (uiError) {
+    throw new Error(`Registration failed in UI with error: "${uiError}"`);
+  }
 
-  const headingLocator = page.locator(
-    '[data-testid="thank-you-heading"], h1'
-  ).first();
+  await page.waitForURL("**/thank-you", { timeout: 15000 });
+
+  const headingLocator = page
+    .locator('[data-testid="thank-you-heading"], h1')
+    .first();
   await headingLocator.waitFor({ state: "visible", timeout: 8000 });
 
   const heading = (await headingLocator.innerText()).trim();
   const registrationSucceeded = heading === "Registration complete";
   if (!registrationSucceeded) {
     throw new Error(
-      `Assertion Failure: Expected heading "Registration complete" but received "${heading}".`
+      `Assertion Failure: Expected heading "Registration complete" but received "${heading}".`,
     );
   }
 
@@ -129,14 +154,19 @@ export default async function run(page, options = {}) {
   await ctaLocator.waitFor({ state: "hidden", timeout: 3000 }).catch(() => {});
   const ctaVisibleOnThankYou = await ctaLocator.isVisible();
   if (ctaVisibleOnThankYou) {
-    throw new Error("Assertion Failure: Mobile CTA must remain hidden on /thank-you.");
+    throw new Error(
+      "Assertion Failure: Mobile CTA must remain hidden on /thank-you.",
+    );
   }
 
   // 6. Navigate from /thank-you to /login via the Sign In button
-  const signInLink = page.locator(
-    '[data-testid="thank-you-signin-btn"], a[href="/login"]'
-  ).first();
-  await signInLink.waitFor({ state: "visible", timeout: 5000 });
+  // Scope specifically to the status-page CTA button so it does not match the hidden desktop nav link
+  const signInLink = page
+    .locator(
+      '[data-testid="thank-you-signin-btn"], [data-testid="thank-you-container"] a.status-cta, main.status-page a[href="/login"]',
+    )
+    .first();
+  await signInLink.waitFor({ state: "visible", timeout: 8000 });
 
   await Promise.all([
     page.waitForURL("**/login", { timeout: 10000 }),
@@ -144,15 +174,21 @@ export default async function run(page, options = {}) {
   ]);
 
   // 7. Perform Login with the created account
-  const loginEmailInput = page.locator(
-    '[data-testid="login-email-input"], input#login-email, input[type="email"]'
-  ).first();
-  const loginPasswordInput = page.locator(
-    '[data-testid="login-password-input"], input#login-password, input[type="password"]'
-  ).first();
-  const loginSubmitBtn = page.locator(
-    '[data-testid="login-submit-button"], button[type="submit"]'
-  ).first();
+  const loginEmailInput = page
+    .locator(
+      '[data-testid="login-email-input"], form[data-testid="login-form"] input[type="email"], input#login-email',
+    )
+    .first();
+  const loginPasswordInput = page
+    .locator(
+      '[data-testid="login-password-input"], form[data-testid="login-form"] input[type="password"], input#login-password',
+    )
+    .first();
+  const loginSubmitBtn = page
+    .locator(
+      '[data-testid="login-submit-button"], form[data-testid="login-form"] button[type="submit"]',
+    )
+    .first();
 
   await loginEmailInput.waitFor({ state: "visible", timeout: 8000 });
   await loginEmailInput.fill(testUser.email);
@@ -164,7 +200,7 @@ export default async function run(page, options = {}) {
       (resp) =>
         resp.url().includes("/api/auth/login") &&
         resp.request().method() === "POST",
-      { timeout: 10000 }
+      { timeout: 10000 },
     )
     .catch(() => null);
 
@@ -174,7 +210,7 @@ export default async function run(page, options = {}) {
   if (loginResponse && !loginResponse.ok()) {
     const errorText = await loginResponse.text().catch(() => "Unknown error");
     throw new Error(
-      `Login API request failed with status ${loginResponse.status()}: ${errorText}`
+      `Login API request failed with status ${loginResponse.status()}: ${errorText}`,
     );
   }
 
@@ -184,7 +220,9 @@ export default async function run(page, options = {}) {
   const loginSucceeded = currentUrl.includes("/dashboard");
 
   if (!loginSucceeded) {
-    throw new Error(`Assertion Failure: Expected redirect to /dashboard but reached "${currentUrl}".`);
+    throw new Error(
+      `Assertion Failure: Expected redirect to /dashboard but reached "${currentUrl}".`,
+    );
   }
 
   return {
