@@ -76,22 +76,33 @@ export default function Register() {
         </p>
 
         {error && (
-          <div className="mb-4 text-xs font-semibold text-red-600 dark:text-rose-400 bg-red-50 dark:bg-rose-950/50 border border-red-100 dark:border-rose-900 p-3 rounded-xl text-center">
+          <div
+            role="alert"
+            data-testid="register-error"
+            className="mb-4 text-xs font-semibold text-red-600 dark:text-rose-400 bg-red-50 dark:bg-rose-950/50 border border-red-100 dark:border-rose-900 p-3 rounded-xl text-center"
+          >
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" data-testid="register-form">
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="register-username"
+              className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5"
+            >
               Username
             </label>
             <input
+              id="register-username"
+              name="username"
               type="text"
+              autoComplete="username"
               required
               disabled={isSubmitting}
               value={formData.username}
               placeholder="e.g. john_doe"
+              data-testid="register-username-input"
               onChange={(e) =>
                 setFormData({ ...formData, username: e.target.value })
               }
@@ -100,15 +111,22 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="register-email"
+              className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5"
+            >
               Email Address
             </label>
             <input
+              id="register-email"
+              name="email"
               type="email"
+              autoComplete="email"
               required
               disabled={isSubmitting}
               value={formData.email}
               placeholder="e.g. john@farm.com"
+              data-testid="register-email-input"
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
@@ -117,15 +135,22 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="register-password"
+              className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5"
+            >
               Password
             </label>
             <input
+              id="register-password"
+              name="password"
               type="password"
+              autoComplete="new-password"
               required
               disabled={isSubmitting}
               value={formData.password}
               placeholder="••••••••"
+              data-testid="register-password-input"
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
@@ -134,15 +159,22 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="register-location"
+              className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5"
+            >
               Location (Town/City)
             </label>
             <input
+              id="register-location"
+              name="location"
               type="text"
+              autoComplete="address-level2"
               required
               disabled={isSubmitting}
               value={formData.location}
               placeholder="e.g. Nakuru, Nairobi"
+              data-testid="register-location-input"
               onChange={(e) =>
                 setFormData({ ...formData, location: e.target.value })
               }
@@ -151,12 +183,18 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="register-role"
+              className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5"
+            >
               Account Role
             </label>
             <select
+              id="register-role"
+              name="role"
               value={formData.role}
               disabled={isSubmitting}
+              data-testid="register-role-select"
               onChange={(e) =>
                 setFormData({ ...formData, role: e.target.value })
               }
@@ -172,6 +210,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={isSubmitting}
+            data-testid="register-submit-button"
             className="w-full bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition shadow-md shadow-green-600/15 inline-flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             {isSubmitting ? (
