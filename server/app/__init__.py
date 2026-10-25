@@ -162,6 +162,9 @@ def create_app(config_class=None):
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['X-XSS-Protection'] = '1; mode=block'
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        # Private Network Access (PNA) preflight support for local dev
+        if not app.config.get("IS_PROD"):
+            response.headers['Access-Control-Allow-Private-Network'] = 'true'
         if app.config.get("IS_PROD"):
             response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         return response

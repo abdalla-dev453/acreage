@@ -1,15 +1,17 @@
 import axios from 'axios';
 
-// Vite inlines VITE_-prefixed variables at build time and strips any other
-// trailing slash so we never emit a doubled `//api` path segment.
+// In dev or when no custom domain is passed, use a relative `/api` path so
+// requests hit Vite's local dev proxy. This prevents Chromium's Private Network
+// Access (PNA) checks from blocking cross-port requests (e.g. 5173 -> 5000)
+// with net::ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS / net::ERR_FAILED.
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL
   || import.meta.env.VITE_API_BASE_URL
-  || 'http://localhost:5000'
+  || ''
 ).replace(/\/+$/, '');
 
 const API = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
+  baseURL: API_BASE_URL ? `${API_BASE_URL}/api` : '/api',
   headers: {
     'Content-Type': 'application/json',
   },
